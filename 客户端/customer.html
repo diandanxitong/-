@@ -184,10 +184,23 @@
 <body>
 <div id="app"></div>
 
+<script src="https://www.gstatic.com/firebasejs/12.17.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/12.17.1/firebase-firestore-compat.js"></script>
 <script>
-// TODO: 替换成你自己的 Apps Script 部署网址，形如
-// https://script.google.com/macros/s/AKfycb.../exec
-const API_URL = 'https://script.google.com/macros/s/AKfycbwZj2IJKTs1-0mp04KgbwoX3uAcvLScBT-WXCvFVyKl-qRLIQIjXnRYzOQTQIofFNoE/exec';
+// TODO: 替换成你自己的 Firebase 项目配置
+// 拿法：Firebase 控制台 → 项目设置（齿轮图标）→ 常规 → 往下滚到"你的应用"
+// → 网页应用 → 复制 firebaseConfig 对象，整段替换掉下面这个占位对象
+const firebaseConfig = {
+  apiKey: 'YOUR_API_KEY',
+  authDomain: 'YOUR_PROJECT_ID.firebaseapp.com',
+  projectId: 'YOUR_PROJECT_ID',
+  storageBucket: 'YOUR_PROJECT_ID.firebasestorage.app',
+  messagingSenderId: 'YOUR_SENDER_ID',
+  appId: 'YOUR_APP_ID',
+};
+firebase.initializeApp(firebaseConfig);
+const db = firebase.firestore();
+const ordersRef = db.collection('orders');
 
 const MENU = [
   { id:'dachang', name:'爆炒大肠', tag:'猛火爆炒，外脆里嫩' },
@@ -268,9 +281,8 @@ function resetToMenu(){
 
 async function fetchTableOrders(table){
   try{
-    const res = await fetch(API_URL, { cache: 'no-store' });
-    const data = await res.json();
-    return data.filter(o => String(o.table) === String(table));
+    const snap = await ordersRef.where('table', '==', String(table)).get();
+    return snap.docs.map(d => d.data());
   }catch(e){ return []; }
 }
 
@@ -302,13 +314,11 @@ async function submitOrder(){
     const priorOrders = await fetchTableOrders(state.table);
     const isAddOn = priorOrders.length > 0;
 
-    const res = await fetch(API_URL, {
-      method: 'POST',
-      headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-      body: JSON.stringify({ action: 'create', table: order.table, items: order.items, createdAt: order.createdAt })
+    await ordersRef.add({
+      table: order.table,
+      items: order.items,
+      createdAt: order.createdAt,
     });
-    const result = await res.json();
-    if(!result.ok) throw new Error('server rejected order');
 
     const tableOrders = await fetchTableOrders(state.table);
     const summaryItems = mergeItems(tableOrders.length > 0 ? tableOrders : [...priorOrders, order]);

@@ -94,9 +94,21 @@
 </header>
 <div id="app"></div>
 
+<script src="https://www.gstatic.com/firebasejs/12.17.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/12.17.1/firebase-firestore-compat.js"></script>
 <script>
-// TODO: 替换成你自己的 Apps Script 部署网址，跟顾客端用同一个
-const API_URL = 'https://script.google.com/macros/s/AKfycbwZj2IJKTs1-0mp04KgbwoX3uAcvLScBT-WXCvFVyKl-qRLIQIjXnRYzOQTQIofFNoE/exec';
+// TODO: 替换成你自己的 Firebase 项目配置，跟顾客端用同一个（同一个项目、同一个 config）
+const firebaseConfig = {
+  apiKey: 'YOUR_API_KEY',
+  authDomain: 'YOUR_PROJECT_ID.firebaseapp.com',
+  projectId: 'YOUR_PROJECT_ID',
+  storageBucket: 'YOUR_PROJECT_ID.firebasestorage.app',
+  messagingSenderId: 'YOUR_SENDER_ID',
+  appId: 'YOUR_APP_ID',
+};
+firebase.initializeApp(firebaseConfig);
+const db = firebase.firestore();
+const ordersRef = db.collection('orders');
 
 let orders = [];   // { key, table, items, createdAt }
 let loaded = false;
@@ -112,31 +124,25 @@ function elapsedInfo(ts){
   return { label, level };
 }
 
-async function fetchOrders(){
-  try{
-    const res = await fetch(API_URL, { cache: 'no-store' });
-    const data = await res.json();
-    const results = data.map(o => ({ key:o.id, table:o.table, items:o.items, createdAt:o.createdAt }));
-    results.sort((a,b)=>a.createdAt - b.createdAt);
-    orders = results;
-    loaded = true;
-    document.getElementById('status').textContent = '最后更新：' + new Date().toLocaleTimeString('zh-CN',{hour12:false});
-  }catch(e){
-    document.getElementById('status').textContent = '连接异常，正在重试…';
-  }
+ordersRef.onSnapshot(snap => {
+  const results = snap.docs.map(d => ({ key: d.id, table: d.data().table, items: d.data().items, createdAt: d.data().createdAt }));
+  results.sort((a,b) => a.createdAt - b.createdAt);
+  orders = results;
+  loaded = true;
+  document.getElementById('status').textContent = '实时更新：' + new Date().toLocaleTimeString('zh-CN',{hour12:false});
   render();
-}
+}, err => {
+  document.getElementById('status').textContent = '连接异常，正在重试…';
+});
 
 async function completeOrder(keys){
   orders = orders.filter(o => !keys.includes(o.key));
   render();
   try{
-    await Promise.all(keys.map(key => fetch(API_URL, {
-      method: 'POST',
-      headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-      body: JSON.stringify({ action: 'complete', id: key })
-    })));
-  }catch(e){ /* next poll will resync if this failed */ }
+    const batch = db.batch();
+    keys.forEach(key => batch.delete(ordersRef.doc(key)));
+    await batch.commit();
+  }catch(e){ /* onSnapshot 会在下一次推送时自动纠正 */ }
 }
 
 // 同一桌可能分多次下单（加菜），这里按桌号把订单合并成一张看板卡片
@@ -198,9 +204,8 @@ function render(){
   app.innerHTML = `<div class="grid">${groups.map(cardHTML).join('')}</div>`;
 }
 
-fetchOrders();
-setInterval(fetchOrders, 4000);   // 定时向存储拉取最新订单
-setInterval(render, 1000);        // 每秒刷新一次等待时长与颜色提示
+render();
+setInterval(render, 1000);        // 每秒刷新一次等待时长与颜色提示（订单数据本身由 onSnapshot 实时推送）
 </script>
 </body>
 </html>

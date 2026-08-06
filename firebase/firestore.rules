@@ -1,0 +1,51 @@
+// 扫码点单系统 - Firestore 安全规则
+//
+// 这个 App 没有登录功能（扫码即用），所以规则没法按“谁在写”来限制，
+// 只能按“写的内容长什么样”来限制——这是唯一能做的第一道防线。
+// 部署方式：Firebase 控制台 → Firestore Database → 规则 → 粘贴本文件全部内容 → 发布
+//
+// 已知局限：Firestore 规则语法不支持遍历数组，没法逐项校验 items 里
+// 每一道菜的 name/qty/spice。这里只能做“整体形状”和“数量上限”的校验，
+// 挡不住"字段类型对但内容瞎填"的脏数据。如果以后需要更强的校验，
+// 可以加一个 Cloud Functions onCreate 触发器做二次清洗，这次先不做。
+//
+// 强烈建议同时开启 Firebase App Check（reCAPTCHA v3），能挡掉绝大多数
+// 用脚本直接打 Firestore API 的滥用请求，是比规则更有效的防线。
+// 另外建议保持 Spark（免费）方案不升级到 Blaze，这样即使被刷，
+// 顶多是当天配额用完导致暂时下不了单，不会产生任何费用。
+
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    match /orders/{orderId} {
+
+      // 顾客端和员工看板都需要读取全部订单，且没有登录态，只能开放读
+      allow read: if true;
+
+      // 建单：严格校验字段形状、类型、长度范围，拒绝多余字段和离谱数值
+      allow create: if request.resource.data.keys().hasOnly(['table', 'items', 'createdAt'])
+                    && request.resource.data.table is string
+                    && request.resource.data.table.size() > 0
+                    && request.resource.data.table.size() <= 20
+                    && request.resource.data.items is list
+                    && request.resource.data.items.size() > 0
+                    && request.resource.data.items.size() <= 30
+                    && request.resource.data.createdAt is number
+                    // createdAt 必须落在服务器时间前后 10 分钟内，防止伪造过期/未来时间戳
+                    && math.abs(request.time.toMillis() - request.resource.data.createdAt) < 10 * 60 * 1000;
+
+      // 订单一旦建立不允许改内容（没有"改单"功能，改单当面找服务员）
+      allow update: if false;
+
+      // 员工端"已处理，移出看板"需要删除订单；没有登录态，只能开放删
+      allow delete: if true;
+    }
+
+    // 兜底：其他任何 collection 一律拒绝，避免规则之外的路径被意外读写
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}
