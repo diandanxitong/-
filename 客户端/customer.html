@@ -1,0 +1,376 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>扫码点单</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;700;900&family=Archivo+Black&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#1B1613;
+    --bg-soft:#221B17;
+    --card:#2A2119;
+    --card-line:#3D332B;
+    --ember:#E3421F;
+    --ember-dark:#B22F14;
+    --gold:#E8A23D;
+    --text:#F3ECE1;
+    --text-muted:#AFA396;
+    --radius:16px;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  html,body{background:var(--bg);color:var(--text);}
+  body{
+    font-family:'Noto Sans SC','PingFang SC','Microsoft YaHei',sans-serif;
+    min-height:100vh;
+    display:flex;
+    justify-content:center;
+  }
+  #app{width:100%;max-width:480px;min-height:100vh;position:relative;padding-bottom:110px;}
+  .eyebrow{
+    font-size:12px;letter-spacing:.14em;color:var(--gold);
+    text-transform:uppercase;font-weight:700;
+  }
+  /* ---------- table picker (test mode) ---------- */
+  .pick-screen{padding:64px 24px;text-align:center;}
+  .pick-screen h1{
+    font-family:'Archivo Black',sans-serif;
+    font-size:28px;margin:14px 0 6px;
+  }
+  .pick-hint{color:var(--text-muted);font-size:14px;margin-bottom:32px;}
+  .table-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;}
+  .table-grid button{
+    aspect-ratio:1;border-radius:14px;border:1px solid var(--card-line);
+    background:var(--card);color:var(--text);font-size:20px;font-weight:700;
+    font-family:'Archivo Black',sans-serif;cursor:pointer;
+  }
+  .table-grid button:hover{border-color:var(--ember);color:var(--ember);}
+  .table-grid button:focus-visible{outline:2px solid var(--gold);outline-offset:2px;}
+
+  /* ---------- header ---------- */
+  header.bar{
+    padding:28px 24px 18px;border-bottom:1px solid var(--card-line);
+    display:flex;align-items:center;justify-content:space-between;
+  }
+  .table-badge{display:flex;flex-direction:column;gap:4px;}
+  .table-badge .num{
+    font-family:'Archivo Black',sans-serif;
+    font-size:34px;color:var(--ember);line-height:1;
+  }
+  .change-table{
+    background:none;border:1px solid var(--card-line);color:var(--text-muted);
+    font-size:12px;padding:6px 10px;border-radius:20px;cursor:pointer;
+  }
+  .change-table:hover{color:var(--text);border-color:var(--text-muted);}
+
+  /* ---------- menu ---------- */
+  .menu-title{padding:22px 24px 10px;font-size:15px;font-weight:700;color:var(--text-muted);letter-spacing:.05em;}
+  .dish-list{padding:0 16px;display:flex;flex-direction:column;gap:14px;}
+  .dish-card{
+    background:var(--card);border:1px solid var(--card-line);border-radius:var(--radius);
+    padding:18px 18px 16px;
+  }
+  .dish-head{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;}
+  .dish-head h3{
+    font-size:20px;font-weight:900;letter-spacing:.02em;
+  }
+  .dish-head .tag{font-size:12.5px;color:var(--text-muted);margin-top:5px;}
+  .stepper{display:flex;align-items:center;gap:2px;flex-shrink:0;}
+  .stepper button{
+    width:32px;height:32px;border-radius:9px;border:1px solid var(--card-line);
+    background:var(--bg-soft);color:var(--text);font-size:18px;cursor:pointer;
+    display:flex;align-items:center;justify-content:center;line-height:1;
+  }
+  .stepper button:disabled{opacity:.35;cursor:not-allowed;}
+  .stepper button:not(:disabled):hover{border-color:var(--ember);color:var(--ember);}
+  .stepper .qty{
+    width:30px;text-align:center;font-weight:700;font-size:16px;
+    font-family:'Archivo Black',sans-serif;
+  }
+  .spice-row{display:flex;gap:8px;margin-top:14px;padding-top:14px;border-top:1px dashed var(--card-line);}
+  .spice-pill{
+    flex:1;display:flex;align-items:center;justify-content:center;gap:5px;
+    padding:8px 6px;border-radius:10px;border:1px solid var(--card-line);
+    background:var(--bg-soft);color:var(--text-muted);font-size:12.5px;cursor:pointer;
+  }
+  .spice-pill.active{border-color:var(--ember);color:var(--ember);background:rgba(227,66,31,.12);}
+  .flame{fill:var(--card-line);}
+  .spice-pill.active .flame.lit{fill:var(--ember);}
+  .spice-pill:not(.active) .flame.lit{fill:var(--text-muted);}
+
+  /* ---------- sticky bottom bar ---------- */
+  .bottom-bar{
+    position:fixed;left:0;right:0;bottom:0;display:flex;justify-content:center;
+    background:linear-gradient(180deg,rgba(27,22,19,0) 0%,var(--bg) 30%);
+    padding:20px 16px 24px;
+  }
+  .bottom-bar-inner{
+    width:100%;max-width:448px;display:flex;align-items:center;gap:14px;
+    background:var(--card);border:1px solid var(--card-line);border-radius:16px;
+    padding:12px 12px 12px 18px;
+  }
+  .bottom-count{font-size:13px;color:var(--text-muted);flex-shrink:0;}
+  .bottom-count b{color:var(--text);font-size:15px;}
+  .submit-btn{
+    flex:1;background:var(--ember);color:#fff;border:none;border-radius:12px;
+    padding:14px 10px;font-size:15px;font-weight:700;cursor:pointer;
+    font-family:'Noto Sans SC',sans-serif;
+  }
+  .submit-btn:disabled{background:var(--card-line);color:var(--text-muted);cursor:not-allowed;}
+  .submit-btn:not(:disabled):active{background:var(--ember-dark);}
+
+  /* ---------- confirm screen ---------- */
+  .confirm-screen{padding:56px 28px 40px;text-align:center;}
+  .stamp-ring{
+    width:132px;height:132px;margin:0 auto 26px;border-radius:50%;
+    border:3px solid var(--ember);display:flex;align-items:center;justify-content:center;
+    transform:rotate(-8deg);position:relative;
+  }
+  .stamp-ring::before{
+    content:"";position:absolute;inset:8px;border:1px solid var(--ember);border-radius:50%;
+  }
+  .stamp-ring span{
+    font-family:'Archivo Black',sans-serif;color:var(--ember);font-size:19px;letter-spacing:.05em;
+  }
+  @media (prefers-reduced-motion:no-preference){
+    .stamp-ring{animation:pop .4s cubic-bezier(.2,1.4,.4,1);}
+  }
+  @keyframes pop{from{transform:rotate(-8deg) scale(.6);opacity:0}to{transform:rotate(-8deg) scale(1);opacity:1}}
+  .confirm-screen h2{font-family:'Archivo Black',sans-serif;font-size:24px;color:var(--ember);margin-bottom:22px;}
+  .order-summary{list-style:none;text-align:left;background:var(--card);border:1px solid var(--card-line);
+    border-radius:var(--radius);padding:6px 18px;margin-bottom:20px;}
+  .order-summary li{
+    display:flex;justify-content:space-between;align-items:center;
+    padding:13px 0;font-size:15px;
+  }
+  .order-summary li + li{border-top:1px dashed var(--card-line);}
+  .spice-tag{font-size:11.5px;color:var(--gold);border:1px solid var(--gold);border-radius:20px;padding:2px 9px;}
+  .hint{color:var(--text-muted);font-size:13.5px;margin-bottom:26px;}
+  .ghost-btn{
+    background:none;border:1px solid var(--card-line);color:var(--text-muted);
+    padding:11px 22px;border-radius:12px;font-size:14px;cursor:pointer;
+  }
+  .ghost-btn:hover{color:var(--text);border-color:var(--text-muted);}
+</style>
+</head>
+<body>
+<div id="app"></div>
+
+<script>
+// TODO: 替换成你自己的 Apps Script 部署网址，形如
+// https://script.google.com/macros/s/AKfycb.../exec
+const API_URL = 'https://script.google.com/macros/s/AKfycbwZj2IJKTs1-0mp04KgbwoX3uAcvLScBT-WXCvFVyKl-qRLIQIjXnRYzOQTQIofFNoE/exec';
+
+const MENU = [
+  { id:'dachang', name:'爆炒大肠', tag:'猛火爆炒，外脆里嫩' },
+  { id:'chaofan',  name:'狂炒米饭', tag:'锅气拉满，粒粒分明' },
+  { id:'mixian',   name:'狠炒米线', tag:'劲道爽滑，越吃越上头' },
+];
+const SPICE_LEVELS = ['微辣','中辣','特辣'];
+
+const params = new URLSearchParams(location.search);
+const urlTable = params.get('table');
+
+let state = {
+  table: urlTable || null,
+  lockedByUrl: !!urlTable,
+  screen: urlTable ? 'menu' : 'pick',
+  items: {},   // { dishId: { qty, spice } }
+  lastOrder: null,
+  submitting: false,
+};
+
+function getItem(id){
+  return state.items[id] || { qty:0, spice:'中辣' };
+}
+
+function changeQty(id, delta){
+  const cur = getItem(id);
+  const qty = Math.max(0, Math.min(20, cur.qty + delta));
+  state.items[id] = { qty, spice: cur.spice };
+  render();
+}
+
+function setSpice(id, level){
+  const cur = getItem(id);
+  if(cur.qty <= 0) return;
+  state.items[id] = { qty: cur.qty, spice: level };
+  render();
+}
+
+function selectTable(n){
+  state.table = String(n);
+  state.screen = 'menu';
+  render();
+}
+
+function changeTable(){
+  if(state.lockedByUrl) return;
+  state.screen = 'pick';
+  render();
+}
+
+function totalCount(){
+  return Object.values(state.items).reduce((s,v)=>s+v.qty,0);
+}
+
+function resetToMenu(){
+  state.items = {};
+  state.lastOrder = null;
+  state.screen = 'menu';
+  render();
+}
+
+async function fetchTableOrders(table){
+  try{
+    const res = await fetch(API_URL, { cache: 'no-store' });
+    const data = await res.json();
+    return data.filter(o => String(o.table) === String(table));
+  }catch(e){ return []; }
+}
+
+// 同一桌可能有多笔未处理订单（加菜），按“菜名+辣度”合并数量，方便顾客看到本桌目前的点单全貌
+function mergeItems(ordersList){
+  const merged = new Map();
+  ordersList.forEach(o => {
+    o.items.forEach(it => {
+      const key = it.name + '__' + it.spice;
+      if(!merged.has(key)) merged.set(key, { name: it.name, spice: it.spice, qty: 0 });
+      merged.get(key).qty += it.qty;
+    });
+  });
+  return Array.from(merged.values());
+}
+
+async function submitOrder(){
+  if(state.submitting || totalCount() === 0) return;
+  state.submitting = true; render();
+
+  const items = MENU
+    .map(d => ({ name: d.name, ...getItem(d.id) }))
+    .filter(it => it.qty > 0)
+    .map(it => ({ name: it.name, qty: it.qty, spice: it.spice }));
+
+  const order = { table: state.table, items, createdAt: Date.now() };
+
+  try{
+    const priorOrders = await fetchTableOrders(state.table);
+    const isAddOn = priorOrders.length > 0;
+
+    const res = await fetch(API_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+      body: JSON.stringify({ action: 'create', table: order.table, items: order.items, createdAt: order.createdAt })
+    });
+    const result = await res.json();
+    if(!result.ok) throw new Error('server rejected order');
+
+    const tableOrders = await fetchTableOrders(state.table);
+    const summaryItems = mergeItems(tableOrders.length > 0 ? tableOrders : [...priorOrders, order]);
+
+    state.lastOrder = { table: order.table, items: order.items, summaryItems, isAddOn };
+    state.screen = 'confirm';
+  }catch(e){
+    alert('下单失败，请重试一次，或直接告诉服务员～');
+  }
+  state.submitting = false;
+  render();
+}
+
+function flameIcons(n){
+  let out = '';
+  for(let i=0;i<3;i++){
+    out += `<svg class="flame ${i<n?'lit':''}" viewBox="0 0 24 24" width="11" height="11">
+      <path d="M12 2c1 3-3 4-3 7a3 3 0 006 0c0-1-.5-2-1-3 2 1 3 3 3 5a5 5 0 01-10 0c0-4 3-5 5-9z"/>
+    </svg>`;
+  }
+  return out;
+}
+
+function tablePickHTML(){
+  return `
+    <div class="pick-screen">
+      <p class="eyebrow">测试模式</p>
+      <h1>请选择桌号</h1>
+      <p class="pick-hint">正式部署后，扫桌上二维码会自动带入桌号</p>
+      <div class="table-grid">
+        ${[1,2,3,4,5,6,7,8,9].map(n=>`<button onclick="selectTable(${n})">桌 ${n}</button>`).join('')}
+      </div>
+    </div>`;
+}
+
+function menuHTML(){
+  const dishesHTML = MENU.map(d=>{
+    const it = getItem(d.id);
+    return `
+      <div class="dish-card">
+        <div class="dish-head">
+          <div>
+            <h3>${d.name}</h3>
+            <p class="tag">${d.tag}</p>
+          </div>
+          <div class="stepper">
+            <button onclick="changeQty('${d.id}',-1)" ${it.qty<=0?'disabled':''} aria-label="减少数量">−</button>
+            <span class="qty">${it.qty}</span>
+            <button onclick="changeQty('${d.id}',1)" aria-label="增加数量">+</button>
+          </div>
+        </div>
+        ${it.qty>0 ? `
+          <div class="spice-row">
+            ${SPICE_LEVELS.map((lvl,i)=>`
+              <button class="spice-pill ${it.spice===lvl?'active':''}" onclick="setSpice('${d.id}','${lvl}')">
+                ${flameIcons(i+1)}<span>${lvl}</span>
+              </button>`).join('')}
+          </div>` : ''}
+      </div>`;
+  }).join('');
+
+  const count = totalCount();
+
+  return `
+    <header class="bar">
+      <div class="table-badge">
+        <span class="eyebrow">桌号</span>
+        <span class="num">${state.table}</span>
+      </div>
+      ${!state.lockedByUrl ? `<button class="change-table" onclick="changeTable()">切换桌号</button>` : ''}
+    </header>
+    <p class="menu-title">菜单</p>
+    <div class="dish-list">${dishesHTML}</div>
+    <div class="bottom-bar">
+      <div class="bottom-bar-inner">
+        <span class="bottom-count">已选 <b>${count}</b> 件</span>
+        <button class="submit-btn" onclick="submitOrder()" ${count===0||state.submitting?'disabled':''}>
+          ${state.submitting?'下单中…':'确认下单'}
+        </button>
+      </div>
+    </div>`;
+}
+
+function confirmHTML(order){
+  return `
+    <div class="confirm-screen">
+      <div class="stamp-ring"><span>${order.isAddOn ? '加单成功' : '已下单'}</span></div>
+      <h2>桌号 ${order.table}</h2>
+      <p class="hint" style="margin-bottom:14px;">${order.isAddOn ? '已为您加菜，本桌目前已点：' : '本次点单：'}</p>
+      <ul class="order-summary">
+        ${order.summaryItems.map(it=>`<li>${it.name} × ${it.qty}<span class="spice-tag">${it.spice}</span></li>`).join('')}
+      </ul>
+      <p class="hint">请稍候，服务员马上确认～</p>
+      <button class="ghost-btn" onclick="resetToMenu()">继续点单</button>
+    </div>`;
+}
+
+function render(){
+  const app = document.getElementById('app');
+  if(state.screen === 'pick'){ app.innerHTML = tablePickHTML(); return; }
+  if(state.screen === 'confirm'){ app.innerHTML = confirmHTML(state.lastOrder); return; }
+  app.innerHTML = menuHTML();
+}
+
+render();
+</script>
+</body>
+</html>

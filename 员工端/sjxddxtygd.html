@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex, nofollow">
+<title>接单看板</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;700;900&family=Archivo+Black&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#121012;
+    --card:#1C191A;
+    --line:#332E2C;
+    --text:#F5F1EC;
+    --text-muted:#8E8883;
+    --normal:#3E5C4C;
+    --warn:#E8A23D;
+    --urgent:#E3421F;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{
+    background:var(--bg);color:var(--text);
+    font-family:'Noto Sans SC','PingFang SC','Microsoft YaHei',sans-serif;
+    min-height:100vh;padding:22px 26px 40px;
+  }
+  header{display:flex;align-items:baseline;justify-content:space-between;margin-bottom:22px;flex-wrap:wrap;gap:10px;}
+  header h1{font-family:'Archivo Black',sans-serif;font-size:22px;letter-spacing:.02em;}
+  .live-dot{display:inline-block;width:8px;height:8px;border-radius:50%;background:#5FBE8A;margin-right:8px;}
+  @media (prefers-reduced-motion:no-preference){
+    .live-dot{animation:pulse 1.8s ease-in-out infinite;}
+  }
+  @keyframes pulse{0%,100%{opacity:1}50%{opacity:.35}}
+  .status{color:var(--text-muted);font-size:13px;}
+  .count-pill{
+    background:var(--card);border:1px solid var(--line);border-radius:20px;
+    padding:6px 16px;font-size:13px;color:var(--text-muted);
+  }
+  .count-pill b{color:var(--text);font-size:15px;}
+
+  .empty{
+    margin-top:22vh;text-align:center;color:var(--text-muted);
+  }
+  .empty p{font-size:15px;}
+
+  .grid{
+    display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:16px;
+  }
+  .order-card{
+    background:var(--card);border-radius:16px;border:1px solid var(--line);
+    border-left:5px solid var(--normal);padding:18px 18px 16px;
+    display:flex;flex-direction:column;gap:12px;
+  }
+  .order-card.warn{border-left-color:var(--warn);}
+  .order-card.urgent{border-left-color:var(--urgent);}
+
+  .card-top{display:flex;justify-content:space-between;align-items:flex-start;}
+  .table-num{font-family:'Archivo Black',sans-serif;font-size:30px;line-height:1;}
+  .elapsed{
+    font-size:12px;padding:4px 10px;border-radius:20px;
+    background:rgba(255,255,255,.06);color:var(--text-muted);white-space:nowrap;
+  }
+  .order-card.warn .elapsed{color:var(--warn);}
+  .order-card.urgent .elapsed{color:var(--urgent);}
+
+  .item-list{list-style:none;display:flex;flex-direction:column;gap:8px;}
+  .item-list li{
+    display:flex;justify-content:space-between;align-items:center;
+    font-size:16px;padding:9px 12px;background:rgba(255,255,255,.04);border-radius:10px;
+  }
+  .item-list .qty{
+    font-family:'Archivo Black',sans-serif;color:var(--warn);margin-right:8px;
+  }
+  .spice-tag{font-size:11.5px;color:var(--text-muted);border:1px solid var(--line);border-radius:20px;padding:2px 9px;}
+  .new-tag{font-size:11.5px;color:var(--urgent);border:1px solid var(--urgent);border-radius:20px;padding:2px 9px;font-weight:700;}
+  .item-list li.is-new{background:rgba(227,66,31,.14);}
+
+  .done-btn{
+    margin-top:2px;background:none;border:1px solid var(--line);color:var(--text-muted);
+    padding:11px;border-radius:10px;font-size:14px;cursor:pointer;font-weight:700;
+  }
+  .done-btn:hover{border-color:#5FBE8A;color:#5FBE8A;}
+  .done-btn:active{background:rgba(95,190,138,.12);}
+</style>
+</head>
+<body>
+<header>
+  <h1><span class="live-dot"></span>接单看板</h1>
+  <div style="display:flex;align-items:center;gap:12px;">
+    <span class="status" id="status">加载中…</span>
+    <span class="count-pill">待处理 <b id="count">0</b> 桌</span>
+  </div>
+</header>
+<div id="app"></div>
+
+<script>
+// TODO: 替换成你自己的 Apps Script 部署网址，跟顾客端用同一个
+const API_URL = 'https://script.google.com/macros/s/AKfycbwZj2IJKTs1-0mp04KgbwoX3uAcvLScBT-WXCvFVyKl-qRLIQIjXnRYzOQTQIofFNoE/exec';
+
+let orders = [];   // { key, table, items, createdAt }
+let loaded = false;
+
+function elapsedInfo(ts){
+  const diffMs = Date.now() - ts;
+  const mins = Math.floor(diffMs / 60000);
+  let label, level;
+  if(mins < 1){ label = '刚刚下单'; } else { label = mins + ' 分钟前'; }
+  if(mins < 3){ level = 'normal'; }
+  else if(mins < 6){ level = 'warn'; }
+  else { level = 'urgent'; }
+  return { label, level };
+}
+
+async function fetchOrders(){
+  try{
+    const res = await fetch(API_URL, { cache: 'no-store' });
+    const data = await res.json();
+    const results = data.map(o => ({ key:o.id, table:o.table, items:o.items, createdAt:o.createdAt }));
+    results.sort((a,b)=>a.createdAt - b.createdAt);
+    orders = results;
+    loaded = true;
+    document.getElementById('status').textContent = '最后更新：' + new Date().toLocaleTimeString('zh-CN',{hour12:false});
+  }catch(e){
+    document.getElementById('status').textContent = '连接异常，正在重试…';
+  }
+  render();
+}
+
+async function completeOrder(keys){
+  orders = orders.filter(o => !keys.includes(o.key));
+  render();
+  try{
+    await Promise.all(keys.map(key => fetch(API_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+      body: JSON.stringify({ action: 'complete', id: key })
+    })));
+  }catch(e){ /* next poll will resync if this failed */ }
+}
+
+// 同一桌可能分多次下单（加菜），这里按桌号把订单合并成一张看板卡片
+function groupByTable(list){
+  const map = new Map();
+  for(const o of list){
+    if(!map.has(o.table)) map.set(o.table, []);
+    map.get(o.table).push(o);
+  }
+  const groups = [];
+  for(const [table, batch] of map){
+    batch.sort((a,b) => a.createdAt - b.createdAt);
+    groups.push({ table, batch, createdAt: batch[0].createdAt, keys: batch.map(o => o.key) });
+  }
+  groups.sort((a,b) => a.createdAt - b.createdAt);
+  return groups;
+}
+
+// 按“菜名+辣度”合并数量；只有第一批之后才出现的菜品标记为“新加”
+function mergeItems(batch){
+  const merged = new Map();
+  batch.forEach((o, batchIndex) => {
+    o.items.forEach(it => {
+      const itemKey = it.name + '__' + it.spice;
+      if(!merged.has(itemKey)){
+        merged.set(itemKey, { name: it.name, spice: it.spice, qty: 0, isNew: batchIndex > 0 });
+      }
+      merged.get(itemKey).qty += it.qty;
+    });
+  });
+  return Array.from(merged.values());
+}
+
+function cardHTML(group){
+  const { label, level } = elapsedInfo(group.createdAt);
+  const items = mergeItems(group.batch);
+  return `
+    <div class="order-card ${level}">
+      <div class="card-top">
+        <span class="table-num">桌 ${group.table}</span>
+        <span class="elapsed">${label}</span>
+      </div>
+      <ul class="item-list">
+        ${items.map(it => `<li class="${it.isNew?'is-new':''}"><span><span class="qty">${it.qty}×</span>${it.name}</span><span style="display:flex;gap:6px;align-items:center;"><span class="spice-tag">${it.spice}</span>${it.isNew?'<span class="new-tag">新加</span>':''}</span></li>`).join('')}
+      </ul>
+      <button class="done-btn" data-keys="${group.keys.join(',')}" onclick="completeOrder(this.dataset.keys.split(','))">✓ 已处理，移出看板</button>
+    </div>`;
+}
+
+function render(){
+  const groups = groupByTable(orders);
+  document.getElementById('count').textContent = groups.length;
+  const app = document.getElementById('app');
+  if(!loaded){ app.innerHTML = ''; return; }
+  if(groups.length === 0){
+    app.innerHTML = `<div class="empty"><p>暂无订单，等待顾客点单中…</p></div>`;
+    return;
+  }
+  app.innerHTML = `<div class="grid">${groups.map(cardHTML).join('')}</div>`;
+}
+
+fetchOrders();
+setInterval(fetchOrders, 4000);   // 定时向存储拉取最新订单
+setInterval(render, 1000);        // 每秒刷新一次等待时长与颜色提示
+</script>
+</body>
+</html>
