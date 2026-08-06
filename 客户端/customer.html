@@ -153,6 +153,32 @@
     padding:11px 22px;border-radius:12px;font-size:14px;cursor:pointer;
   }
   .ghost-btn:hover{color:var(--text);border-color:var(--text-muted);}
+
+  .back-row{text-align:left;padding:14px 24px 0;}
+  .back-btn{
+    background:none;border:none;color:var(--text-muted);
+    font-size:13px;font-weight:700;cursor:pointer;padding:6px 2px;
+    font-family:inherit;
+  }
+  .back-btn:hover{color:var(--text);}
+
+  .my-order-card{
+    margin-top:32px;text-align:left;
+    background:var(--card);border:1px solid var(--card-line);border-radius:var(--radius);
+    padding:18px 18px 16px;
+  }
+  .my-order-title{font-weight:900;font-size:15px;letter-spacing:.02em;color:var(--text);}
+  .my-order-card .order-summary{
+    margin:12px 0 0;background:none;border:none;padding:0;
+  }
+  .my-order-card .order-summary li{padding:11px 0;}
+  .my-order-card .order-summary li + li{border-top:1px dashed var(--card-line);}
+  .my-order-note{font-size:12.5px;color:var(--gold);margin:14px 0 0;}
+  .text-link-btn{
+    background:none;border:none;color:var(--ember);font-weight:700;font-size:14px;
+    cursor:pointer;padding:14px 0 0;font-family:inherit;display:block;
+  }
+  .text-link-btn:hover{text-decoration:underline;}
 </style>
 </head>
 <body>
@@ -182,6 +208,20 @@ let state = {
   submitting: false,
 };
 
+let screenHistory = [];   // 记录来源页面，供“返回”按钮回退用
+
+function goBack(){
+  const prev = screenHistory.pop();
+  if(!prev) return;
+  state.screen = prev;
+  render();
+}
+
+function backRowHTML(){
+  if(screenHistory.length === 0) return '';
+  return `<div class="back-row"><button class="back-btn" onclick="goBack()" aria-label="返回上一页">← 返回</button></div>`;
+}
+
 function getItem(id){
   return state.items[id] || { qty:0, spice:'中辣' };
 }
@@ -201,6 +241,7 @@ function setSpice(id, level){
 }
 
 function selectTable(n){
+  screenHistory.push(state.screen);
   state.table = String(n);
   state.screen = 'menu';
   render();
@@ -208,6 +249,7 @@ function selectTable(n){
 
 function changeTable(){
   if(state.lockedByUrl) return;
+  screenHistory = [];
   state.screen = 'pick';
   render();
 }
@@ -219,6 +261,7 @@ function totalCount(){
 function resetToMenu(){
   state.items = {};
   state.lastOrder = null;
+  screenHistory = [];
   state.screen = 'menu';
   render();
 }
@@ -271,6 +314,7 @@ async function submitOrder(){
     const summaryItems = mergeItems(tableOrders.length > 0 ? tableOrders : [...priorOrders, order]);
 
     state.lastOrder = { table: order.table, items: order.items, summaryItems, isAddOn };
+    screenHistory.push('menu');
     state.screen = 'confirm';
   }catch(e){
     alert('下单失败，请重试一次，或直接告诉服务员～');
@@ -330,6 +374,7 @@ function menuHTML(){
   const count = totalCount();
 
   return `
+    ${backRowHTML()}
     <header class="bar">
       <div class="table-badge">
         <span class="eyebrow">桌号</span>
@@ -352,14 +397,20 @@ function menuHTML(){
 function confirmHTML(order){
   return `
     <div class="confirm-screen">
+      ${backRowHTML()}
       <div class="stamp-ring"><span>${order.isAddOn ? '加单成功' : '已下单'}</span></div>
       <h2>桌号 ${order.table}</h2>
-      <p class="hint" style="margin-bottom:14px;">${order.isAddOn ? '已为您加菜，本桌目前已点：' : '本次点单：'}</p>
-      <ul class="order-summary">
-        ${order.summaryItems.map(it=>`<li>${it.name} × ${it.qty}<span class="spice-tag">${it.spice}</span></li>`).join('')}
-      </ul>
       <p class="hint">请稍候，服务员马上确认～</p>
       <button class="ghost-btn" onclick="resetToMenu()">继续点单</button>
+
+      <div class="my-order-card">
+        <p class="my-order-title">我的订单</p>
+        <ul class="order-summary">
+          ${order.summaryItems.map(it=>`<li>${it.name} × ${it.qty}<span class="spice-tag">${it.spice}</span></li>`).join('')}
+        </ul>
+        <p class="hint my-order-note">如需退菜，请联系服务员哦～</p>
+        <button class="text-link-btn" onclick="resetToMenu()">继续点单 →</button>
+      </div>
     </div>`;
 }
 
