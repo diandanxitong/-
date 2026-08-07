@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
@@ -52,22 +53,48 @@
   /* ---------- header ---------- */
   header.bar{
     padding:28px 24px 18px;border-bottom:1px solid var(--card-line);
-    display:flex;align-items:center;justify-content:space-between;
+    display:flex;align-items:flex-start;justify-content:space-between;
   }
   .table-badge{display:flex;flex-direction:column;gap:4px;}
   .table-badge .num{
     font-family:'Archivo Black',sans-serif;
     font-size:34px;color:var(--ember);line-height:1;
   }
+  .header-actions{display:flex;flex-direction:column;align-items:flex-end;gap:10px;}
   .change-table{
     background:none;border:1px solid var(--card-line);color:var(--text-muted);
     font-size:12px;padding:6px 10px;border-radius:20px;cursor:pointer;
   }
   .change-table:hover{color:var(--text);border-color:var(--text-muted);}
+  .my-order-btn{
+    display:flex;align-items:center;gap:7px;background:none;border:none;cursor:pointer;
+    padding:0;font-family:inherit;color:var(--text);
+  }
+  .panda-avatar{
+    width:36px;height:36px;border-radius:50%;flex-shrink:0;
+    background:var(--card);border:1px solid var(--card-line);
+    display:flex;align-items:center;justify-content:center;font-size:19px;line-height:1;
+  }
+  .my-order-btn:hover .panda-avatar{border-color:var(--ember);}
+  .my-order-label{font-size:12.5px;font-weight:700;color:var(--text-muted);}
+  .my-order-btn:hover .my-order-label{color:var(--text);}
 
   /* ---------- menu ---------- */
   .menu-title{padding:22px 24px 10px;font-size:15px;font-weight:700;color:var(--text-muted);letter-spacing:.05em;}
-  .dish-list{padding:0 16px;display:flex;flex-direction:column;gap:14px;}
+  .menu-body{display:flex;align-items:flex-start;}
+  .category-nav{
+    width:84px;flex-shrink:0;display:flex;flex-direction:column;
+    border-right:1px solid var(--card-line);
+  }
+  .cat-btn{
+    background:none;border:none;border-left:3px solid transparent;color:var(--text-muted);
+    font-size:13px;font-weight:700;padding:14px 6px;cursor:pointer;text-align:center;
+    font-family:inherit;line-height:1.3;
+  }
+  .cat-btn.active{color:var(--text);background:var(--bg-soft);border-left-color:var(--ember);}
+  .cat-btn:hover{color:var(--text);}
+  .dish-panel{flex:1;min-width:0;padding-right:16px;}
+  .dish-list{padding:0 0 0 16px;display:flex;flex-direction:column;gap:14px;}
   .dish-card{
     background:var(--card);border:1px solid var(--card-line);border-radius:var(--radius);
     padding:18px 18px 16px;
@@ -200,10 +227,11 @@ const db = firebase.firestore();
 const ordersRef = db.collection('orders');
 
 const MENU = [
-  { id:'dachang', name:'爆炒大肠', tag:'猛火爆炒，外脆里嫩' },
-  { id:'chaofan',  name:'狂炒米饭', tag:'锅气拉满，粒粒分明' },
-  { id:'mixian',   name:'狠炒米线', tag:'劲道爽滑，越吃越上头' },
+  { id:'dachang', name:'爆炒大肠', tag:'猛火爆炒，外脆里嫩', category:'招牌菜' },
+  { id:'chaofan',  name:'狂炒米饭', tag:'锅气拉满，粒粒分明', category:'主食' },
+  { id:'mixian',   name:'狠炒米线', tag:'劲道爽滑，越吃越上头', category:'主食' },
 ];
+const CATEGORIES = ['全部', ...Array.from(new Set(MENU.map(d=>d.category)))];
 const SPICE_LEVELS = ['微辣','中辣','特辣'];
 
 const params = new URLSearchParams(location.search);
@@ -214,8 +242,11 @@ let state = {
   lockedByUrl: !!urlTable,
   screen: urlTable ? 'menu' : 'pick',
   items: {},   // { dishId: { qty, spice } }
+  activeCategory: '全部',
   lastOrder: null,
   submitting: false,
+  myOrderItems: null,
+  myOrderLoading: false,
 };
 
 let screenHistory = [];   // 记录来源页面，供“返回”按钮回退用
@@ -247,6 +278,24 @@ function setSpice(id, level){
   const cur = getItem(id);
   if(cur.qty <= 0) return;
   state.items[id] = { qty: cur.qty, spice: level };
+  render();
+}
+
+function setCategory(cat){
+  state.activeCategory = cat;
+  render();
+}
+
+async function goToMyOrder(){
+  screenHistory.push(state.screen);
+  state.screen = 'myOrder';
+  state.myOrderLoading = true;
+  state.myOrderItems = null;
+  render();
+
+  const orders = await fetchTableOrders(state.table);
+  state.myOrderItems = mergeItems(orders);
+  state.myOrderLoading = false;
   render();
 }
 
@@ -353,7 +402,10 @@ function tablePickHTML(){
 }
 
 function menuHTML(){
-  const dishesHTML = MENU.map(d=>{
+  const activeCat = state.activeCategory || '全部';
+  const filteredMenu = activeCat === '全部' ? MENU : MENU.filter(d=>d.category===activeCat);
+
+  const dishesHTML = filteredMenu.map(d=>{
     const it = getItem(d.id);
     return `
       <div class="dish-card">
@@ -378,6 +430,10 @@ function menuHTML(){
       </div>`;
   }).join('');
 
+  const categoryNavHTML = CATEGORIES.map(cat=>`
+    <button class="cat-btn ${activeCat===cat?'active':''}" onclick="setCategory('${cat}')">${cat}</button>
+  `).join('');
+
   const count = totalCount();
 
   return `
@@ -387,10 +443,21 @@ function menuHTML(){
         <span class="eyebrow">桌号</span>
         <span class="num">${state.table}</span>
       </div>
-      ${!state.lockedByUrl ? `<button class="change-table" onclick="changeTable()">切换桌号</button>` : ''}
+      <div class="header-actions">
+        <button class="my-order-btn" onclick="goToMyOrder()" aria-label="查看我的订单">
+          <span class="panda-avatar">🐼</span>
+          <span class="my-order-label">我的订单</span>
+        </button>
+        ${!state.lockedByUrl ? `<button class="change-table" onclick="changeTable()">切换桌号</button>` : ''}
+      </div>
     </header>
     <p class="menu-title">菜单</p>
-    <div class="dish-list">${dishesHTML}</div>
+    <div class="menu-body">
+      <nav class="category-nav">${categoryNavHTML}</nav>
+      <div class="dish-panel">
+        <div class="dish-list">${dishesHTML}</div>
+      </div>
+    </div>
     <div class="bottom-bar">
       <div class="bottom-bar-inner">
         <span class="bottom-count">已选 <b>${count}</b> 件</span>
@@ -398,6 +465,26 @@ function menuHTML(){
           ${state.submitting?'下单中…':'确认下单'}
         </button>
       </div>
+    </div>`;
+}
+
+function myOrderHTML(){
+  const items = state.myOrderItems || [];
+  return `
+    ${backRowHTML()}
+    <div class="confirm-screen">
+      <p class="eyebrow">桌号 ${state.table}</p>
+      <h2 style="margin-top:6px;">我的订单</h2>
+      ${state.myOrderLoading
+        ? `<p class="hint">加载中…</p>`
+        : items.length === 0
+          ? `<p class="hint">还没有点菜，去菜单看看吧～</p>`
+          : `<ul class="order-summary">
+              ${items.map(it=>`<li>${it.name} × ${it.qty}<span class="spice-tag">${it.spice}</span></li>`).join('')}
+            </ul>
+            <p class="hint">如需退菜，请联系服务员哦～</p>`
+      }
+      <button class="ghost-btn" onclick="goBack()">返回菜单</button>
     </div>`;
 }
 
@@ -425,6 +512,7 @@ function render(){
   const app = document.getElementById('app');
   if(state.screen === 'pick'){ app.innerHTML = tablePickHTML(); return; }
   if(state.screen === 'confirm'){ app.innerHTML = confirmHTML(state.lastOrder); return; }
+  if(state.screen === 'myOrder'){ app.innerHTML = myOrderHTML(); return; }
   app.innerHTML = menuHTML();
 }
 
