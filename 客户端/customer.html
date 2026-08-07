@@ -53,20 +53,24 @@
   /* ---------- header ---------- */
   header.bar{
     padding:28px 24px 18px;border-bottom:1px solid var(--card-line);
-    display:flex;align-items:flex-start;justify-content:space-between;
   }
-  .table-badge{display:flex;flex-direction:column;gap:4px;}
+  .table-badge{display:flex;flex-direction:column;align-items:flex-start;gap:4px;}
   .table-badge .num{
     font-family:'Archivo Black',sans-serif;
     font-size:34px;color:var(--ember);line-height:1;
   }
-  .header-actions{display:flex;flex-direction:column;align-items:flex-end;gap:10px;}
   .change-table{
     background:none;border:1px solid var(--card-line);color:var(--text-muted);
     font-size:12px;padding:6px 10px;border-radius:20px;cursor:pointer;
+    margin-top:6px;
   }
   .change-table:hover{color:var(--text);border-color:var(--text-muted);}
+
+  /* ---------- panda nav (fixed, shown on every screen once a table is known) ---------- */
+  #panda-nav{position:fixed;top:18px;right:18px;z-index:60;display:flex;flex-direction:column;align-items:flex-end;}
+  .panda-overlay{position:fixed;inset:0;z-index:55;background:none;border:none;padding:0;margin:0;cursor:default;}
   .my-order-btn{
+    position:relative;z-index:56;
     display:flex;align-items:center;gap:7px;background:none;border:none;cursor:pointer;
     padding:0;font-family:inherit;color:var(--text);
   }
@@ -78,6 +82,17 @@
   .my-order-btn:hover .panda-avatar{border-color:var(--ember);}
   .my-order-label{font-size:12.5px;font-weight:700;color:var(--text-muted);}
   .my-order-btn:hover .my-order-label{color:var(--text);}
+  .panda-dropdown{
+    position:relative;z-index:56;margin-top:8px;min-width:136px;
+    background:var(--card);border:1px solid var(--card-line);border-radius:12px;
+    overflow:hidden;box-shadow:0 10px 26px rgba(0,0,0,.4);
+  }
+  .panda-dropdown button{
+    display:block;width:100%;text-align:left;background:none;border:none;color:var(--text);
+    font-size:13.5px;font-weight:700;padding:12px 16px;cursor:pointer;font-family:inherit;
+  }
+  .panda-dropdown button+button{border-top:1px solid var(--card-line);}
+  .panda-dropdown button:hover{background:var(--bg-soft);color:var(--ember);}
 
   /* ---------- menu ---------- */
   .menu-title{padding:22px 24px 10px;font-size:15px;font-weight:700;color:var(--text-muted);letter-spacing:.05em;}
@@ -210,6 +225,7 @@
 </head>
 <body>
 <div id="app"></div>
+<div id="panda-nav"></div>
 
 <script src="https://www.gstatic.com/firebasejs/12.17.1/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/12.17.1/firebase-firestore-compat.js"></script>
@@ -228,6 +244,9 @@ const ordersRef = db.collection('orders');
 
 const MENU = [
   { id:'dachang', name:'爆炒大肠', tag:'猛火爆炒，外脆里嫩', category:'招牌菜' },
+  { id:'zhangyi', name:'油炸张毅', tag:'现炸现装，外酥里嫩', category:'招牌菜' },
+  { id:'wangdianzhang', name:'清蒸王店长', tag:'原汁原味，清淡鲜香', category:'招牌菜' },
+  { id:'zhaoshifu', name:'干煸赵师傅', tag:'干煸入味，越嚼越香', category:'招牌菜' },
   { id:'chaofan',  name:'狂炒米饭', tag:'锅气拉满，粒粒分明', category:'主食' },
   { id:'mixian',   name:'狠炒米线', tag:'劲道爽滑，越吃越上头', category:'主食' },
 ];
@@ -247,6 +266,7 @@ let state = {
   submitting: false,
   myOrderItems: null,
   myOrderLoading: false,
+  pandaMenuOpen: false,
 };
 
 let screenHistory = [];   // 记录来源页面，供“返回”按钮回退用
@@ -287,7 +307,8 @@ function setCategory(cat){
 }
 
 async function goToMyOrder(){
-  screenHistory.push(state.screen);
+  state.pandaMenuOpen = false;
+  if(state.screen !== 'myOrder') screenHistory.push(state.screen);
   state.screen = 'myOrder';
   state.myOrderLoading = true;
   state.myOrderItems = null;
@@ -296,6 +317,24 @@ async function goToMyOrder(){
   const orders = await fetchTableOrders(state.table);
   state.myOrderItems = mergeItems(orders);
   state.myOrderLoading = false;
+  render();
+}
+
+function goToCart(){
+  state.pandaMenuOpen = false;
+  if(state.screen !== 'cart') screenHistory.push(state.screen);
+  state.screen = 'cart';
+  render();
+}
+
+function togglePandaMenu(){
+  state.pandaMenuOpen = !state.pandaMenuOpen;
+  render();
+}
+
+function closePandaMenu(){
+  if(!state.pandaMenuOpen) return;
+  state.pandaMenuOpen = false;
   render();
 }
 
@@ -442,12 +481,6 @@ function menuHTML(){
       <div class="table-badge">
         <span class="eyebrow">桌号</span>
         <span class="num">${state.table}</span>
-      </div>
-      <div class="header-actions">
-        <button class="my-order-btn" onclick="goToMyOrder()" aria-label="查看我的订单">
-          <span class="panda-avatar">🐼</span>
-          <span class="my-order-label">我的订单</span>
-        </button>
         ${!state.lockedByUrl ? `<button class="change-table" onclick="changeTable()">切换桌号</button>` : ''}
       </div>
     </header>
@@ -488,6 +521,40 @@ function myOrderHTML(){
     </div>`;
 }
 
+function cartHTML(){
+  const items = MENU
+    .map(d => ({ name: d.name, ...getItem(d.id) }))
+    .filter(it => it.qty > 0);
+  return `
+    ${backRowHTML()}
+    <div class="confirm-screen">
+      <p class="eyebrow">桌号 ${state.table}</p>
+      <h2 style="margin-top:6px;">购物车</h2>
+      ${items.length === 0
+        ? `<p class="hint">购物车是空的，去菜单选几道菜吧～</p>`
+        : `<ul class="order-summary">
+            ${items.map(it=>`<li>${it.name} × ${it.qty}<span class="spice-tag">${it.spice}</span></li>`).join('')}
+          </ul>`
+      }
+      <button class="ghost-btn" onclick="goBack()">返回菜单</button>
+    </div>`;
+}
+
+function pandaNavHTML(){
+  if(!state.table) return '';
+  return `
+    ${state.pandaMenuOpen ? `<button class="panda-overlay" onclick="closePandaMenu()" aria-label="关闭菜单"></button>` : ''}
+    <button class="my-order-btn" onclick="togglePandaMenu()" aria-label="我的小锅" aria-expanded="${state.pandaMenuOpen}">
+      <span class="panda-avatar">🐼</span>
+      <span class="my-order-label">我的小锅</span>
+    </button>
+    ${state.pandaMenuOpen ? `
+      <div class="panda-dropdown">
+        <button onclick="goToCart()">购物车</button>
+        <button onclick="goToMyOrder()">已点菜品</button>
+      </div>` : ''}`;
+}
+
 function confirmHTML(order){
   return `
     <div class="confirm-screen">
@@ -510,10 +577,12 @@ function confirmHTML(order){
 
 function render(){
   const app = document.getElementById('app');
-  if(state.screen === 'pick'){ app.innerHTML = tablePickHTML(); return; }
-  if(state.screen === 'confirm'){ app.innerHTML = confirmHTML(state.lastOrder); return; }
-  if(state.screen === 'myOrder'){ app.innerHTML = myOrderHTML(); return; }
-  app.innerHTML = menuHTML();
+  if(state.screen === 'pick'){ app.innerHTML = tablePickHTML(); }
+  else if(state.screen === 'confirm'){ app.innerHTML = confirmHTML(state.lastOrder); }
+  else if(state.screen === 'myOrder'){ app.innerHTML = myOrderHTML(); }
+  else if(state.screen === 'cart'){ app.innerHTML = cartHTML(); }
+  else{ app.innerHTML = menuHTML(); }
+  document.getElementById('panda-nav').innerHTML = pandaNavHTML();
 }
 
 render();
