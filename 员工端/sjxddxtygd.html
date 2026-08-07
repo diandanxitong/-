@@ -25,6 +25,14 @@
     font-family:'Noto Sans SC','PingFang SC','Microsoft YaHei',sans-serif;
     min-height:100vh;padding:22px 26px 40px;
   }
+  .top-nav{margin-bottom:16px;}
+  .control-btn{
+    display:inline-flex;align-items:center;gap:6px;text-decoration:none;
+    background:var(--card);border:1px solid var(--line);color:var(--text-muted);
+    font-size:13px;font-weight:700;padding:8px 14px;border-radius:20px;
+  }
+  .control-btn:hover{color:var(--text);border-color:var(--text-muted);}
+
   header{display:flex;align-items:baseline;justify-content:space-between;margin-bottom:22px;flex-wrap:wrap;gap:10px;}
   header h1{font-family:'Archivo Black',sans-serif;font-size:22px;letter-spacing:.02em;}
   .live-dot{display:inline-block;width:8px;height:8px;border-radius:50%;background:#5FBE8A;margin-right:8px;}
@@ -85,6 +93,9 @@
 </style>
 </head>
 <body>
+<nav class="top-nav">
+  <a class="control-btn" href="../index.html">← 控制系统</a>
+</nav>
 <header>
   <h1><span class="live-dot"></span>接单看板</h1>
   <div style="display:flex;align-items:center;gap:12px;">

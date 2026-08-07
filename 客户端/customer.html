@@ -586,14 +586,16 @@ function flameIcons(n){
   return out;
 }
 
+const PICKABLE_TABLES = [...Array.from({length:30},(_,i)=>i+1), 888];
+
 function tablePickHTML(){
   return `
     <div class="pick-screen">
-      <p class="eyebrow">测试模式</p>
+      <p class="eyebrow">选择桌号</p>
       <h1>请选择桌号</h1>
-      <p class="pick-hint">正式部署后，扫桌上二维码会自动带入桌号</p>
+      <p class="pick-hint">顾客请直接扫桌上二维码；员工帮客人点单，请选择对应桌号</p>
       <div class="table-grid">
-        ${[1,2,3,4,5,6,7,8,9].map(n=>`<button onclick="selectTable(${n})">桌 ${n}</button>`).join('')}
+        ${PICKABLE_TABLES.map(n=>`<button onclick="selectTable(${n})">桌 ${n}</button>`).join('')}
       </div>
     </div>`;
 }
