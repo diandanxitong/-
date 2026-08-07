@@ -149,19 +149,37 @@
     padding:20px 16px 24px;
   }
   .bottom-bar-inner{
-    width:100%;max-width:448px;display:flex;align-items:center;gap:14px;
-    background:var(--card);border:1px solid var(--card-line);border-radius:16px;
-    padding:12px 12px 12px 18px;
+    width:100%;max-width:448px;display:flex;align-items:stretch;gap:12px;
   }
-  .bottom-count{font-size:13px;color:var(--text-muted);flex-shrink:0;}
-  .bottom-count b{color:var(--text);font-size:15px;}
   .submit-btn{
-    flex:1;background:var(--ember);color:#fff;border:none;border-radius:12px;
+    flex:1;background:var(--ember);color:#fff;border:none;border-radius:14px;
     padding:14px 10px;font-size:15px;font-weight:700;cursor:pointer;
     font-family:'Noto Sans SC',sans-serif;
   }
   .submit-btn:disabled{background:var(--card-line);color:var(--text-muted);cursor:not-allowed;}
   .submit-btn:not(:disabled):active{background:var(--ember-dark);}
+
+  .cart-btn{
+    flex:1;background:#2E9E5B;color:#fff;border:none;border-radius:14px;
+    padding:12px 18px;cursor:pointer;font-family:inherit;
+    display:flex;flex-direction:column;align-items:flex-start;justify-content:center;gap:3px;
+    text-align:left;
+  }
+  .cart-btn:disabled{background:var(--card-line);color:var(--text-muted);cursor:not-allowed;}
+  .cart-btn:not(:disabled):active{background:#257C48;}
+  .cart-btn-title{font-size:16px;font-weight:900;}
+  .cart-btn-sub{font-size:11px;font-weight:500;opacity:.85;}
+
+  .order-now-btn{
+    width:92px;aspect-ratio:1;flex-shrink:0;background:var(--ember);color:#fff;border:none;
+    border-radius:14px;cursor:pointer;font-family:inherit;
+    display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;
+    text-align:center;
+  }
+  .order-now-btn:disabled{background:var(--card-line);color:var(--text-muted);cursor:not-allowed;}
+  .order-now-btn:not(:disabled):active{background:var(--ember-dark);}
+  .order-now-title{font-size:14px;font-weight:900;}
+  .order-now-sub{font-size:9.5px;font-weight:500;opacity:.85;}
 
   /* ---------- confirm screen ---------- */
   .confirm-screen{padding:56px 28px 40px;text-align:center;}
@@ -493,9 +511,13 @@ function menuHTML(){
     </div>
     <div class="bottom-bar">
       <div class="bottom-bar-inner">
-        <span class="bottom-count">已选 <b>${count}</b> 件</span>
-        <button class="submit-btn" onclick="submitOrder()" ${count===0||state.submitting?'disabled':''}>
-          ${state.submitting?'下单中…':'确认下单'}
+        <button class="cart-btn" onclick="goToCart()" ${count===0?'disabled':''}>
+          <span class="cart-btn-title">加入购物车</span>
+          <span class="cart-btn-sub">小纠结？先丢进购物车！</span>
+        </button>
+        <button class="order-now-btn" onclick="submitOrder()" ${count===0||state.submitting?'disabled':''}>
+          <span class="order-now-title">${state.submitting?'下单中…':'立即下单'}</span>
+          <span class="order-now-sub">不再犹豫！</span>
         </button>
       </div>
     </div>`;
@@ -523,8 +545,10 @@ function myOrderHTML(){
 
 function cartHTML(){
   const items = MENU
-    .map(d => ({ name: d.name, ...getItem(d.id) }))
+    .map(d => ({ id: d.id, name: d.name, ...getItem(d.id) }))
     .filter(it => it.qty > 0);
+  const count = totalCount();
+
   return `
     ${backRowHTML()}
     <div class="confirm-screen">
@@ -533,11 +557,27 @@ function cartHTML(){
       ${items.length === 0
         ? `<p class="hint">购物车是空的，去菜单选几道菜吧～</p>`
         : `<ul class="order-summary">
-            ${items.map(it=>`<li>${it.name} × ${it.qty}<span class="spice-tag">${it.spice}</span></li>`).join('')}
+            ${items.map(it=>`
+              <li>
+                <span>${it.name}<span class="spice-tag" style="margin-left:8px;">${it.spice}</span></span>
+                <span class="stepper">
+                  <button onclick="changeQty('${it.id}',-1)" aria-label="减少数量">−</button>
+                  <span class="qty">${it.qty}</span>
+                  <button onclick="changeQty('${it.id}',1)" aria-label="增加数量">+</button>
+                </span>
+              </li>`).join('')}
           </ul>`
       }
       <button class="ghost-btn" onclick="goBack()">返回菜单</button>
-    </div>`;
+    </div>
+    ${count > 0 ? `
+    <div class="bottom-bar">
+      <div class="bottom-bar-inner">
+        <button class="submit-btn" onclick="submitOrder()" ${state.submitting?'disabled':''}>
+          ${state.submitting?'下单中…':'立即下单'}
+        </button>
+      </div>
+    </div>` : ''}`;
 }
 
 function pandaNavHTML(){
