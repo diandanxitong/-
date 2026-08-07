@@ -161,25 +161,80 @@
 
   .cart-btn{
     flex:1;background:#2E9E5B;color:#fff;border:none;border-radius:14px;
-    padding:12px 18px;cursor:pointer;font-family:inherit;
-    display:flex;flex-direction:column;align-items:flex-start;justify-content:center;gap:3px;
-    text-align:left;
+    padding:12px 14px;cursor:pointer;font-family:inherit;
+    display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;
+    text-align:center;
   }
   .cart-btn:disabled{background:var(--card-line);color:var(--text-muted);cursor:not-allowed;}
   .cart-btn:not(:disabled):active{background:#257C48;}
-  .cart-btn-title{font-size:16px;font-weight:900;}
-  .cart-btn-sub{font-size:11px;font-weight:500;opacity:.85;}
+  .cart-btn-title{font-size:23px;font-weight:900;}
+  .cart-btn-sub{font-size:11.5px;font-weight:500;opacity:.85;}
 
   .order-now-btn{
     width:92px;aspect-ratio:1;flex-shrink:0;background:var(--ember);color:#fff;border:none;
-    border-radius:14px;cursor:pointer;font-family:inherit;
+    border-radius:14px;cursor:pointer;font-family:inherit;padding:0 6px;
     display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;
     text-align:center;
   }
   .order-now-btn:disabled{background:var(--card-line);color:var(--text-muted);cursor:not-allowed;}
   .order-now-btn:not(:disabled):active{background:var(--ember-dark);}
-  .order-now-title{font-size:14px;font-weight:900;}
+  .order-now-title{font-size:17px;font-weight:900;}
   .order-now-sub{font-size:9.5px;font-weight:500;opacity:.85;}
+
+  /* ---------- add-to-cart dumpling/hotpot animation ---------- */
+  .hotpot-toast{
+    position:fixed;left:50%;bottom:148px;z-index:80;pointer-events:none;
+    display:flex;flex-direction:column;align-items:center;gap:8px;
+    animation:hotpot-toast-life 1.7s ease forwards;
+  }
+  @keyframes hotpot-toast-life{
+    0%{opacity:0;transform:translateX(-50%) translateY(10px) scale(.9);}
+    10%{opacity:1;transform:translateX(-50%) translateY(0) scale(1);}
+    82%{opacity:1;transform:translateX(-50%) translateY(0) scale(1);}
+    100%{opacity:0;transform:translateX(-50%) translateY(-8px) scale(.96);}
+  }
+  .hotpot-pot{position:relative;width:112px;height:84px;}
+  .hotpot-pot svg{position:absolute;left:0;top:0;filter:drop-shadow(0 8px 14px rgba(0,0,0,.45));}
+  .hotpot-dumpling{
+    position:absolute;left:50%;top:50%;font-size:26px;line-height:1;
+    transform:translate(-50%,-120px) rotate(-25deg);
+    animation:dumpling-drop .55s cubic-bezier(.55,0,.85,.6) .3s forwards;
+  }
+  @keyframes dumpling-drop{
+    0%{transform:translate(-50%,-120px) rotate(-25deg);opacity:1;}
+    85%{transform:translate(-50%,-14px) rotate(20deg);opacity:1;}
+    100%{transform:translate(-50%,-10px) rotate(15deg) scale(.92);opacity:1;}
+  }
+  .hotpot-splash{
+    position:absolute;left:50%;top:36%;font-size:20px;
+    transform:translate(-50%,-50%) scale(.2);opacity:0;
+    animation:hotpot-splash .45s ease-out .82s forwards;
+  }
+  @keyframes hotpot-splash{
+    0%{transform:translate(-50%,-50%) scale(.2);opacity:0;}
+    35%{transform:translate(-50%,-50%) scale(1.3);opacity:1;}
+    100%{transform:translate(-50%,-60%) scale(1.6);opacity:0;}
+  }
+  .hotpot-steam{
+    position:absolute;color:rgba(255,255,255,.55);font-size:16px;font-weight:700;opacity:0;
+    animation:hotpot-steam-rise 1.6s ease-in-out infinite;
+  }
+  .hotpot-steam.s1{left:36%;top:4px;animation-delay:0s;}
+  .hotpot-steam.s2{left:58%;top:0;animation-delay:.5s;}
+  @keyframes hotpot-steam-rise{
+    0%{opacity:0;transform:translateY(4px) scale(.8);}
+    30%{opacity:.8;}
+    100%{opacity:0;transform:translateY(-22px) scale(1.15);}
+  }
+  .hotpot-caption{
+    background:var(--card);border:1px solid var(--card-line);color:var(--text);
+    font-size:12.5px;font-weight:700;padding:6px 14px;border-radius:20px;
+    opacity:0;animation:hotpot-caption-in .4s ease .9s forwards;
+  }
+  @keyframes hotpot-caption-in{
+    0%{opacity:0;transform:translateY(6px);}
+    100%{opacity:1;transform:translateY(0);}
+  }
 
   /* ---------- confirm screen ---------- */
   .confirm-screen{padding:56px 28px 40px;text-align:center;}
@@ -336,6 +391,35 @@ async function goToMyOrder(){
   state.myOrderItems = mergeItems(orders);
   state.myOrderLoading = false;
   render();
+}
+
+function celebrateAddToCart(){
+  const existing = document.querySelector('.hotpot-toast');
+  if(existing) existing.remove();
+
+  const toast = document.createElement('div');
+  toast.className = 'hotpot-toast';
+  toast.innerHTML = `
+    <div class="hotpot-pot">
+      <svg viewBox="0 0 120 90" width="112" height="84">
+        <path d="M10 32 Q10 80 60 80 Q110 80 110 32 L100 32 Q100 70 60 70 Q20 70 20 32 Z" fill="#8A2A12"/>
+        <ellipse cx="60" cy="32" rx="50" ry="13" fill="#E3421F"/>
+        <ellipse cx="60" cy="32" rx="50" ry="13" fill="none" stroke="#7A2A14" stroke-width="2.5"/>
+        <ellipse cx="60" cy="32" rx="42" ry="9" fill="#B22F14"/>
+        <rect x="-2" y="27" width="16" height="8" rx="4" fill="#8A2A12"/>
+        <rect x="106" y="27" width="16" height="8" rx="4" fill="#8A2A12"/>
+      </svg>
+      <span class="hotpot-steam s1">~</span>
+      <span class="hotpot-steam s2">~</span>
+      <span class="hotpot-dumpling">🥟</span>
+      <span class="hotpot-splash">💦</span>
+    </div>
+    <p class="hotpot-caption">已加入购物车！</p>
+  `;
+  document.body.appendChild(toast);
+  toast.addEventListener('animationend', (ev)=>{
+    if(ev.target === toast) toast.remove();
+  });
 }
 
 function goToCart(){
@@ -511,7 +595,7 @@ function menuHTML(){
     </div>
     <div class="bottom-bar">
       <div class="bottom-bar-inner">
-        <button class="cart-btn" onclick="goToCart()" ${count===0?'disabled':''}>
+        <button class="cart-btn" onclick="celebrateAddToCart()" ${count===0?'disabled':''}>
           <span class="cart-btn-title">加入购物车</span>
           <span class="cart-btn-sub">小纠结？先丢进购物车！</span>
         </button>
