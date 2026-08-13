@@ -160,10 +160,12 @@
     background:linear-gradient(180deg,var(--cinnabar),var(--gold));
   }
   .dish-head{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;}
+  .dish-info{flex:1;min-width:0;}
   .dish-head h3{
     font-size:20px;font-weight:900;letter-spacing:.02em;
+    overflow-wrap:break-word;
   }
-  .dish-head .tag{font-size:12.5px;color:var(--text-muted);margin-top:5px;}
+  .dish-head .tag{font-size:12.5px;color:var(--text-muted);margin-top:5px;overflow-wrap:break-word;}
   .stepper{display:flex;align-items:center;gap:2px;flex-shrink:0;}
   .stepper button{
     width:32px;height:32px;border-radius:9px;border:1px solid var(--card-line);
@@ -176,12 +178,15 @@
     width:30px;text-align:center;font-weight:700;font-size:16px;
     font-family:'Archivo Black',sans-serif;
   }
-  .spice-row{display:flex;gap:8px;margin-top:14px;padding-top:14px;border-top:1px dashed var(--card-line);}
+  .spice-row{display:flex;gap:6px;margin-top:14px;padding-top:14px;border-top:1px dashed var(--card-line);}
   .spice-pill{
-    flex:1;display:flex;align-items:center;justify-content:center;gap:5px;
-    padding:8px 6px;border-radius:10px;border:1px solid var(--card-line);
-    background:var(--bg-soft);color:var(--text-muted);font-size:12.5px;cursor:pointer;
+    flex:1;min-width:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;
+    padding:8px 4px;border-radius:10px;border:1px solid var(--card-line);
+    background:var(--bg-soft);color:var(--text-muted);font-size:11px;line-height:1.2;cursor:pointer;
+    text-align:center;
   }
+  .spice-pill .flames{display:flex;gap:1px;flex-shrink:0;}
+  .spice-pill .spice-label{overflow-wrap:break-word;}
   .spice-pill.active{border-color:var(--cinnabar);color:var(--gold);background:rgba(200,30,44,.16);}
   .flame{fill:var(--card-line);}
   .spice-pill.active .flame.lit{fill:var(--cinnabar);}
@@ -191,7 +196,7 @@
   .bottom-bar{
     position:fixed;left:0;right:0;bottom:0;display:flex;justify-content:center;
     background:linear-gradient(180deg,rgba(27,22,19,0) 0%,var(--bg) 30%);
-    padding:20px 16px 24px;
+    padding:20px 16px 26px;
   }
   .bottom-bar-inner{
     width:100%;max-width:448px;display:flex;align-items:stretch;gap:12px;
@@ -206,32 +211,35 @@
   .submit-btn:disabled{background:var(--card-line);color:var(--text-muted);cursor:not-allowed;box-shadow:none;border-color:var(--card-line);}
   .submit-btn:not(:disabled):active{background:var(--ember-dark);}
 
-  .cart-btn{
-    flex:1;background:linear-gradient(160deg,var(--jade) 0%,var(--jade-dark) 100%);
-    color:#fff;border:1px solid var(--gold-line);border-radius:14px;
-    padding:12px 14px;cursor:pointer;font-family:inherit;
-    display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;
-    text-align:center;
-    box-shadow:0 6px 18px rgba(36,95,73,.35);
+  /* one unified pill spanning ~2/3 of the screen, split into two actions */
+  .action-pill-wrap{width:67%;max-width:320px;min-width:264px;margin:0 auto;}
+  .action-pill{
+    position:relative;display:flex;align-items:stretch;
+    border-radius:999px;overflow:hidden;
+    border:1px solid var(--gold-line);
+    box-shadow:0 12px 28px rgba(0,0,0,.45);
   }
-  .cart-btn:disabled{background:var(--card-line);color:var(--text-muted);cursor:not-allowed;box-shadow:none;border-color:var(--card-line);}
-  .cart-btn:not(:disabled):active{background:var(--jade-dark);}
-  .cart-btn-title{font-size:23px;font-weight:900;}
-  .cart-btn-sub{font-size:11.5px;font-weight:500;opacity:.85;}
-
-  .order-now-btn{
-    width:92px;aspect-ratio:1;flex-shrink:0;
-    background:linear-gradient(160deg,var(--ember) 0%,var(--ember-dark) 100%);
-    color:#fff;border:1px solid var(--gold-line);
-    border-radius:14px;cursor:pointer;font-family:inherit;padding:0 6px;
+  .action-pill::before{
+    content:"";position:absolute;inset:0;z-index:2;pointer-events:none;
+    background:linear-gradient(180deg, rgba(255,255,255,.16) 0%, rgba(255,255,255,0) 42%);
+  }
+  .action-pill::after{
+    content:"";position:absolute;z-index:2;top:16%;bottom:16%;left:50%;width:1px;
+    background:linear-gradient(180deg, transparent, rgba(232,162,61,.65), transparent);
+    pointer-events:none;
+  }
+  .cart-btn, .order-now-btn{
+    flex:1;min-width:0;border:none;cursor:pointer;font-family:inherit;
     display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;
-    text-align:center;
-    box-shadow:0 6px 18px rgba(178,47,20,.35);
+    padding:13px 8px;text-align:center;
   }
-  .order-now-btn:disabled{background:var(--card-line);color:var(--text-muted);cursor:not-allowed;box-shadow:none;border-color:var(--card-line);}
+  .cart-btn{background:linear-gradient(160deg,var(--jade) 0%,var(--jade-dark) 100%);color:#fff;}
+  .order-now-btn{background:linear-gradient(160deg,var(--ember) 0%,var(--ember-dark) 100%);color:#fff;}
+  .cart-btn:disabled, .order-now-btn:disabled{background:var(--card-line);color:var(--text-muted);cursor:not-allowed;}
+  .cart-btn:not(:disabled):active{background:var(--jade-dark);}
   .order-now-btn:not(:disabled):active{background:var(--ember-dark);}
-  .order-now-title{font-size:17px;font-weight:900;}
-  .order-now-sub{font-size:9.5px;font-weight:500;opacity:.85;}
+  .cart-btn-title, .order-now-title{font-size:16px;font-weight:900;letter-spacing:.02em;overflow-wrap:break-word;}
+  .cart-btn-sub, .order-now-sub{font-size:10px;font-weight:500;opacity:.85;overflow-wrap:break-word;}
 
   /* ---------- add-to-cart dumpling/hotpot animation ---------- */
   .hotpot-toast{
@@ -1003,7 +1011,7 @@ function menuHTML(){
     return `
       <div class="dish-card">
         <div class="dish-head">
-          <div>
+          <div class="dish-info">
             <h3>${tDish(d.id,'name')}</h3>
             <p class="tag">${tDish(d.id,'tag')}</p>
           </div>
@@ -1017,7 +1025,7 @@ function menuHTML(){
           <div class="spice-row">
             ${SPICE_LEVELS.map((lvl,i)=>`
               <button class="spice-pill ${it.spice===lvl?'active':''}" onclick="setSpice('${d.id}','${lvl}')">
-                ${flameIcons(i+1)}<span>${tSpice(i)}</span>
+                <span class="flames">${flameIcons(i+1)}</span><span class="spice-label">${tSpice(i)}</span>
               </button>`).join('')}
           </div>` : ''}
       </div>`;
@@ -1046,15 +1054,17 @@ function menuHTML(){
       </div>
     </div>
     <div class="bottom-bar">
-      <div class="bottom-bar-inner">
-        <button class="cart-btn" onclick="celebrateAddToCart()" ${count===0?'disabled':''}>
-          <span class="cart-btn-title">${t('addToCart')}</span>
-          <span class="cart-btn-sub">${t('addToCartSub')}</span>
-        </button>
-        <button class="order-now-btn" onclick="submitOrder()" ${count===0||state.submitting?'disabled':''}>
-          <span class="order-now-title">${state.submitting?t('ordering'):t('orderNow')}</span>
-          <span class="order-now-sub">${t('orderNowSub')}</span>
-        </button>
+      <div class="action-pill-wrap">
+        <div class="action-pill">
+          <button class="cart-btn" onclick="celebrateAddToCart()" ${count===0?'disabled':''}>
+            <span class="cart-btn-title">${t('addToCart')}</span>
+            <span class="cart-btn-sub">${t('addToCartSub')}</span>
+          </button>
+          <button class="order-now-btn" onclick="submitOrder()" ${count===0||state.submitting?'disabled':''}>
+            <span class="order-now-title">${state.submitting?t('ordering'):t('orderNow')}</span>
+            <span class="order-now-sub">${t('orderNowSub')}</span>
+          </button>
+        </div>
       </div>
     </div>`;
 }
