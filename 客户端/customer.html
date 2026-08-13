@@ -351,6 +351,69 @@
     cursor:pointer;padding:14px 0 0;font-family:inherit;display:block;
   }
   .text-link-btn:hover{text-decoration:underline;}
+
+  /* ---------- welcome / language select ---------- */
+  .welcome-screen{min-height:100vh;width:100%;display:flex;align-items:center;justify-content:center;padding:24px;}
+  .welcome-inner{
+    opacity:0;transform:translateY(16px);
+    transition:opacity 1s ease, transform 1s ease;
+    text-align:center;width:100%;max-width:380px;
+  }
+  .welcome-inner.visible{opacity:1;transform:translateY(0);}
+  .welcome-eyebrow{
+    font-size:11px;letter-spacing:.32em;color:var(--gold);
+    text-transform:uppercase;font-weight:700;margin-bottom:20px;opacity:.8;
+  }
+  .welcome-word-wrap{height:76px;display:flex;align-items:center;justify-content:center;margin-bottom:40px;}
+  .welcome-word{
+    font-family:var(--brush);font-weight:400;font-size:52px;color:var(--text);
+    text-shadow:0 0 26px rgba(200,30,44,.5);
+    transition:opacity .4s ease, transform .4s ease;opacity:1;transform:translateY(0);
+  }
+  .welcome-word.swap{opacity:0;transform:translateY(8px);}
+  .welcome-btn-wrap{
+    opacity:0;transform:translateY(10px);
+    transition:opacity .8s ease .35s, transform .8s ease .35s;
+    position:relative;
+  }
+  .welcome-btn-wrap.visible{opacity:1;transform:translateY(0);}
+  .lang-select-btn{
+    position:relative;z-index:56;
+    display:inline-flex;align-items:center;gap:10px;
+    background:linear-gradient(160deg, rgba(232,162,61,.14), rgba(200,30,44,.12));
+    border:1px solid var(--gold-line);color:var(--text);
+    padding:14px 26px;border-radius:30px;font-size:13.5px;font-weight:700;
+    letter-spacing:.02em;cursor:pointer;font-family:inherit;
+    box-shadow:0 8px 24px rgba(0,0,0,.35);
+    transition:border-color .2s ease, box-shadow .2s ease, transform .2s ease;
+  }
+  .lang-select-btn:hover{border-color:var(--gold);box-shadow:0 10px 28px rgba(232,162,61,.25);transform:translateY(-1px);}
+  .lang-select-icon{font-size:16px;}
+  .lang-panel{
+    position:relative;z-index:56;margin-top:14px;
+    background:var(--card);border:1px solid var(--gold-line);
+    border-radius:16px;overflow:hidden;box-shadow:0 14px 34px rgba(0,0,0,.5);
+    text-align:left;
+  }
+  .lang-panel button{
+    display:flex;align-items:center;justify-content:space-between;width:100%;
+    background:none;border:none;color:var(--text);font-family:inherit;
+    padding:14px 18px;font-size:14.5px;font-weight:700;cursor:pointer;
+  }
+  .lang-panel button+button{border-top:1px solid var(--card-line);}
+  .lang-panel button:hover{background:var(--bg-soft);color:var(--gold);}
+  .lang-panel .lang-check{color:var(--gold);opacity:0;font-size:13px;}
+  .lang-panel button.active .lang-check{opacity:1;}
+
+  /* ---------- in-app language switcher ---------- */
+  .lang-switcher-overlay{position:fixed;inset:0;z-index:65;background:rgba(0,0,0,.5);border:none;padding:0;margin:0;cursor:default;}
+  .lang-switcher-panel{
+    position:fixed;left:50%;top:50%;transform:translate(-50%,-50%);
+    z-index:66;width:calc(100% - 56px);max-width:340px;
+    background:var(--card);border:1px solid var(--gold-line);border-radius:18px;
+    overflow:hidden;box-shadow:0 20px 50px rgba(0,0,0,.6);
+  }
+  .lang-switcher-title{padding:16px 18px 8px;font-size:12px;letter-spacing:.1em;color:var(--gold);text-transform:uppercase;font-weight:700;}
 </style>
 </head>
 <body>
@@ -372,14 +435,167 @@ firebase.initializeApp(firebaseConfig);
 const db = firebase.firestore();
 const ordersRef = db.collection('orders');
 
+const LANG_ORDER = ['zh','en','it','fr','es'];
+const LANG_META = {
+  zh:{ native:'中文', greeting:'欢迎光临' },
+  en:{ native:'English', greeting:'Welcome' },
+  it:{ native:'Italiano', greeting:'Benvenuti' },
+  fr:{ native:'Français', greeting:'Bienvenue' },
+  es:{ native:'Español', greeting:'Bienvenido' },
+};
+
+const I18N = {
+  zh:{
+    appTitle:"扫码点单",
+    pickEyebrow:"选择桌号", pickTitle:"请选择桌号",
+    pickHint:"顾客请直接扫桌上二维码；员工帮客人点单，请选择对应桌号",
+    tablePrefix:"桌 ", tableEyebrow:"桌号", changeTable:"切换桌号",
+    menuTitle:"菜单", myPot:"我的小锅", cart:"购物车", orderedItems:"已点菜品",
+    addToCart:"加入购物车", addToCartSub:"小纠结？先丢进购物车！",
+    orderNow:"立即下单", orderNowSub:"不再犹豫！", ordering:"下单中…",
+    addedToCart:"已加入购物车！", back:"返回",
+    addOnSuccess:"加单成功", orderPlaced:"已下单", waitConfirm:"请稍候，服务员马上确认～",
+    continueOrdering:"继续点单", myOrder:"我的订单", removeHint:"如需退菜，请联系服务员哦～",
+    loading:"加载中…", noOrderYet:"还没有点菜，去菜单看看吧～", backToMenu:"返回菜单",
+    emptyCart:"购物车是空的，去菜单选几道菜吧～",
+    orderFailed:"下单失败，请重试一次，或直接告诉服务员～",
+    languageLabel:"语言", closeMenu:"关闭菜单", decreaseQty:"减少数量", increaseQty:"增加数量",
+    categories:{ all:"全部", signature:"招牌菜", staple:"主食" },
+    spice:["微辣","中辣","特辣"],
+    dishes:{
+      dachang:{ name:"爆炒大肠", tag:"猛火爆炒，外脆里嫩" },
+      wangdianzhang:{ name:"清蒸王店长", tag:"原汁原味，清淡鲜香" },
+      zhaoshifu:{ name:"干煸赵师傅", tag:"干煸入味，越嚼越香" },
+      chaofan:{ name:"狂炒米饭", tag:"锅气拉满，粒粒分明" },
+      mixian:{ name:"狠炒米线", tag:"劲道爽滑，越吃越上头" },
+    },
+  },
+  en:{
+    appTitle:"Scan to Order",
+    pickEyebrow:"Select Table", pickTitle:"Choose Your Table",
+    pickHint:"Guests: please scan the QR code on your table. Staff: select the matching table to order on a guest's behalf.",
+    tablePrefix:"Table ", tableEyebrow:"Table", changeTable:"Change Table",
+    menuTitle:"Menu", myPot:"My Pot", cart:"Cart", orderedItems:"Items Ordered",
+    addToCart:"Add to Cart", addToCartSub:"Still deciding? Add it to your cart!",
+    orderNow:"Order Now", orderNowSub:"No more hesitating!", ordering:"Ordering…",
+    addedToCart:"Added to cart!", back:"Back",
+    addOnSuccess:"Add-on Placed", orderPlaced:"Order Placed", waitConfirm:"Please wait, staff will confirm shortly~",
+    continueOrdering:"Continue Ordering", myOrder:"My Order", removeHint:"To remove an item, please contact staff~",
+    loading:"Loading…", noOrderYet:"No items yet — check out the menu~", backToMenu:"Back to Menu",
+    emptyCart:"Your cart is empty — pick some dishes from the menu~",
+    orderFailed:"Order failed, please try again or let staff know~",
+    languageLabel:"Language", closeMenu:"Close menu", decreaseQty:"Decrease quantity", increaseQty:"Increase quantity",
+    categories:{ all:"All", signature:"Signature", staple:"Mains" },
+    spice:["Mild","Medium","Extra Spicy"],
+    dishes:{
+      dachang:{ name:"Stir-Fried Pork Intestines", tag:"High-heat wok-seared, crispy outside, tender inside" },
+      wangdianzhang:{ name:'Steamed "Manager Wang"', tag:"Original flavor, light and savory" },
+      zhaoshifu:{ name:'Dry-Fried "Chef Zhao"', tag:"Dry-fried to perfection, more delicious with every bite" },
+      chaofan:{ name:"Wild Fried Rice", tag:"Full wok hei, every grain distinct" },
+      mixian:{ name:"Fierce Fried Rice Noodles", tag:"Chewy and smooth, addictively good" },
+    },
+  },
+  it:{
+    appTitle:"Scansiona per Ordinare",
+    pickEyebrow:"Seleziona Tavolo", pickTitle:"Scegli il Tuo Tavolo",
+    pickHint:"Clienti: scansionate il codice QR sul tavolo. Staff: selezionate il tavolo corrispondente per ordinare per un cliente.",
+    tablePrefix:"Tavolo ", tableEyebrow:"Tavolo", changeTable:"Cambia Tavolo",
+    menuTitle:"Menu", myPot:"La Mia Pentola", cart:"Carrello", orderedItems:"Piatti Ordinati",
+    addToCart:"Aggiungi al Carrello", addToCartSub:"Ancora indeciso? Mettilo nel carrello!",
+    orderNow:"Ordina Ora", orderNowSub:"Non esitare più!", ordering:"Ordinazione in corso…",
+    addedToCart:"Aggiunto al carrello!", back:"Indietro",
+    addOnSuccess:"Aggiunta Effettuata", orderPlaced:"Ordine Effettuato", waitConfirm:"Attendere, lo staff confermerà a breve~",
+    continueOrdering:"Continua a Ordinare", myOrder:"Il Mio Ordine", removeHint:"Per rimuovere un piatto, contattare lo staff~",
+    loading:"Caricamento…", noOrderYet:"Nessun piatto ancora — dai un'occhiata al menu~", backToMenu:"Torna al Menu",
+    emptyCart:"Il carrello è vuoto — scegli qualche piatto dal menu~",
+    orderFailed:"Ordine non riuscito, riprova o avvisa lo staff~",
+    languageLabel:"Lingua", closeMenu:"Chiudi menu", decreaseQty:"Diminuisci quantità", increaseQty:"Aumenta quantità",
+    categories:{ all:"Tutti", signature:"Specialità", staple:"Piatti Principali" },
+    spice:["Poco Piccante","Piccante","Molto Piccante"],
+    dishes:{
+      dachang:{ name:"Intestino di Maiale Saltato", tag:"Saltato a fuoco vivo, croccante fuori e tenero dentro" },
+      wangdianzhang:{ name:'"Direttore Wang" al Vapore', tag:"Sapore originale, leggero e saporito" },
+      zhaoshifu:{ name:'"Chef Zhao" Saltato in Padella', tag:"Saltato a secco e ben insaporito, più lo mastichi più ti piace" },
+      chaofan:{ name:"Riso Saltato Selvaggio", tag:'Pieno di "wok hei", ogni chicco ben distinto' },
+      mixian:{ name:"Spaghetti di Riso Saltati Piccanti", tag:"Elastici e morbidi, sempre più coinvolgenti" },
+    },
+  },
+  fr:{
+    appTitle:"Scanner pour Commander",
+    pickEyebrow:"Choisir une Table", pickTitle:"Choisissez Votre Table",
+    pickHint:"Clients : veuillez scanner le code QR sur votre table. Personnel : sélectionnez la table correspondante pour commander pour un client.",
+    tablePrefix:"Table ", tableEyebrow:"Table", changeTable:"Changer de Table",
+    menuTitle:"Menu", myPot:"Mon Petit Pot", cart:"Panier", orderedItems:"Plats Commandés",
+    addToCart:"Ajouter au Panier", addToCartSub:"Pas encore décidé ? Mettez-le dans le panier !",
+    orderNow:"Commander", orderNowSub:"N'hésitez plus !", ordering:"Commande en cours…",
+    addedToCart:"Ajouté au panier !", back:"Retour",
+    addOnSuccess:"Ajout Effectué", orderPlaced:"Commande Passée", waitConfirm:"Veuillez patienter, le personnel confirmera bientôt~",
+    continueOrdering:"Continuer à Commander", myOrder:"Ma Commande", removeHint:"Pour retirer un plat, veuillez contacter le personnel~",
+    loading:"Chargement…", noOrderYet:"Aucun plat pour l'instant — jetez un œil au menu~", backToMenu:"Retour au Menu",
+    emptyCart:"Votre panier est vide — choisissez des plats dans le menu~",
+    orderFailed:"Échec de la commande, veuillez réessayer ou prévenir le personnel~",
+    languageLabel:"Langue", closeMenu:"Fermer le menu", decreaseQty:"Diminuer la quantité", increaseQty:"Augmenter la quantité",
+    categories:{ all:"Tous", signature:"Spécialités", staple:"Plats Principaux" },
+    spice:["Peu Épicé","Épicé","Très Épicé"],
+    dishes:{
+      dachang:{ name:"Intestin de Porc Sauté", tag:"Sauté à feu vif, croustillant dehors, tendre dedans" },
+      wangdianzhang:{ name:'"Directeur Wang" Vapeur', tag:"Saveur originale, légère et savoureuse" },
+      zhaoshifu:{ name:'"Chef Zhao" Sauté à Sec', tag:"Sauté à sec et bien relevé, plus on mâche, plus c'est bon" },
+      chaofan:{ name:"Riz Sauté Sauvage", tag:"Plein de saveur du wok, chaque grain bien distinct" },
+      mixian:{ name:"Vermicelles de Riz Sautés Épicés", tag:"Moelleux et lisse, on ne peut plus s'arrêter" },
+    },
+  },
+  es:{
+    appTitle:"Escanea para Pedir",
+    pickEyebrow:"Elegir Mesa", pickTitle:"Elige Tu Mesa",
+    pickHint:"Clientes: por favor escaneen el código QR de su mesa. Personal: seleccionen la mesa correspondiente para pedir en nombre de un cliente.",
+    tablePrefix:"Mesa ", tableEyebrow:"Mesa", changeTable:"Cambiar Mesa",
+    menuTitle:"Menú", myPot:"Mi Ollita", cart:"Carrito", orderedItems:"Platos Pedidos",
+    addToCart:"Añadir al Carrito", addToCartSub:"¿Aún indeciso? ¡Añádelo al carrito!",
+    orderNow:"Pedir Ahora", orderNowSub:"¡No lo dudes más!", ordering:"Pidiendo…",
+    addedToCart:"¡Añadido al carrito!", back:"Atrás",
+    addOnSuccess:"Pedido Adicional Realizado", orderPlaced:"Pedido Realizado", waitConfirm:"Espere, el personal confirmará en breve~",
+    continueOrdering:"Seguir Pidiendo", myOrder:"Mi Pedido", removeHint:"Para quitar un plato, por favor contacte al personal~",
+    loading:"Cargando…", noOrderYet:"Aún no hay platos — eche un vistazo al menú~", backToMenu:"Volver al Menú",
+    emptyCart:"Tu carrito está vacío — elige algunos platos del menú~",
+    orderFailed:"Error al pedir, inténtalo de nuevo o avisa al personal~",
+    languageLabel:"Idioma", closeMenu:"Cerrar menú", decreaseQty:"Disminuir cantidad", increaseQty:"Aumentar cantidad",
+    categories:{ all:"Todos", signature:"Especialidades", staple:"Platos Principales" },
+    spice:["Poco Picante","Picante","Muy Picante"],
+    dishes:{
+      dachang:{ name:"Intestino de Cerdo Salteado", tag:"Salteado a fuego alto, crujiente por fuera, tierno por dentro" },
+      wangdianzhang:{ name:'"Gerente Wang" al Vapor', tag:"Sabor original, ligero y sabroso" },
+      zhaoshifu:{ name:'"Chef Zhao" Salteado Seco', tag:"Salteado en seco y bien sazonado, cuanto más lo masticas, mejor sabe" },
+      chaofan:{ name:"Arroz Frito Salvaje", tag:"Lleno de sabor a wok, cada grano bien suelto" },
+      mixian:{ name:"Fideos de Arroz Salteados Picantes", tag:"Suaves y elásticos, cada vez más adictivos" },
+    },
+  },
+};
+
+function t(key){
+  const dict = I18N[state.lang] || I18N.zh;
+  return dict[key] !== undefined ? dict[key] : I18N.zh[key];
+}
+function tCat(catId){ return (I18N[state.lang] || I18N.zh).categories[catId]; }
+function tSpice(idx){ return (I18N[state.lang] || I18N.zh).spice[idx]; }
+function tDish(id, field){ return (I18N[state.lang] || I18N.zh).dishes[id][field]; }
+function displayDishName(zhName){
+  const dish = MENU.find(d => d.name === zhName);
+  return dish ? tDish(dish.id, 'name') : zhName;
+}
+function displaySpice(zhSpice){
+  const idx = SPICE_LEVELS.indexOf(zhSpice);
+  return idx >= 0 ? tSpice(idx) : zhSpice;
+}
+
 const MENU = [
-  { id:'dachang', name:'爆炒大肠', tag:'猛火爆炒，外脆里嫩', category:'招牌菜' },
-  { id:'wangdianzhang', name:'清蒸王店长', tag:'原汁原味，清淡鲜香', category:'招牌菜' },
-  { id:'zhaoshifu', name:'干煸赵师傅', tag:'干煸入味，越嚼越香', category:'招牌菜' },
-  { id:'chaofan',  name:'狂炒米饭', tag:'锅气拉满，粒粒分明', category:'主食' },
-  { id:'mixian',   name:'狠炒米线', tag:'劲道爽滑，越吃越上头', category:'主食' },
+  { id:'dachang', name:'爆炒大肠', category:'signature' },
+  { id:'wangdianzhang', name:'清蒸王店长', category:'signature' },
+  { id:'zhaoshifu', name:'干煸赵师傅', category:'signature' },
+  { id:'chaofan',  name:'狂炒米饭', category:'staple' },
+  { id:'mixian',   name:'狠炒米线', category:'staple' },
 ];
-const CATEGORIES = ['全部', ...Array.from(new Set(MENU.map(d=>d.category)))];
+const CATEGORIES = ['all','signature','staple'];
 const SPICE_LEVELS = ['微辣','中辣','特辣'];
 
 const params = new URLSearchParams(location.search);
@@ -388,9 +604,13 @@ const urlTable = params.get('table');
 let state = {
   table: urlTable || null,
   lockedByUrl: !!urlTable,
-  screen: urlTable ? 'menu' : 'pick',
+  screen: 'welcome',
+  lang: 'zh',
+  welcomeVisible: false,
+  langMenuOpen: false,
+  langSwitcherOpen: false,
   items: {},   // { dishId: { qty, spice } }
-  activeCategory: '全部',
+  activeCategory: 'all',
   lastOrder: null,
   submitting: false,
   myOrderItems: null,
@@ -399,6 +619,109 @@ let state = {
 };
 
 let screenHistory = [];   // 记录来源页面，供“返回”按钮回退用
+let welcomeTimer = null;
+
+function applyLanguage(code){
+  state.lang = code;
+  document.documentElement.lang = code;
+  document.title = t('appTitle');
+}
+
+function selectLanguage(code){
+  applyLanguage(code);
+  state.langMenuOpen = false;
+  state.welcomeVisible = false;
+  stopWelcomeCycle();
+  screenHistory = [];
+  state.screen = state.table ? 'menu' : 'pick';
+  render();
+}
+
+function setLanguage(code){
+  applyLanguage(code);
+  state.langSwitcherOpen = false;
+  state.pandaMenuOpen = false;
+  render();
+}
+
+function toggleWelcomeLangMenu(){
+  state.langMenuOpen = !state.langMenuOpen;
+  render();
+}
+
+function toggleLangSwitcher(){
+  state.pandaMenuOpen = false;
+  state.langSwitcherOpen = !state.langSwitcherOpen;
+  render();
+}
+
+function closeLangSwitcher(){
+  state.langSwitcherOpen = false;
+  render();
+}
+
+function stopWelcomeCycle(){
+  if(welcomeTimer){ clearInterval(welcomeTimer); welcomeTimer = null; }
+}
+
+function startWelcomeCycle(){
+  if(welcomeTimer) return;
+  let idx = 0;
+  welcomeTimer = setInterval(()=>{
+    const el = document.getElementById('welcome-word');
+    if(!el) return;
+    el.classList.add('swap');
+    setTimeout(()=>{
+      idx = (idx + 1) % LANG_ORDER.length;
+      el.textContent = LANG_META[LANG_ORDER[idx]].greeting;
+      el.classList.remove('swap');
+    }, 400);
+  }, 1800);
+}
+
+function mountWelcomeScreen(){
+  if(!state.welcomeVisible){
+    const inner = document.getElementById('welcome-inner');
+    const btnWrap = document.getElementById('welcome-btn-wrap');
+    setTimeout(()=>{
+      if(inner) inner.classList.add('visible');
+      if(btnWrap) btnWrap.classList.add('visible');
+      state.welcomeVisible = true;
+    }, 100);
+  }
+  startWelcomeCycle();
+}
+
+function langPanelHTML(handlerName){
+  return `
+    <div class="lang-panel">
+      ${LANG_ORDER.map(code => `
+        <button class="${state.lang===code?'active':''}" onclick="${handlerName}('${code}')">
+          <span class="lang-native">${LANG_META[code].native}</span>
+          <span class="lang-check">✓</span>
+        </button>`).join('')}
+    </div>`;
+}
+
+function welcomeHTML(){
+  return `
+    <div class="welcome-screen">
+      <div class="welcome-inner ${state.welcomeVisible?'visible':''}" id="welcome-inner">
+        <p class="welcome-eyebrow">Sichuan Hotpot · 扫码点单</p>
+        <div class="welcome-word-wrap">
+          <span class="welcome-word" id="welcome-word">${LANG_META[LANG_ORDER[0]].greeting}</span>
+        </div>
+        <div class="welcome-btn-wrap ${state.welcomeVisible?'visible':''}" id="welcome-btn-wrap">
+          ${state.langMenuOpen ? `<button class="panda-overlay" onclick="toggleWelcomeLangMenu()" aria-label="${t('closeMenu')}"></button>` : ''}
+          <button class="lang-select-btn" onclick="toggleWelcomeLangMenu()">
+            <span class="lang-select-icon">🌐</span>
+            <span>选择语言 · Select Language</span>
+          </button>
+          ${state.langMenuOpen ? langPanelHTML('selectLanguage') : ''}
+        </div>
+      </div>
+    </div>`;
+}
 
 function goBack(){
   const prev = screenHistory.pop();
@@ -409,7 +732,7 @@ function goBack(){
 
 function backRowHTML(){
   if(screenHistory.length === 0) return '';
-  return `<div class="back-row"><button class="back-btn" onclick="goBack()" aria-label="返回上一页">← 返回</button></div>`;
+  return `<div class="back-row"><button class="back-btn" onclick="goBack()" aria-label="${t('back')}">← ${t('back')}</button></div>`;
 }
 
 function getItem(id){
@@ -470,7 +793,7 @@ function celebrateAddToCart(){
       <span class="hotpot-dumpling">🥟</span>
       <span class="hotpot-splash">💦</span>
     </div>
-    <p class="hotpot-caption">已加入购物车！</p>
+    <p class="hotpot-caption">${t('addedToCart')}</p>
   `;
   document.body.appendChild(toast);
   toast.addEventListener('animationend', (ev)=>{
@@ -570,7 +893,7 @@ async function submitOrder(){
     screenHistory.push('menu');
     state.screen = 'confirm';
   }catch(e){
-    alert('下单失败，请重试一次，或直接告诉服务员～');
+    alert(t('orderFailed'));
   }
   state.submitting = false;
   render();
@@ -591,18 +914,18 @@ const PICKABLE_TABLES = [...Array.from({length:30},(_,i)=>i+1), 888];
 function tablePickHTML(){
   return `
     <div class="pick-screen">
-      <p class="eyebrow">选择桌号</p>
-      <h1>请选择桌号</h1>
-      <p class="pick-hint">顾客请直接扫桌上二维码；员工帮客人点单，请选择对应桌号</p>
+      <p class="eyebrow">${t('pickEyebrow')}</p>
+      <h1>${t('pickTitle')}</h1>
+      <p class="pick-hint">${t('pickHint')}</p>
       <div class="table-grid">
-        ${PICKABLE_TABLES.map(n=>`<button onclick="selectTable(${n})">桌 ${n}</button>`).join('')}
+        ${PICKABLE_TABLES.map(n=>`<button onclick="selectTable(${n})">${t('tablePrefix')}${n}</button>`).join('')}
       </div>
     </div>`;
 }
 
 function menuHTML(){
-  const activeCat = state.activeCategory || '全部';
-  const filteredMenu = activeCat === '全部' ? MENU : MENU.filter(d=>d.category===activeCat);
+  const activeCat = state.activeCategory || 'all';
+  const filteredMenu = activeCat === 'all' ? MENU : MENU.filter(d=>d.category===activeCat);
 
   const dishesHTML = filteredMenu.map(d=>{
     const it = getItem(d.id);
@@ -610,27 +933,27 @@ function menuHTML(){
       <div class="dish-card">
         <div class="dish-head">
           <div>
-            <h3>${d.name}</h3>
-            <p class="tag">${d.tag}</p>
+            <h3>${tDish(d.id,'name')}</h3>
+            <p class="tag">${tDish(d.id,'tag')}</p>
           </div>
           <div class="stepper">
-            <button onclick="changeQty('${d.id}',-1)" ${it.qty<=0?'disabled':''} aria-label="减少数量">−</button>
+            <button onclick="changeQty('${d.id}',-1)" ${it.qty<=0?'disabled':''} aria-label="${t('decreaseQty')}">−</button>
             <span class="qty">${it.qty}</span>
-            <button onclick="changeQty('${d.id}',1)" aria-label="增加数量">+</button>
+            <button onclick="changeQty('${d.id}',1)" aria-label="${t('increaseQty')}">+</button>
           </div>
         </div>
         ${it.qty>0 ? `
           <div class="spice-row">
             ${SPICE_LEVELS.map((lvl,i)=>`
               <button class="spice-pill ${it.spice===lvl?'active':''}" onclick="setSpice('${d.id}','${lvl}')">
-                ${flameIcons(i+1)}<span>${lvl}</span>
+                ${flameIcons(i+1)}<span>${tSpice(i)}</span>
               </button>`).join('')}
           </div>` : ''}
       </div>`;
   }).join('');
 
   const categoryNavHTML = CATEGORIES.map(cat=>`
-    <button class="cat-btn ${activeCat===cat?'active':''}" onclick="setCategory('${cat}')">${cat}</button>
+    <button class="cat-btn ${activeCat===cat?'active':''}" onclick="setCategory('${cat}')">${tCat(cat)}</button>
   `).join('');
 
   const count = totalCount();
@@ -639,12 +962,12 @@ function menuHTML(){
     ${backRowHTML()}
     <header class="bar">
       <div class="table-badge">
-        <span class="eyebrow">桌号</span>
+        <span class="eyebrow">${t('tableEyebrow')}</span>
         <span class="num">${state.table}</span>
-        ${!state.lockedByUrl ? `<button class="change-table" onclick="changeTable()">切换桌号</button>` : ''}
+        ${!state.lockedByUrl ? `<button class="change-table" onclick="changeTable()">${t('changeTable')}</button>` : ''}
       </div>
     </header>
-    <p class="menu-title">菜单</p>
+    <p class="menu-title">${t('menuTitle')}</p>
     <div class="menu-body">
       <nav class="category-nav">${categoryNavHTML}</nav>
       <div class="dish-panel">
@@ -654,12 +977,12 @@ function menuHTML(){
     <div class="bottom-bar">
       <div class="bottom-bar-inner">
         <button class="cart-btn" onclick="celebrateAddToCart()" ${count===0?'disabled':''}>
-          <span class="cart-btn-title">加入购物车</span>
-          <span class="cart-btn-sub">小纠结？先丢进购物车！</span>
+          <span class="cart-btn-title">${t('addToCart')}</span>
+          <span class="cart-btn-sub">${t('addToCartSub')}</span>
         </button>
         <button class="order-now-btn" onclick="submitOrder()" ${count===0||state.submitting?'disabled':''}>
-          <span class="order-now-title">${state.submitting?'下单中…':'立即下单'}</span>
-          <span class="order-now-sub">不再犹豫！</span>
+          <span class="order-now-title">${state.submitting?t('ordering'):t('orderNow')}</span>
+          <span class="order-now-sub">${t('orderNowSub')}</span>
         </button>
       </div>
     </div>`;
@@ -670,53 +993,53 @@ function myOrderHTML(){
   return `
     ${backRowHTML()}
     <div class="confirm-screen">
-      <p class="eyebrow">桌号 ${state.table}</p>
-      <h2 style="margin-top:6px;">我的订单</h2>
+      <p class="eyebrow">${t('tableEyebrow')} ${state.table}</p>
+      <h2 style="margin-top:6px;">${t('myOrder')}</h2>
       ${state.myOrderLoading
-        ? `<p class="hint">加载中…</p>`
+        ? `<p class="hint">${t('loading')}</p>`
         : items.length === 0
-          ? `<p class="hint">还没有点菜，去菜单看看吧～</p>`
+          ? `<p class="hint">${t('noOrderYet')}</p>`
           : `<ul class="order-summary">
-              ${items.map(it=>`<li>${it.name} × ${it.qty}<span class="spice-tag">${it.spice}</span></li>`).join('')}
+              ${items.map(it=>`<li>${displayDishName(it.name)} × ${it.qty}<span class="spice-tag">${displaySpice(it.spice)}</span></li>`).join('')}
             </ul>
-            <p class="hint">如需退菜，请联系服务员哦～</p>`
+            <p class="hint">${t('removeHint')}</p>`
       }
-      <button class="ghost-btn" onclick="goBack()">返回菜单</button>
+      <button class="ghost-btn" onclick="goBack()">${t('backToMenu')}</button>
     </div>`;
 }
 
 function cartHTML(){
   const items = MENU
-    .map(d => ({ id: d.id, name: d.name, ...getItem(d.id) }))
+    .map(d => ({ id: d.id, name: tDish(d.id,'name'), ...getItem(d.id) }))
     .filter(it => it.qty > 0);
   const count = totalCount();
 
   return `
     ${backRowHTML()}
     <div class="confirm-screen">
-      <p class="eyebrow">桌号 ${state.table}</p>
-      <h2 style="margin-top:6px;">购物车</h2>
+      <p class="eyebrow">${t('tableEyebrow')} ${state.table}</p>
+      <h2 style="margin-top:6px;">${t('cart')}</h2>
       ${items.length === 0
-        ? `<p class="hint">购物车是空的，去菜单选几道菜吧～</p>`
+        ? `<p class="hint">${t('emptyCart')}</p>`
         : `<ul class="order-summary">
             ${items.map(it=>`
               <li>
-                <span>${it.name}<span class="spice-tag" style="margin-left:8px;">${it.spice}</span></span>
+                <span>${it.name}<span class="spice-tag" style="margin-left:8px;">${displaySpice(it.spice)}</span></span>
                 <span class="stepper">
-                  <button onclick="changeQty('${it.id}',-1)" aria-label="减少数量">−</button>
+                  <button onclick="changeQty('${it.id}',-1)" aria-label="${t('decreaseQty')}">−</button>
                   <span class="qty">${it.qty}</span>
-                  <button onclick="changeQty('${it.id}',1)" aria-label="增加数量">+</button>
+                  <button onclick="changeQty('${it.id}',1)" aria-label="${t('increaseQty')}">+</button>
                 </span>
               </li>`).join('')}
           </ul>`
       }
-      <button class="ghost-btn" onclick="goBack()">返回菜单</button>
+      <button class="ghost-btn" onclick="goBack()">${t('backToMenu')}</button>
     </div>
     ${count > 0 ? `
     <div class="bottom-bar">
       <div class="bottom-bar-inner">
         <button class="submit-btn" onclick="submitOrder()" ${state.submitting?'disabled':''}>
-          ${state.submitting?'下单中…':'立即下单'}
+          ${state.submitting?t('ordering'):t('orderNow')}
         </button>
       </div>
     </div>` : ''}`;
@@ -725,15 +1048,16 @@ function cartHTML(){
 function pandaNavHTML(){
   if(!state.table) return '';
   return `
-    ${state.pandaMenuOpen ? `<button class="panda-overlay" onclick="closePandaMenu()" aria-label="关闭菜单"></button>` : ''}
-    <button class="my-order-btn" onclick="togglePandaMenu()" aria-label="我的小锅" aria-expanded="${state.pandaMenuOpen}">
+    ${state.pandaMenuOpen ? `<button class="panda-overlay" onclick="closePandaMenu()" aria-label="${t('closeMenu')}"></button>` : ''}
+    <button class="my-order-btn" onclick="togglePandaMenu()" aria-label="${t('myPot')}" aria-expanded="${state.pandaMenuOpen}">
       <span class="panda-avatar">🐼</span>
-      <span class="my-order-label">我的小锅</span>
+      <span class="my-order-label">${t('myPot')}</span>
     </button>
     ${state.pandaMenuOpen ? `
       <div class="panda-dropdown">
-        <button onclick="goToCart()">购物车</button>
-        <button onclick="goToMyOrder()">已点菜品</button>
+        <button onclick="goToCart()">${t('cart')}</button>
+        <button onclick="goToMyOrder()">${t('orderedItems')}</button>
+        <button onclick="toggleLangSwitcher()">🌐 ${LANG_META[state.lang].native}</button>
       </div>` : ''}`;
 }
 
@@ -741,30 +1065,44 @@ function confirmHTML(order){
   return `
     <div class="confirm-screen">
       ${backRowHTML()}
-      <div class="stamp-ring"><span>${order.isAddOn ? '加单成功' : '已下单'}</span></div>
-      <h2>桌号 ${order.table}</h2>
-      <p class="hint">请稍候，服务员马上确认～</p>
-      <button class="ghost-btn" onclick="resetToMenu()">继续点单</button>
+      <div class="stamp-ring"><span>${order.isAddOn ? t('addOnSuccess') : t('orderPlaced')}</span></div>
+      <h2>${t('tableEyebrow')} ${order.table}</h2>
+      <p class="hint">${t('waitConfirm')}</p>
+      <button class="ghost-btn" onclick="resetToMenu()">${t('continueOrdering')}</button>
 
       <div class="my-order-card">
-        <p class="my-order-title">我的订单</p>
+        <p class="my-order-title">${t('myOrder')}</p>
         <ul class="order-summary">
-          ${order.summaryItems.map(it=>`<li>${it.name} × ${it.qty}<span class="spice-tag">${it.spice}</span></li>`).join('')}
+          ${order.summaryItems.map(it=>`<li>${displayDishName(it.name)} × ${it.qty}<span class="spice-tag">${displaySpice(it.spice)}</span></li>`).join('')}
         </ul>
-        <p class="hint my-order-note">如需退菜，请联系服务员哦～</p>
-        <button class="text-link-btn" onclick="resetToMenu()">继续点单 →</button>
+        <p class="hint my-order-note">${t('removeHint')}</p>
+        <button class="text-link-btn" onclick="resetToMenu()">${t('continueOrdering')} →</button>
       </div>
     </div>`;
 }
 
 function render(){
   const app = document.getElementById('app');
-  if(state.screen === 'pick'){ app.innerHTML = tablePickHTML(); }
-  else if(state.screen === 'confirm'){ app.innerHTML = confirmHTML(state.lastOrder); }
-  else if(state.screen === 'myOrder'){ app.innerHTML = myOrderHTML(); }
-  else if(state.screen === 'cart'){ app.innerHTML = cartHTML(); }
-  else{ app.innerHTML = menuHTML(); }
-  document.getElementById('panda-nav').innerHTML = pandaNavHTML();
+  let screenHtml;
+  if(state.screen === 'welcome'){ screenHtml = welcomeHTML(); }
+  else if(state.screen === 'pick'){ screenHtml = tablePickHTML(); }
+  else if(state.screen === 'confirm'){ screenHtml = confirmHTML(state.lastOrder); }
+  else if(state.screen === 'myOrder'){ screenHtml = myOrderHTML(); }
+  else if(state.screen === 'cart'){ screenHtml = cartHTML(); }
+  else{ screenHtml = menuHTML(); }
+
+  const overlayHtml = state.langSwitcherOpen ? `
+    <button class="lang-switcher-overlay" onclick="closeLangSwitcher()" aria-label="${t('closeMenu')}"></button>
+    <div class="lang-switcher-panel">
+      <p class="lang-switcher-title">${t('languageLabel')}</p>
+      ${langPanelHTML('setLanguage')}
+    </div>` : '';
+
+  app.innerHTML = screenHtml + overlayHtml;
+  document.getElementById('panda-nav').innerHTML = state.screen === 'welcome' ? '' : pandaNavHTML();
+
+  if(state.screen === 'welcome'){ mountWelcomeScreen(); }
+  else{ stopWelcomeCycle(); }
 }
 
 render();
