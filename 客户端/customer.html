@@ -7,7 +7,7 @@
 <title>扫码点单</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;700;900&family=Archivo+Black&family=Ma+Shan+Zheng&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;700;900&family=Archivo+Black&family=Ma+Shan+Zheng&family=Cormorant+Garamond:wght@500;600&display=swap" rel="stylesheet">
 <style>
   :root{
     --bg:#1A120F;
@@ -353,57 +353,127 @@
   .text-link-btn:hover{text-decoration:underline;}
 
   /* ---------- welcome / language select ---------- */
-  .welcome-screen{min-height:100vh;width:100%;display:flex;align-items:center;justify-content:center;padding:24px;}
+  .welcome-screen{
+    --wgold-hi:#F7E3A1;--wgold-mid:#D8AE55;--wgold-deep:#8A5A18;--wgold-line:rgba(216,174,85,.55);
+    --wcream:#F3E6C8;
+    position:relative;overflow:hidden;
+    min-height:100vh;width:100%;display:flex;align-items:center;justify-content:center;
+    padding:10vh 24px;
+    background:#9C231C;
+    background-image:radial-gradient(ellipse 70% 55% at 50% 38%, #9C231C 0%, #7A1414 62%, #3E0808 100%);
+  }
+  .welcome-screen::before{
+    content:"";position:absolute;inset:0;
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='168' height='168' viewBox='0 0 168 168'%3E%3Cg fill='none' stroke='%23F7E3A1' stroke-width='2.2' stroke-linecap='round' opacity='0.16'%3E%3Cpath d='M20 40c0-9 7-15 15-15s13 5 13 12c6-6 16-6 21 1 5-6 15-5 18 2 4-5 12-4 13 3'/%3E%3Cpath d='M20 40c-8 1-13 8-11 15s10 10 16 7'/%3E%3Cpath d='M104 118c0-9 7-15 15-15s13 5 13 12c6-6 16-6 21 1 5-6 15-5 18 2 4-5 12-4 13 3' transform='translate(-84 -30)'/%3E%3Cpath d='M104 118c-8 1-13 8-11 15s10 10 16 7'/%3E%3C/g%3E%3C/svg%3E");
+    background-size:168px 168px;background-repeat:repeat;
+    opacity:.55;pointer-events:none;
+  }
+  .welcome-screen::after{
+    content:"";position:absolute;inset:0;
+    background:radial-gradient(ellipse 80% 65% at 50% 40%, rgba(0,0,0,0) 0%, rgba(0,0,0,0) 45%, rgba(30,4,4,.55) 100%);
+    pointer-events:none;
+  }
   .welcome-inner{
-    opacity:0;transform:translateY(16px);
-    transition:opacity 1s ease, transform 1s ease;
+    position:relative;z-index:1;
     text-align:center;width:100%;max-width:380px;
+    display:flex;flex-direction:column;align-items:center;
   }
-  .welcome-inner.visible{opacity:1;transform:translateY(0);}
-  .welcome-eyebrow{
-    font-size:11px;letter-spacing:.32em;color:var(--gold);
-    text-transform:uppercase;font-weight:700;margin-bottom:20px;opacity:.8;
+
+  .welcome-leaf{
+    width:150px;
+    opacity:0;transform:translateY(10px) scale(.86);filter:blur(2px);
+    transition:opacity 1.1s cubic-bezier(.16,.9,.28,1), transform 1.1s cubic-bezier(.16,.9,.28,1), filter 1.1s cubic-bezier(.16,.9,.28,1);
   }
-  .welcome-word-wrap{height:76px;display:flex;align-items:center;justify-content:center;margin-bottom:40px;}
+  .welcome-leaf.in{opacity:1;transform:translateY(0) scale(1);filter:blur(0);}
+  .welcome-leaf img{
+    display:block;width:100%;height:auto;
+    filter:drop-shadow(0 10px 22px rgba(20,2,2,.55)) drop-shadow(0 2px 3px rgba(0,0,0,.35));
+  }
+
   .welcome-word{
-    font-family:var(--brush);font-weight:400;font-size:52px;color:var(--text);
-    text-shadow:0 0 26px rgba(200,30,44,.5);
-    transition:opacity .4s ease, transform .4s ease;opacity:1;transform:translateY(0);
-  }
-  .welcome-word.swap{opacity:0;transform:translateY(8px);}
-  .welcome-btn-wrap{
+    margin:24px 0 0;min-height:1.3em;
     opacity:0;transform:translateY(10px);
-    transition:opacity .8s ease .35s, transform .8s ease .35s;
+    transition:opacity .8s cubic-bezier(.2,.9,.3,1), transform .8s cubic-bezier(.2,.9,.3,1);
+    font-family:'Cormorant Garamond','Songti SC','Noto Serif SC',serif;
+    font-weight:500;font-size:clamp(26px,6.4vw,32px);
+    letter-spacing:.02em;color:var(--wcream);
+    text-shadow:0 1px 10px rgba(0,0,0,.3);
+  }
+  .welcome-word.in{opacity:1;transform:translateY(0);}
+  .welcome-word.swap{opacity:0;transform:translateY(6px);transition:opacity .38s ease, transform .38s ease;}
+
+  .welcome-divider{
+    width:0%;height:1px;margin:22px 0 20px;
+    background:linear-gradient(90deg, transparent, var(--wgold-line) 50%, transparent);
+    transition:width 1s ease;
+  }
+  .welcome-divider.in{width:64%;}
+
+  .welcome-wordmark{
+    opacity:0;transform:translateY(14px);
+    transition:opacity .8s cubic-bezier(.2,.9,.3,1), transform .8s cubic-bezier(.2,.9,.3,1);
+  }
+  .welcome-wordmark.in{opacity:1;transform:translateY(0);}
+  .welcome-wordmark h1{
+    margin:0;
+    font-family:'Cormorant Garamond',Georgia,'Songti SC',serif;
+    font-weight:500;font-size:clamp(30px,7.6vw,40px);
+    letter-spacing:.14em;text-transform:uppercase;line-height:1.15;
+    background:linear-gradient(180deg, var(--wgold-hi) 0%, var(--wgold-mid) 48%, var(--wgold-deep) 100%);
+    -webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;
+    color:var(--wgold-mid);
+    text-shadow:0 1px 0 rgba(0,0,0,.18);
+  }
+
+  .welcome-kicker{
+    margin-top:16px;
+    opacity:0;transform:translateY(8px);
+    transition:opacity .8s cubic-bezier(.2,.9,.3,1), transform .8s cubic-bezier(.2,.9,.3,1);
+    font-size:11px;letter-spacing:.34em;text-transform:uppercase;color:var(--wgold-line);
+  }
+  .welcome-kicker.in{opacity:1;transform:translateY(0);}
+
+  .welcome-btn-wrap{
+    margin-top:38px;
+    opacity:0;transform:translateY(10px);
+    transition:opacity .8s cubic-bezier(.2,.9,.3,1), transform .8s cubic-bezier(.2,.9,.3,1);
     position:relative;
   }
-  .welcome-btn-wrap.visible{opacity:1;transform:translateY(0);}
+  .welcome-btn-wrap.in{opacity:1;transform:translateY(0);}
   .lang-select-btn{
     position:relative;z-index:56;
     display:inline-flex;align-items:center;gap:10px;
-    background:linear-gradient(160deg, rgba(232,162,61,.14), rgba(200,30,44,.12));
-    border:1px solid var(--gold-line);color:var(--text);
-    padding:14px 26px;border-radius:30px;font-size:13.5px;font-weight:700;
-    letter-spacing:.02em;cursor:pointer;font-family:inherit;
-    box-shadow:0 8px 24px rgba(0,0,0,.35);
-    transition:border-color .2s ease, box-shadow .2s ease, transform .2s ease;
+    background:linear-gradient(160deg, rgba(216,174,85,.16), rgba(216,174,85,.05));
+    border:1px solid var(--wgold-line);color:var(--wcream);
+    padding:13px 26px;border-radius:999px;font-size:13px;font-weight:700;
+    letter-spacing:.05em;cursor:pointer;font-family:inherit;
+    box-shadow:0 8px 22px rgba(20,2,2,.4);
+    transition:border-color .2s ease, box-shadow .2s ease, transform .2s ease, background .2s ease;
   }
-  .lang-select-btn:hover{border-color:var(--gold);box-shadow:0 10px 28px rgba(232,162,61,.25);transform:translateY(-1px);}
+  .lang-select-btn:hover{border-color:var(--wgold-mid);box-shadow:0 10px 26px rgba(216,174,85,.22);transform:translateY(-1px);background:linear-gradient(160deg, rgba(216,174,85,.24), rgba(216,174,85,.08));}
   .lang-select-icon{font-size:16px;}
   .lang-panel{
     position:relative;z-index:56;margin-top:14px;
-    background:var(--card);border:1px solid var(--gold-line);
+    background:linear-gradient(165deg, #7E1B15, #591009);
+    border:1px solid var(--wgold-line);
     border-radius:16px;overflow:hidden;box-shadow:0 14px 34px rgba(0,0,0,.5);
     text-align:left;
   }
   .lang-panel button{
     display:flex;align-items:center;justify-content:space-between;width:100%;
-    background:none;border:none;color:var(--text);font-family:inherit;
+    background:none;border:none;color:var(--wcream);font-family:'PingFang SC','Microsoft YaHei','Noto Sans SC',sans-serif;
     padding:14px 18px;font-size:14.5px;font-weight:700;cursor:pointer;
   }
-  .lang-panel button+button{border-top:1px solid var(--card-line);}
-  .lang-panel button:hover{background:var(--bg-soft);color:var(--gold);}
-  .lang-panel .lang-check{color:var(--gold);opacity:0;font-size:13px;}
+  .lang-panel button+button{border-top:1px solid rgba(216,174,85,.2);}
+  .lang-panel button:hover{background:rgba(216,174,85,.12);}
+  .lang-panel .lang-check{color:var(--wgold-mid);opacity:0;font-size:13px;}
   .lang-panel button.active .lang-check{opacity:1;}
+
+  @media (prefers-reduced-motion: reduce){
+    .welcome-leaf,.welcome-word,.welcome-divider,.welcome-wordmark,.welcome-kicker,.welcome-btn-wrap{
+      transition:none !important;
+    }
+  }
 
   /* ---------- in-app language switcher ---------- */
   .lang-switcher-overlay{position:fixed;inset:0;z-index:65;background:rgba(0,0,0,.5);border:none;padding:0;margin:0;cursor:default;}
@@ -679,17 +749,28 @@ function startWelcomeCycle(){
   }, 1800);
 }
 
+const WELCOME_INTRO = [
+  { id:'welcome-leaf',     delay:100 },
+  { id:'welcome-word',     delay:500 },
+  { id:'welcome-divider',  delay:1150 },
+  { id:'welcome-wordmark', delay:1350 },
+  { id:'welcome-kicker',   delay:1600 },
+  { id:'welcome-btn-wrap', delay:1850 },
+];
+
 function mountWelcomeScreen(){
   if(!state.welcomeVisible){
-    const inner = document.getElementById('welcome-inner');
-    const btnWrap = document.getElementById('welcome-btn-wrap');
-    setTimeout(()=>{
-      if(inner) inner.classList.add('visible');
-      if(btnWrap) btnWrap.classList.add('visible');
-      state.welcomeVisible = true;
-    }, 100);
+    WELCOME_INTRO.forEach((item, i)=>{
+      setTimeout(()=>{
+        const el = document.getElementById(item.id);
+        if(el) el.classList.add('in');
+        if(i === WELCOME_INTRO.length - 1) state.welcomeVisible = true;
+      }, item.delay);
+    });
+    setTimeout(startWelcomeCycle, 1500);
+  }else{
+    startWelcomeCycle();
   }
-  startWelcomeCycle();
 }
 
 function langPanelHTML(handlerName){
@@ -704,14 +785,18 @@ function langPanelHTML(handlerName){
 }
 
 function welcomeHTML(){
+  const v = state.welcomeVisible ? 'in' : '';
   return `
     <div class="welcome-screen">
-      <div class="welcome-inner ${state.welcomeVisible?'visible':''}" id="welcome-inner">
-        <p class="welcome-eyebrow">Sichuan Hotpot · 扫码点单</p>
-        <div class="welcome-word-wrap">
-          <span class="welcome-word" id="welcome-word">${LANG_META[LANG_ORDER[0]].greeting}</span>
+      <div class="welcome-inner">
+        <div class="welcome-leaf ${v}" id="welcome-leaf">
+          <img src="../image/LOGO/logo.png" alt="Ginkgo Restaurant"/>
         </div>
-        <div class="welcome-btn-wrap ${state.welcomeVisible?'visible':''}" id="welcome-btn-wrap">
+        <p class="welcome-word ${v}" id="welcome-word">${LANG_META[LANG_ORDER[0]].greeting}</p>
+        <div class="welcome-divider ${v}" id="welcome-divider"></div>
+        <div class="welcome-wordmark ${v}" id="welcome-wordmark"><h1>Ginkgo<br/>Restaurant</h1></div>
+        <p class="welcome-kicker ${v}" id="welcome-kicker">扫码点单 · Scan to Order</p>
+        <div class="welcome-btn-wrap ${v}" id="welcome-btn-wrap">
           ${state.langMenuOpen ? `<button class="panda-overlay" onclick="toggleWelcomeLangMenu()" aria-label="${t('closeMenu')}"></button>` : ''}
           <button class="lang-select-btn" onclick="toggleWelcomeLangMenu()">
             <span class="lang-select-icon">🌐</span>
