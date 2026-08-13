@@ -159,13 +159,25 @@
     content:"";position:absolute;left:0;top:0;bottom:0;width:4px;
     background:linear-gradient(180deg,var(--cinnabar),var(--gold));
   }
-  .dish-head{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;}
-  .dish-info{flex:1;min-width:0;}
-  .dish-head h3{
-    font-size:20px;font-weight:900;letter-spacing:.02em;
-    overflow-wrap:break-word;
+  .dish-head{display:flex;align-items:flex-start;gap:14px;}
+  .dish-thumb-col{flex-shrink:0;width:74px;display:flex;flex-direction:column;align-items:center;gap:6px;}
+  .dish-thumb-wrap{
+    position:relative;width:74px;height:74px;border-radius:13px;overflow:hidden;
+    border:1px solid var(--card-line);
+    background:linear-gradient(160deg,var(--bg-soft) 0%,var(--card) 100%);
+    display:flex;align-items:center;justify-content:center;flex-shrink:0;
   }
-  .dish-head .tag{font-size:12.5px;color:var(--text-muted);margin-top:5px;overflow-wrap:break-word;}
+  .dish-thumb-wrap::before{
+    content:"🍽";font-size:24px;opacity:.32;position:absolute;
+  }
+  .dish-thumb{position:relative;z-index:1;width:100%;height:100%;object-fit:cover;display:block;}
+  .dish-name-caption{
+    font-size:13px;font-weight:900;letter-spacing:.01em;line-height:1.25;
+    text-align:center;color:var(--text);overflow-wrap:break-word;
+  }
+  .dish-info{flex:1;min-width:0;padding-top:2px;}
+  .dish-info-top{display:flex;justify-content:flex-end;}
+  .dish-head .tag{font-size:12.5px;color:var(--text-muted);margin-top:8px;line-height:1.55;overflow-wrap:break-word;}
   .stepper{display:flex;align-items:center;gap:2px;flex-shrink:0;}
   .stepper button{
     width:32px;height:32px;border-radius:9px;border:1px solid var(--card-line);
@@ -654,11 +666,11 @@ function displaySpice(zhSpice){
 }
 
 const MENU = [
-  { id:'dachang', name:'爆炒大肠', category:'signature' },
-  { id:'wangdianzhang', name:'清蒸王店长', category:'signature' },
-  { id:'zhaoshifu', name:'干煸赵师傅', category:'signature' },
-  { id:'chaofan',  name:'狂炒米饭', category:'staple' },
-  { id:'mixian',   name:'狠炒米线', category:'staple' },
+  { id:'dachang', name:'爆炒大肠', category:'signature', img:'https://picsum.photos/seed/dachang-dish/160/160' },
+  { id:'wangdianzhang', name:'清蒸王店长', category:'signature', img:'https://picsum.photos/seed/wangdianzhang-dish/160/160' },
+  { id:'zhaoshifu', name:'干煸赵师傅', category:'signature', img:'https://picsum.photos/seed/zhaoshifu-dish/160/160' },
+  { id:'chaofan',  name:'狂炒米饭', category:'staple', img:'https://picsum.photos/seed/chaofan-dish/160/160' },
+  { id:'mixian',   name:'狠炒米线', category:'staple', img:'https://picsum.photos/seed/mixian-dish/160/160' },
 ];
 const CATEGORIES = ['all','signature','staple'];
 const SPICE_LEVELS = ['微辣','中辣','特辣'];
@@ -1011,14 +1023,21 @@ function menuHTML(){
     return `
       <div class="dish-card">
         <div class="dish-head">
-          <div class="dish-info">
-            <h3>${tDish(d.id,'name')}</h3>
-            <p class="tag">${tDish(d.id,'tag')}</p>
+          <div class="dish-thumb-col">
+            <div class="dish-thumb-wrap">
+              <img class="dish-thumb" src="${d.img}" alt="${tDish(d.id,'name')}" loading="lazy" decoding="async" onerror="this.style.display='none'">
+            </div>
+            <p class="dish-name-caption">${tDish(d.id,'name')}</p>
           </div>
-          <div class="stepper">
-            <button onclick="changeQty('${d.id}',-1)" ${it.qty<=0?'disabled':''} aria-label="${t('decreaseQty')}">−</button>
-            <span class="qty">${it.qty}</span>
-            <button onclick="changeQty('${d.id}',1)" aria-label="${t('increaseQty')}">+</button>
+          <div class="dish-info">
+            <div class="dish-info-top">
+              <div class="stepper">
+                <button onclick="changeQty('${d.id}',-1)" ${it.qty<=0?'disabled':''} aria-label="${t('decreaseQty')}">−</button>
+                <span class="qty">${it.qty}</span>
+                <button onclick="changeQty('${d.id}',1)" aria-label="${t('increaseQty')}">+</button>
+              </div>
+            </div>
+            <p class="tag">${tDish(d.id,'tag')}</p>
           </div>
         </div>
         ${it.qty>0 ? `
