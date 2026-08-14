@@ -25,7 +25,8 @@ service cloud.firestore {
       allow read: if true;
 
       // 建单：严格校验字段形状、类型、长度范围，拒绝多余字段和离谱数值
-      allow create: if request.resource.data.keys().hasOnly(['table', 'items', 'createdAt'])
+      // nickname / partySize 是下单确认页新加的字段（昵称 + 就餐人数）
+      allow create: if request.resource.data.keys().hasOnly(['table', 'items', 'createdAt', 'nickname', 'partySize'])
                     && request.resource.data.table is string
                     && request.resource.data.table.size() > 0
                     && request.resource.data.table.size() <= 20
@@ -34,7 +35,12 @@ service cloud.firestore {
                     && request.resource.data.items.size() <= 30
                     && request.resource.data.createdAt is number
                     // createdAt 必须落在服务器时间前后 10 分钟内，防止伪造过期/未来时间戳
-                    && math.abs(request.time.toMillis() - request.resource.data.createdAt) < 10 * 60 * 1000;
+                    && math.abs(request.time.toMillis() - request.resource.data.createdAt) < 10 * 60 * 1000
+                    && request.resource.data.nickname is string
+                    && request.resource.data.nickname.size() <= 30
+                    && request.resource.data.partySize is number
+                    && request.resource.data.partySize > 0
+                    && request.resource.data.partySize <= 50;
 
       // 订单一旦建立不允许改内容（没有"改单"功能，改单当面找服务员）
       allow update: if false;

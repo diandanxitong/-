@@ -201,6 +201,18 @@
   .size-pill .size-label{font-weight:700;}
   .size-pill .size-price{font-size:10.5px;opacity:.85;}
   .size-pill.active{border-color:var(--cinnabar);color:var(--gold);background:rgba(200,30,44,.16);}
+  .option-row{display:flex;flex-wrap:wrap;gap:6px;margin-top:12px;}
+  .option-chip{
+    display:flex;align-items:center;gap:5px;
+    padding:6px 10px;border-radius:20px;border:1px solid var(--card-line);
+    background:var(--bg-soft);color:var(--text-muted);font-size:11.5px;cursor:pointer;font-family:inherit;
+  }
+  .option-chip .option-check{
+    width:13px;height:13px;flex-shrink:0;border-radius:4px;border:1px solid var(--card-line);
+    display:flex;align-items:center;justify-content:center;font-size:10px;line-height:1;color:var(--bg);
+  }
+  .option-chip.active{border-color:var(--jade);color:var(--text);background:rgba(47,122,94,.16);}
+  .option-chip.active .option-check{background:var(--jade);border-color:var(--jade);color:#fff;}
   .dish-actions{display:flex;justify-content:flex-end;margin-top:12px;}
   .stepper{display:flex;align-items:center;gap:2px;flex-shrink:0;}
   .stepper button{
@@ -523,6 +535,60 @@
     overflow:hidden;box-shadow:0 20px 50px rgba(0,0,0,.6);
   }
   .lang-switcher-title{padding:16px 18px 8px;font-size:12px;letter-spacing:.1em;color:var(--gold);text-transform:uppercase;font-weight:700;}
+
+  /* ---------- order review page ---------- */
+  .review-field{margin-top:16px;}
+  .review-input{
+    width:100%;padding:15px 18px;border-radius:999px;
+    border:1px solid var(--card-line);background:var(--bg-soft);color:var(--text);
+    font-size:14px;font-family:inherit;
+  }
+  .review-input::placeholder{color:var(--text-muted);}
+  .review-input:focus{outline:none;border-color:var(--gold-line);}
+  .review-field-stepper{
+    display:flex;align-items:center;justify-content:space-between;gap:10px;
+    padding:11px 10px 11px 18px;border-radius:999px;
+    border:1px solid var(--card-line);background:var(--bg-soft);
+  }
+  .review-field-label{font-size:14px;color:var(--text);font-weight:700;}
+
+  /* ---------- drink/dessert upsell modal ---------- */
+  .upsell-modal{
+    position:fixed;left:50%;top:50%;transform:translate(-50%,-50%);
+    z-index:70;width:calc(100% - 48px);max-width:380px;max-height:calc(100vh - 80px);overflow-y:auto;
+    background:var(--card);border:1px solid var(--gold-line);border-radius:20px;
+    box-shadow:0 20px 50px rgba(0,0,0,.6);padding:20px;
+  }
+  .upsell-title{
+    text-align:center;font-family:var(--brush);font-size:21px;font-weight:400;
+    color:var(--gold);margin-bottom:16px;
+  }
+  .upsell-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+  .upsell-tile{
+    display:flex;flex-direction:column;align-items:center;gap:4px;
+    border:1px solid var(--card-line);border-radius:14px;overflow:hidden;
+    background:var(--bg-soft);padding:0 0 10px;cursor:pointer;font-family:inherit;text-align:center;
+  }
+  .upsell-tile.selected{border-color:var(--gold);box-shadow:0 0 0 1px var(--gold-line);}
+  .upsell-photo-wrap{position:relative;width:100%;aspect-ratio:1/1;}
+  .upsell-photo{width:100%;height:100%;object-fit:cover;display:block;}
+  .upsell-check{
+    position:absolute;top:7px;right:7px;width:22px;height:22px;border-radius:50%;
+    display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:900;
+    background:rgba(20,14,11,.55);color:rgba(255,255,255,.35);
+    transition:background .15s ease, color .15s ease;
+  }
+  .upsell-tile.selected .upsell-check{background:var(--jade);color:#fff;}
+  .upsell-name{font-size:12px;font-weight:800;color:var(--text);margin-top:6px;padding:0 6px;line-height:1.3;}
+  .upsell-price{font-size:11px;color:var(--gold);}
+  .upsell-actions{display:flex;gap:10px;margin-top:18px;}
+  .upsell-add-btn, .upsell-later-btn{
+    flex:1;min-width:0;border-radius:12px;padding:12px 8px;font-size:13.5px;font-weight:700;
+    cursor:pointer;font-family:inherit;
+  }
+  .upsell-add-btn{background:linear-gradient(160deg,var(--jade) 0%,var(--jade-dark) 100%);color:#fff;border:1px solid var(--gold-line);}
+  .upsell-later-btn{background:none;border:1px solid var(--card-line);color:var(--text-muted);}
+  .upsell-later-btn:hover{color:var(--gold);border-color:var(--gold-line);}
 </style>
 </head>
 <body>
@@ -570,6 +636,8 @@ const I18N = {
     orderFailed:"下单失败，请重试一次，或直接告诉服务员～",
     languageLabel:"语言", closeMenu:"关闭菜单", decreaseQty:"减少数量", increaseQty:"增加数量",
     allergensBtn:"过敏原", allergensModalTitle:"过敏原说明", totalLabel:"合计", perPersonSuffix:" /人",
+    orderReviewTitle:"确认订单", nicknamePlaceholder:"请输入你的昵称，例如：JOHN", partySizeLabel:"请选择您的就餐人数",
+    upsellTitle:"要不要再加点这些？", addToOrderBtn:"加入到当前订单", laterBtn:"以后再说",
     categories:{ all:"全部", appetizers:"前菜", dumplings:"饺子", soup:"汤", chefSpecial:"厨师推荐", vegetables:"蔬菜", riceNoodles:"饭/面类", dessert:"甜品" },
     spice:["微辣","中辣","特辣"],
   },
@@ -589,6 +657,8 @@ const I18N = {
     orderFailed:"Order failed, please try again or let staff know~",
     languageLabel:"Language", closeMenu:"Close menu", decreaseQty:"Decrease quantity", increaseQty:"Increase quantity",
     allergensBtn:"Allergens", allergensModalTitle:"Allergen Guide", totalLabel:"Total", perPersonSuffix:" / person",
+    orderReviewTitle:"Confirm Order", nicknamePlaceholder:"Enter your nickname, e.g. JOHN", partySizeLabel:"Select your party size",
+    upsellTitle:"Fancy adding these?", addToOrderBtn:"Add to Order", laterBtn:"Later",
     categories:{ all:"All", appetizers:"Appetizers", dumplings:"Dumplings", soup:"Soup", chefSpecial:"Chef's Specials", vegetables:"Vegetables", riceNoodles:"Rice & Noodles", dessert:"Dessert" },
     spice:["Mild","Medium","Extra Spicy"],
   },
@@ -608,6 +678,8 @@ const I18N = {
     orderFailed:"Ordine non riuscito, riprova o avvisa lo staff~",
     languageLabel:"Lingua", closeMenu:"Chiudi menu", decreaseQty:"Diminuisci quantità", increaseQty:"Aumenta quantità",
     allergensBtn:"Allergeni", allergensModalTitle:"Guida agli Allergeni", totalLabel:"Totale", perPersonSuffix:" / persona",
+    orderReviewTitle:"Conferma Ordine", nicknamePlaceholder:"Inserisci il tuo nome, es. JOHN", partySizeLabel:"Seleziona il numero di persone",
+    upsellTitle:"Vuoi aggiungere anche questi?", addToOrderBtn:"Aggiungi all'Ordine", laterBtn:"Più Tardi",
     categories:{ all:"Tutti", appetizers:"Antipasti", dumplings:"Ravioli", soup:"Zuppe", chefSpecial:"Specialità dello Chef", vegetables:"Verdure", riceNoodles:"Riso e Noodles", dessert:"Dessert" },
     spice:["Poco Piccante","Piccante","Molto Piccante"],
   },
@@ -627,6 +699,8 @@ const I18N = {
     orderFailed:"Échec de la commande, veuillez réessayer ou prévenir le personnel~",
     languageLabel:"Langue", closeMenu:"Fermer le menu", decreaseQty:"Diminuer la quantité", increaseQty:"Augmenter la quantité",
     allergensBtn:"Allergènes", allergensModalTitle:"Guide des Allergènes", totalLabel:"Total", perPersonSuffix:" / personne",
+    orderReviewTitle:"Confirmer la Commande", nicknamePlaceholder:"Entrez votre surnom, ex. JOHN", partySizeLabel:"Sélectionnez le nombre de convives",
+    upsellTitle:"Envie d'ajouter ceci ?", addToOrderBtn:"Ajouter à la Commande", laterBtn:"Plus Tard",
     categories:{ all:"Tous", appetizers:"Entrées", dumplings:"Raviolis", soup:"Soupes", chefSpecial:"Spécialités du Chef", vegetables:"Légumes", riceNoodles:"Riz et Nouilles", dessert:"Dessert" },
     spice:["Peu Épicé","Épicé","Très Épicé"],
   },
@@ -646,6 +720,8 @@ const I18N = {
     orderFailed:"Error al pedir, inténtalo de nuevo o avisa al personal~",
     languageLabel:"Idioma", closeMenu:"Cerrar menú", decreaseQty:"Disminuir cantidad", increaseQty:"Aumentar cantidad",
     allergensBtn:"Alérgenos", allergensModalTitle:"Guía de Alérgenos", totalLabel:"Total", perPersonSuffix:" / persona",
+    orderReviewTitle:"Confirmar Pedido", nicknamePlaceholder:"Introduce tu apodo, ej. JOHN", partySizeLabel:"Selecciona tu número de comensales",
+    upsellTitle:"¿Quieres añadir esto?", addToOrderBtn:"Añadir al Pedido", laterBtn:"Más Tarde",
     categories:{ all:"Todos", appetizers:"Entrantes", dumplings:"Empanadillas", soup:"Sopas", chefSpecial:"Especialidades del Chef", vegetables:"Verduras", riceNoodles:"Arroz y Fideos", dessert:"Postres" },
     spice:["Poco Picante","Picante","Muy Picante"],
   },
@@ -675,6 +751,12 @@ const SIZE_LABELS = {
   large:{zh:'大份',en:'Large',it:'Grande',fr:'Grande',es:'Grande'},
   small:{zh:'小份',en:'Small',it:'Piccola',fr:'Petite',es:'Pequeña'},
 };
+const OPTION_LABELS = {
+  onion:{zh:'不要洋葱',en:'No Onion',it:'Senza Cipolla',fr:'Sans Oignon',es:'Sin Cebolla'},
+  ginger:{zh:'不要姜',en:'No Ginger',it:'Senza Zenzero',fr:'Sans Gingembre',es:'Sin Jengibre'},
+  sichuanPepper:{zh:'不要花椒',en:'No Sichuan Pepper',it:'Senza Pepe di Sichuan',fr:'Sans Poivre du Sichuan',es:'Sin Pimienta de Sichuan'},
+  meat:{zh:'不要肉',en:'No Meat',it:'Senza Carne',fr:'Sans Viande',es:'Sin Carne'},
+};
 
 function t(key){
   const dict = I18N[state.lang] || I18N.zh;
@@ -685,6 +767,7 @@ function tSpice(idx){ return (I18N[state.lang] || I18N.zh).spice[idx]; }
 function tDish(id, field){ return (I18N[state.lang] || I18N.zh).dishes[id][field]; }
 function tAllergen(code){ return (ALLERGEN_NAMES[code] || {})[state.lang] || ALLERGEN_NAMES[code].zh; }
 function tSize(key){ return (SIZE_LABELS[key] || {})[state.lang] || SIZE_LABELS[key].zh; }
+function tOption(key){ return (OPTION_LABELS[key] || {})[state.lang] || OPTION_LABELS[key].zh; }
 function displayDishName(zhName){
   const id = ZH_NAME_TO_ID[zhName];
   return id ? tDish(id, 'name') : zhName;
@@ -1319,11 +1402,57 @@ const DISH_DATA = [
       fr:{name:'Sagou à la Mangue et au Pomelo', tag:'Mangue, pomelo, perles de sagou'},
       es:{name:'Sagú de Mango y Pomelo', tag:'Mango, pomelo, perlas de sagú'},
     }},
+
+  // ---------- 饮品 Drinks (not shown as a browsable category — only used as add-on picks at checkout) ----------
+  { id:'coke', category:'drinks', price:3.00, allergens:[],
+    i18n:{
+      zh:{name:'可乐', tag:''}, en:{name:'Coke', tag:''}, it:{name:'Coca-Cola', tag:''},
+      fr:{name:'Coca-Cola', tag:''}, es:{name:'Coca-Cola', tag:''},
+    }},
+  { id:'sprite', category:'drinks', price:3.00, allergens:[],
+    i18n:{
+      zh:{name:'雪碧', tag:''}, en:{name:'Sprite', tag:''}, it:{name:'Sprite', tag:''},
+      fr:{name:'Sprite', tag:''}, es:{name:'Sprite', tag:''},
+    }},
+  { id:'icedLemonTea', category:'drinks', price:3.50, allergens:[],
+    i18n:{
+      zh:{name:'冰镇柠檬茶', tag:''}, en:{name:'Iced Lemon Tea', tag:''}, it:{name:'Tè al Limone Freddo', tag:''},
+      fr:{name:'Thé Glacé au Citron', tag:''}, es:{name:'Té Helado de Limón', tag:''},
+    }},
+  { id:'jasmineTea', category:'drinks', price:2.80, allergens:[],
+    i18n:{
+      zh:{name:'茉莉花茶', tag:''}, en:{name:'Jasmine Tea', tag:''}, it:{name:'Tè al Gelsomino', tag:''},
+      fr:{name:'Thé au Jasmin', tag:''}, es:{name:'Té de Jazmín', tag:''},
+    }},
+  { id:'sparklingWater', category:'drinks', price:3.20, allergens:[],
+    i18n:{
+      zh:{name:'气泡水', tag:''}, en:{name:'Sparkling Water', tag:''}, it:{name:'Acqua Frizzante', tag:''},
+      fr:{name:'Eau Gazeuse', tag:''}, es:{name:'Agua con Gas', tag:''},
+    }},
+  { id:'tsingtaoBeer', category:'drinks', price:4.50, allergens:['GW','GB'],
+    i18n:{
+      zh:{name:'青岛啤酒', tag:''}, en:{name:'Tsingtao Beer', tag:''}, it:{name:'Birra Tsingtao', tag:''},
+      fr:{name:'Bière Tsingtao', tag:''}, es:{name:'Cerveza Tsingtao', tag:''},
+    }},
 ];
+
+// 用常识从中文配料/菜名里判断：这道菜是否可调辣度、是否可勾选“不要洋葱/姜/花椒/肉”
+const SPICY_RE = /辣|剁椒/;
+const OPTION_DETECTORS = {
+  onion: /葱/,
+  ginger: /姜/,
+  sichuanPepper: /花椒/,
+  meat: /鸡肉|猪肉|牛肉|鸭肉|火腿|猪排|牛舌|牛肚|猪腰|猪大肠|猪蹄|五花肉|西冷牛肉|爱尔兰牛柳|小牛肉|培根|午餐肉/,
+};
+function detectSpicy(d){ return SPICY_RE.test(d.i18n.zh.name + d.i18n.zh.tag); }
+function detectOptions(d){
+  return Object.keys(OPTION_DETECTORS).filter(key => OPTION_DETECTORS[key].test(d.i18n.zh.tag));
+}
 
 const MENU = DISH_DATA.map(d => ({
   id: d.id, category: d.category, price: d.price, sizes: d.sizes, unit: d.unit,
   allergens: d.allergens, img: `https://picsum.photos/seed/${d.id}-dish/640/480`,
+  spicy: detectSpicy(d), options: detectOptions(d),
 }));
 LANG_ORDER.forEach(lang => {
   I18N[lang].dishes = {};
@@ -1331,6 +1460,8 @@ LANG_ORDER.forEach(lang => {
 });
 const ZH_NAME_TO_ID = {};
 DISH_DATA.forEach(d => { ZH_NAME_TO_ID[d.i18n.zh.name] = d.id; });
+const MENU_BY_ID = {};
+MENU.forEach(d => { MENU_BY_ID[d.id] = d; });
 
 const params = new URLSearchParams(location.search);
 const urlTable = params.get('table');
@@ -1343,7 +1474,7 @@ let state = {
   welcomeVisible: false,
   langMenuOpen: false,
   langSwitcherOpen: false,
-  items: {},   // { dishId: { qty, spice, size } }
+  items: {},   // { dishId: { qty, spice, size, excludes } }
   activeCategory: 'all',
   lastOrder: null,
   submitting: false,
@@ -1351,6 +1482,12 @@ let state = {
   myOrderLoading: false,
   pandaMenuOpen: false,
   allergenInfoOpen: false,
+  orderNickname: '',
+  orderPartySize: 2,
+  upsellOpen: false,
+  upsellShown: false,     // whether the drinks/dessert upsell has already been resolved for this checkout attempt
+  upsellItems: [],        // 4 randomly-picked dish ids currently shown in the upsell modal
+  upsellSelected: {},     // { dishId: true }
 };
 
 let screenHistory = [];   // 记录来源页面，供“返回”按钮回退用
@@ -1485,26 +1622,34 @@ function backRowHTML(){
 }
 
 function getItem(id){
-  return state.items[id] || { qty:0, spice:'中辣', size:null };
+  return state.items[id] || { qty:0, spice:'中辣', size:null, excludes:{} };
 }
 
 function changeQty(id, delta){
   const cur = getItem(id);
   const qty = Math.max(0, Math.min(20, cur.qty + delta));
-  state.items[id] = { qty, spice: cur.spice, size: cur.size };
+  state.items[id] = { qty, spice: cur.spice, size: cur.size, excludes: cur.excludes };
   render();
 }
 
 function setSpice(id, level){
   const cur = getItem(id);
   if(cur.qty <= 0) return;
-  state.items[id] = { qty: cur.qty, spice: level, size: cur.size };
+  state.items[id] = { qty: cur.qty, spice: level, size: cur.size, excludes: cur.excludes };
   render();
 }
 
 function setSize(id, key){
   const cur = getItem(id);
-  state.items[id] = { qty: cur.qty, spice: cur.spice, size: key };
+  state.items[id] = { qty: cur.qty, spice: cur.spice, size: key, excludes: cur.excludes };
+  render();
+}
+
+function toggleExclude(id, key){
+  const cur = getItem(id);
+  if(cur.qty <= 0) return;
+  const excludes = Object.assign({}, cur.excludes, { [key]: !cur.excludes[key] });
+  state.items[id] = { qty: cur.qty, spice: cur.spice, size: cur.size, excludes };
   render();
 }
 
@@ -1568,6 +1713,70 @@ function goToCart(){
   render();
 }
 
+function goToOrderReview(){
+  if(totalCount() === 0) return;
+  state.pandaMenuOpen = false;
+  if(state.screen !== 'orderReview') screenHistory.push(state.screen);
+  state.screen = 'orderReview';
+  state.upsellShown = false;
+  state.upsellOpen = false;
+  render();
+}
+
+function setPartySize(delta){
+  state.orderPartySize = Math.max(1, Math.min(50, state.orderPartySize + delta));
+  render();
+}
+
+function shuffle(arr){
+  const a = arr.slice();
+  for(let i = a.length - 1; i > 0; i--){
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+
+function handlePlaceOrderClick(){
+  if(totalCount() === 0 || state.submitting) return;
+  if(!state.upsellShown){
+    openUpsell();
+  }else{
+    submitOrder();
+  }
+}
+
+function openUpsell(){
+  const pool = MENU.filter(d => d.category === 'drinks' || d.category === 'dessert');
+  state.upsellItems = shuffle(pool.map(d => d.id)).slice(0, 4);
+  state.upsellSelected = {};
+  state.upsellOpen = true;
+  render();
+}
+
+function toggleUpsellItem(id){
+  state.upsellSelected[id] = !state.upsellSelected[id];
+  render();
+}
+
+function confirmUpsellAdd(){
+  Object.keys(state.upsellSelected).forEach(id => {
+    if(!state.upsellSelected[id]) return;
+    const cur = getItem(id);
+    state.items[id] = { qty: cur.qty + 1, spice: cur.spice, size: cur.size, excludes: cur.excludes };
+  });
+  state.upsellOpen = false;
+  state.upsellShown = true;   // resolved: pressing 立刻下单 again on the mirrored review page submits for real, no re-prompt
+  render();
+}
+
+function skipUpsell(){
+  state.upsellOpen = false;
+  state.upsellShown = true;   // resolved: submit immediately with no drinks/dessert added
+  render();
+  submitOrder();
+}
+
 function togglePandaMenu(){
   state.pandaMenuOpen = !state.pandaMenuOpen;
   render();
@@ -1600,6 +1809,12 @@ function totalCount(){
 function resetToMenu(){
   state.items = {};
   state.lastOrder = null;
+  state.orderNickname = '';
+  state.orderPartySize = 2;
+  state.upsellShown = false;
+  state.upsellOpen = false;
+  state.upsellItems = [];
+  state.upsellSelected = {};
   screenHistory = [];
   state.screen = 'menu';
   render();
@@ -1635,11 +1850,16 @@ async function submitOrder(){
       if(it.qty <= 0) return null;
       const entry = { name: zhDishName(d.id), qty: it.qty, spice: it.spice, price: dishUnitPrice(d, it) };
       if(d.sizes) entry.size = it.size || d.sizes[0].key;
+      const excludeKeys = Object.keys(it.excludes || {}).filter(k => it.excludes[k]);
+      if(excludeKeys.length) entry.excludes = excludeKeys;
       return entry;
     })
     .filter(Boolean);
 
-  const order = { table: state.table, items, createdAt: Date.now() };
+  const order = {
+    table: state.table, items, createdAt: Date.now(),
+    nickname: state.orderNickname || '', partySize: state.orderPartySize || 1,
+  };
 
   try{
     const priorOrders = await fetchTableOrders(state.table);
@@ -1649,12 +1869,14 @@ async function submitOrder(){
       table: order.table,
       items: order.items,
       createdAt: order.createdAt,
+      nickname: order.nickname,
+      partySize: order.partySize,
     });
 
     const tableOrders = await fetchTableOrders(state.table);
     const summaryItems = mergeItems(tableOrders.length > 0 ? tableOrders : [...priorOrders, order]);
 
-    state.lastOrder = { table: order.table, items: order.items, summaryItems, isAddOn };
+    state.lastOrder = { table: order.table, items: order.items, summaryItems, isAddOn, nickname: order.nickname, partySize: order.partySize };
     screenHistory.push('menu');
     state.screen = 'confirm';
   }catch(e){
@@ -1693,6 +1915,15 @@ function sizeRowHTML(d, it){
     ${d.sizes.map(s=>`
       <button class="size-pill ${((it.size||d.sizes[0].key)===s.key)?'active':''}" onclick="setSize('${d.id}','${s.key}')">
         <span class="size-label">${tSize(s.key)}</span><span class="size-price">${formatPrice(s.price)}</span>
+      </button>`).join('')}
+  </div>`;
+}
+
+function optionsRowHTML(d, it){
+  return `<div class="option-row">
+    ${d.options.map(key=>`
+      <button class="option-chip ${it.excludes[key]?'active':''}" onclick="toggleExclude('${d.id}','${key}')">
+        <span class="option-check">${it.excludes[key]?'✓':''}</span><span>${tOption(key)}</span>
       </button>`).join('')}
   </div>`;
 }
@@ -1742,13 +1973,14 @@ function menuHTML(){
               <button onclick="changeQty('${d.id}',1)" aria-label="${t('increaseQty')}">+</button>
             </div>
           </div>
-          ${it.qty>0 ? `
+          ${it.qty>0 && d.spicy ? `
             <div class="spice-row">
               ${SPICE_LEVELS.map((lvl,i)=>`
                 <button class="spice-pill ${it.spice===lvl?'active':''}" onclick="setSpice('${d.id}','${lvl}')">
                   <span class="flames">${flameIcons(i+1)}</span><span class="spice-label">${tSpice(i)}</span>
                 </button>`).join('')}
             </div>` : ''}
+          ${it.qty>0 && d.options.length>0 ? optionsRowHTML(d, it) : ''}
         </div>
       </div>`;
   }).join('');
@@ -1786,8 +2018,8 @@ function menuHTML(){
             <span class="cart-btn-title">${t('addToCart')}</span>
             <span class="cart-btn-sub">${t('addToCartSub')}</span>
           </button>
-          <button class="order-now-btn" onclick="submitOrder()" ${count===0||state.submitting?'disabled':''}>
-            <span class="order-now-title">${state.submitting?t('ordering'):t('orderNow')}</span>
+          <button class="order-now-btn" onclick="goToOrderReview()" ${count===0?'disabled':''}>
+            <span class="order-now-title">${t('orderNow')}</span>
             <span class="order-now-sub">${t('orderNowSub')}</span>
           </button>
         </div>
@@ -1797,16 +2029,21 @@ function menuHTML(){
 
 function orderLineHTML({name, qty, spice, price, extra}){
   const lineTotal = price != null ? formatPrice(price * qty) : '';
+  const bottomBits = (spice ? `<span class="spice-tag">${spice}</span>` : '') + (extra || '');
   return `<li class="order-line">
     <div class="order-line-top">
       <span class="order-line-name">${name} × ${qty}</span>
       ${lineTotal ? `<span class="order-line-price">${lineTotal}</span>` : ''}
     </div>
-    <div class="order-line-bottom"><span class="spice-tag">${spice}</span>${extra||''}</div>
+    ${bottomBits ? `<div class="order-line-bottom">${bottomBits}</div>` : ''}
   </li>`;
 }
 function totalRowHTML(total){
   return `<li class="order-total-line"><span>${t('totalLabel')}</span><span>${formatPrice(total)}</span></li>`;
+}
+function excludesTagsHTML(excludes){
+  if(!excludes || excludes.length === 0) return '';
+  return excludes.map(k => `<span class="spice-tag">${tOption(k)}</span>`).join('');
 }
 
 function myOrderHTML(){
@@ -1822,13 +2059,16 @@ function myOrderHTML(){
         : items.length === 0
           ? `<p class="hint">${t('noOrderYet')}</p>`
           : `<ul class="order-summary">
-              ${items.map(it=>orderLineHTML({
-                name: displayDishName(it.name),
-                qty: it.qty,
-                spice: displaySpice(it.spice),
-                price: it.price,
-                extra: it.size ? `<span class="spice-tag">${tSize(it.size)}</span>` : '',
-              })).join('')}
+              ${items.map(it=>{
+                const dish = MENU_BY_ID[ZH_NAME_TO_ID[it.name]];
+                return orderLineHTML({
+                  name: displayDishName(it.name),
+                  qty: it.qty,
+                  spice: dish && dish.spicy ? displaySpice(it.spice) : '',
+                  price: it.price,
+                  extra: (it.size ? `<span class="spice-tag">${tSize(it.size)}</span>` : '') + excludesTagsHTML(it.excludes),
+                });
+              }).join('')}
               ${totalRowHTML(total)}
             </ul>
             <p class="hint">${t('removeHint')}</p>`
@@ -1837,18 +2077,23 @@ function myOrderHTML(){
     </div>`;
 }
 
-function cartHTML(){
-  const items = MENU
+function cartItemsForCheckout(){
+  return MENU
     .map(d => {
       const it = getItem(d.id);
       if(it.qty <= 0) return null;
       return {
-        id: d.id, name: tDish(d.id,'name'), qty: it.qty, spice: it.spice,
+        id: d.id, name: tDish(d.id,'name'), qty: it.qty, spice: it.spice, spicy: d.spicy,
         price: dishUnitPrice(d, it),
         sizeLabel: d.sizes ? tSize(it.size || d.sizes[0].key) : null,
+        excludeTags: excludesTagsHTML(Object.keys(it.excludes||{}).filter(k=>it.excludes[k])),
       };
     })
     .filter(Boolean);
+}
+
+function cartHTML(){
+  const items = cartItemsForCheckout();
   const count = totalCount();
   const total = items.reduce((s,it)=>s+it.price*it.qty,0);
 
@@ -1867,8 +2112,9 @@ function cartHTML(){
                   <span class="order-line-price">${formatPrice(it.price*it.qty)}</span>
                 </div>
                 <div class="order-line-bottom">
-                  <span class="spice-tag">${displaySpice(it.spice)}</span>
+                  ${it.spicy ? `<span class="spice-tag">${displaySpice(it.spice)}</span>` : ''}
                   ${it.sizeLabel ? `<span class="spice-tag">${it.sizeLabel}</span>` : ''}
+                  ${it.excludeTags}
                   <span class="stepper">
                     <button onclick="changeQty('${it.id}',-1)" aria-label="${t('decreaseQty')}">−</button>
                     <span class="qty">${it.qty}</span>
@@ -1884,11 +2130,80 @@ function cartHTML(){
     ${count > 0 ? `
     <div class="bottom-bar">
       <div class="bottom-bar-inner">
-        <button class="submit-btn" onclick="submitOrder()" ${state.submitting?'disabled':''}>
-          ${state.submitting?t('ordering'):t('orderNow')}
+        <button class="submit-btn" onclick="goToOrderReview()">
+          ${t('orderNow')}
         </button>
       </div>
     </div>` : ''}`;
+}
+
+function orderReviewHTML(){
+  const items = cartItemsForCheckout();
+  const total = items.reduce((s,it)=>s+it.price*it.qty,0);
+
+  return `
+    ${backRowHTML()}
+    <div class="confirm-screen">
+      <p class="eyebrow">${t('tableEyebrow')} ${state.table}</p>
+      <h2 style="margin-top:6px;">${t('orderReviewTitle')}</h2>
+      <ul class="order-summary">
+        ${items.map(it=>orderLineHTML({
+          name: it.name, qty: it.qty,
+          spice: it.spicy ? displaySpice(it.spice) : '',
+          price: it.price,
+          extra: (it.sizeLabel ? `<span class="spice-tag">${it.sizeLabel}</span>` : '') + it.excludeTags,
+        })).join('')}
+        ${totalRowHTML(total)}
+      </ul>
+
+      <div class="review-field">
+        <input type="text" class="review-input" placeholder="${t('nicknamePlaceholder')}" value="${(state.orderNickname||'').replace(/"/g,'&quot;')}" oninput="state.orderNickname=this.value" maxlength="30">
+      </div>
+      <div class="review-field review-field-stepper">
+        <span class="review-field-label">${t('partySizeLabel')}</span>
+        <span class="stepper">
+          <button onclick="setPartySize(-1)" aria-label="${t('decreaseQty')}">−</button>
+          <span class="qty">${state.orderPartySize}</span>
+          <button onclick="setPartySize(1)" aria-label="${t('increaseQty')}">+</button>
+        </span>
+      </div>
+    </div>
+    <div class="bottom-bar">
+      <div class="bottom-bar-inner">
+        <button class="submit-btn" onclick="handlePlaceOrderClick()" ${state.submitting?'disabled':''}>
+          ${state.submitting?t('ordering'):t('orderNow')}
+        </button>
+      </div>
+    </div>
+    ${upsellModalHTML()}`;
+}
+
+function upsellModalHTML(){
+  if(!state.upsellOpen) return '';
+  const items = state.upsellItems.map(id => MENU_BY_ID[id]).filter(Boolean);
+  return `
+    <button class="lang-switcher-overlay" aria-label="${t('upsellTitle')}"></button>
+    <div class="upsell-modal">
+      <p class="upsell-title">${t('upsellTitle')}</p>
+      <div class="upsell-grid">
+        ${items.map(d=>{
+          const selected = !!state.upsellSelected[d.id];
+          return `
+          <button class="upsell-tile ${selected?'selected':''}" onclick="toggleUpsellItem('${d.id}')">
+            <span class="upsell-photo-wrap">
+              <img class="upsell-photo" src="${d.img}" alt="${tDish(d.id,'name')}" loading="lazy">
+              <span class="upsell-check">✓</span>
+            </span>
+            <span class="upsell-name">${tDish(d.id,'name')}</span>
+            <span class="upsell-price">${formatPrice(dishUnitPrice(d, {}))}</span>
+          </button>`;
+        }).join('')}
+      </div>
+      <div class="upsell-actions">
+        <button class="upsell-add-btn" onclick="confirmUpsellAdd()">${t('addToOrderBtn')}</button>
+        <button class="upsell-later-btn" onclick="skipUpsell()">${t('laterBtn')}</button>
+      </div>
+    </div>`;
 }
 
 function pandaNavHTML(){
@@ -1920,13 +2235,16 @@ function confirmHTML(order){
       <div class="my-order-card">
         <p class="my-order-title">${t('myOrder')}</p>
         <ul class="order-summary">
-          ${order.summaryItems.map(it=>orderLineHTML({
-            name: displayDishName(it.name),
-            qty: it.qty,
-            spice: displaySpice(it.spice),
-            price: it.price,
-            extra: it.size ? `<span class="spice-tag">${tSize(it.size)}</span>` : '',
-          })).join('')}
+          ${order.summaryItems.map(it=>{
+            const dish = MENU_BY_ID[ZH_NAME_TO_ID[it.name]];
+            return orderLineHTML({
+              name: displayDishName(it.name),
+              qty: it.qty,
+              spice: dish && dish.spicy ? displaySpice(it.spice) : '',
+              price: it.price,
+              extra: (it.size ? `<span class="spice-tag">${tSize(it.size)}</span>` : '') + excludesTagsHTML(it.excludes),
+            });
+          }).join('')}
           ${totalRowHTML(total)}
         </ul>
         <p class="hint my-order-note">${t('removeHint')}</p>
@@ -1943,6 +2261,7 @@ function render(){
   else if(state.screen === 'confirm'){ screenHtml = confirmHTML(state.lastOrder); }
   else if(state.screen === 'myOrder'){ screenHtml = myOrderHTML(); }
   else if(state.screen === 'cart'){ screenHtml = cartHTML(); }
+  else if(state.screen === 'orderReview'){ screenHtml = orderReviewHTML(); }
   else{ screenHtml = menuHTML(); }
 
   const overlayHtml = state.langSwitcherOpen ? `
