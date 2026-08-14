@@ -637,7 +637,7 @@ const I18N = {
     languageLabel:"语言", closeMenu:"关闭菜单", decreaseQty:"减少数量", increaseQty:"增加数量",
     allergensBtn:"过敏原", allergensModalTitle:"过敏原说明", totalLabel:"合计", perPersonSuffix:" /人",
     orderReviewTitle:"确认订单", nicknamePlaceholder:"请输入你的昵称，例如：JOHN", partySizeLabel:"请选择您的就餐人数",
-    upsellTitle:"要不要再加点这些？", addToOrderBtn:"加入到当前订单", laterBtn:"以后再说",
+    upsellTitle:"忘了点什么？", addToOrderBtn:"加入到当前订单", laterBtn:"以后再说",
     categories:{ all:"全部", appetizers:"前菜", dumplings:"饺子", soup:"汤", chefSpecial:"厨师推荐", vegetables:"蔬菜", riceNoodles:"饭/面类", dessert:"甜品" },
     spice:["微辣","中辣","特辣"],
   },
@@ -658,7 +658,7 @@ const I18N = {
     languageLabel:"Language", closeMenu:"Close menu", decreaseQty:"Decrease quantity", increaseQty:"Increase quantity",
     allergensBtn:"Allergens", allergensModalTitle:"Allergen Guide", totalLabel:"Total", perPersonSuffix:" / person",
     orderReviewTitle:"Confirm Order", nicknamePlaceholder:"Enter your nickname, e.g. JOHN", partySizeLabel:"Select your party size",
-    upsellTitle:"Fancy adding these?", addToOrderBtn:"Add to Order", laterBtn:"Later",
+    upsellTitle:"Forgot Something?", addToOrderBtn:"Add to Order", laterBtn:"Later",
     categories:{ all:"All", appetizers:"Appetizers", dumplings:"Dumplings", soup:"Soup", chefSpecial:"Chef's Specials", vegetables:"Vegetables", riceNoodles:"Rice & Noodles", dessert:"Dessert" },
     spice:["Mild","Medium","Extra Spicy"],
   },
@@ -679,7 +679,7 @@ const I18N = {
     languageLabel:"Lingua", closeMenu:"Chiudi menu", decreaseQty:"Diminuisci quantità", increaseQty:"Aumenta quantità",
     allergensBtn:"Allergeni", allergensModalTitle:"Guida agli Allergeni", totalLabel:"Totale", perPersonSuffix:" / persona",
     orderReviewTitle:"Conferma Ordine", nicknamePlaceholder:"Inserisci il tuo nome, es. JOHN", partySizeLabel:"Seleziona il numero di persone",
-    upsellTitle:"Vuoi aggiungere anche questi?", addToOrderBtn:"Aggiungi all'Ordine", laterBtn:"Più Tardi",
+    upsellTitle:"Hai Dimenticato Qualcosa?", addToOrderBtn:"Aggiungi all'Ordine", laterBtn:"Più Tardi",
     categories:{ all:"Tutti", appetizers:"Antipasti", dumplings:"Ravioli", soup:"Zuppe", chefSpecial:"Specialità dello Chef", vegetables:"Verdure", riceNoodles:"Riso e Noodles", dessert:"Dessert" },
     spice:["Poco Piccante","Piccante","Molto Piccante"],
   },
@@ -700,7 +700,7 @@ const I18N = {
     languageLabel:"Langue", closeMenu:"Fermer le menu", decreaseQty:"Diminuer la quantité", increaseQty:"Augmenter la quantité",
     allergensBtn:"Allergènes", allergensModalTitle:"Guide des Allergènes", totalLabel:"Total", perPersonSuffix:" / personne",
     orderReviewTitle:"Confirmer la Commande", nicknamePlaceholder:"Entrez votre surnom, ex. JOHN", partySizeLabel:"Sélectionnez le nombre de convives",
-    upsellTitle:"Envie d'ajouter ceci ?", addToOrderBtn:"Ajouter à la Commande", laterBtn:"Plus Tard",
+    upsellTitle:"Vous Avez Oublié Quelque Chose ?", addToOrderBtn:"Ajouter à la Commande", laterBtn:"Plus Tard",
     categories:{ all:"Tous", appetizers:"Entrées", dumplings:"Raviolis", soup:"Soupes", chefSpecial:"Spécialités du Chef", vegetables:"Légumes", riceNoodles:"Riz et Nouilles", dessert:"Dessert" },
     spice:["Peu Épicé","Épicé","Très Épicé"],
   },
@@ -721,7 +721,7 @@ const I18N = {
     languageLabel:"Idioma", closeMenu:"Cerrar menú", decreaseQty:"Disminuir cantidad", increaseQty:"Aumentar cantidad",
     allergensBtn:"Alérgenos", allergensModalTitle:"Guía de Alérgenos", totalLabel:"Total", perPersonSuffix:" / persona",
     orderReviewTitle:"Confirmar Pedido", nicknamePlaceholder:"Introduce tu apodo, ej. JOHN", partySizeLabel:"Selecciona tu número de comensales",
-    upsellTitle:"¿Quieres añadir esto?", addToOrderBtn:"Añadir al Pedido", laterBtn:"Más Tarde",
+    upsellTitle:"¿Olvidaste Algo?", addToOrderBtn:"Añadir al Pedido", laterBtn:"Más Tarde",
     categories:{ all:"Todos", appetizers:"Entrantes", dumplings:"Empanadillas", soup:"Sopas", chefSpecial:"Especialidades del Chef", vegetables:"Verduras", riceNoodles:"Arroz y Fideos", dessert:"Postres" },
     spice:["Poco Picante","Picante","Muy Picante"],
   },
@@ -752,9 +752,10 @@ const SIZE_LABELS = {
   small:{zh:'小份',en:'Small',it:'Piccola',fr:'Petite',es:'Pequeña'},
 };
 const OPTION_LABELS = {
+  scallion:{zh:'不要葱',en:'No Spring Onion',it:'Senza Cipollotto',fr:'Sans Oignon Vert',es:'Sin Cebolleta'},
   onion:{zh:'不要洋葱',en:'No Onion',it:'Senza Cipolla',fr:'Sans Oignon',es:'Sin Cebolla'},
   ginger:{zh:'不要姜',en:'No Ginger',it:'Senza Zenzero',fr:'Sans Gingembre',es:'Sin Jengibre'},
-  sichuanPepper:{zh:'不要花椒',en:'No Sichuan Pepper',it:'Senza Pepe di Sichuan',fr:'Sans Poivre du Sichuan',es:'Sin Pimienta de Sichuan'},
+  cilantro:{zh:'不要香菜',en:'No Coriander',it:'Senza Coriandolo',fr:'Sans Coriandre',es:'Sin Cilantro'},
   meat:{zh:'不要肉',en:'No Meat',it:'Senza Carne',fr:'Sans Viande',es:'Sin Carne'},
 };
 
@@ -800,11 +801,11 @@ const DISH_DATA = [
   // ---------- 前菜 Appetizers ----------
   { id:'spicyBag', category:'appetizers', price:11.80, allergens:[],
     i18n:{
-      zh:{name:'辣袋', tag:'薯条、洋葱、红甜椒'},
-      en:{name:'Spicy Bag', tag:'French fries, onion, red bell pepper'},
-      it:{name:'Sacchetto Piccante', tag:'Patatine fritte, cipolla, peperone rosso'},
-      fr:{name:'Sachet Épicé', tag:'Frites, oignon, poivron rouge'},
-      es:{name:'Bolsa Picante', tag:'Patatas fritas, cebolla, pimiento rojo'},
+      zh:{name:'辣袋', tag:'薯条、洋葱、红甜椒、鸡柳'},
+      en:{name:'Spicy Bag', tag:'French fries, onion, red bell pepper, chicken strips'},
+      it:{name:'Sacchetto Piccante', tag:'Patatine fritte, cipolla, peperone rosso, straccetti di pollo'},
+      fr:{name:'Sachet Épicé', tag:'Frites, oignon, poivron rouge, aiguillettes de poulet'},
+      es:{name:'Bolsa Picante', tag:'Patatas fritas, cebolla, pimiento rojo, tiras de pollo'},
     }},
   { id:'veggieSpringRoll', category:'appetizers', price:8.80, allergens:['GW','GB','M','E'],
     i18n:{
@@ -1436,17 +1437,30 @@ const DISH_DATA = [
     }},
 ];
 
-// 用常识从中文配料/菜名里判断：这道菜是否可调辣度、是否可勾选“不要洋葱/姜/花椒/肉”
+// 用常识从中文配料/菜名里判断：这道菜是否可调辣度、是否可勾选“不要肉”
 const SPICY_RE = /辣|剁椒/;
-const OPTION_DETECTORS = {
-  onion: /葱/,
-  ginger: /姜/,
-  sichuanPepper: /花椒/,
-  meat: /鸡肉|猪肉|牛肉|鸭肉|火腿|猪排|牛舌|牛肚|猪腰|猪大肠|猪蹄|五花肉|西冷牛肉|爱尔兰牛柳|小牛肉|培根|午餐肉/,
-};
+const MEAT_RE = /鸡肉|鸡柳|猪肉|牛肉|鸭肉|火腿|猪排|牛舌|牛肚|猪腰|猪大肠|猪蹄|五花肉|西冷牛肉|爱尔兰牛柳|小牛肉|培根|午餐肉/;
+// 这些菜本身就是“以某种肉为主角”（菜名/身份就是那块肉），去掉肉等于没有这道菜了，
+// 所以即使配料里含肉也不提供“不要肉”——常见于名字里直接点名一种肉的招牌菜/汤/干货
+const MEAT_OPTION_EXCLUDE = new Set([
+  'crispyWonton', 'mouthWateringChicken', 'chongqingSpicyChicken', 'fuqiFeipian', 'spicyBeefJerky',
+  'porkDumplings', 'chickenDumplings', 'siuMai', 'nourishingChickenSoup', 'pekingDuck',
+  'kungPaoChicken', 'sweetSourChickenPineapple', 'goldenCrispyChickenSalad', 'sweetSpicyChicken',
+  'blackPepperBeef', 'blackPepperChicken', 'sirloinBeefCubes', 'braisedIrishSteak', 'sweetSourPorkChop',
+  'stirFriedYellowBeef', 'kidneyFlowers', 'twiceCookedPork', 'beefSpicyBroth', 'porkSpicyBroth',
+  'tiHuaTang', 'dryFriedPorkIntestine', 'farmhousePork', 'chickenCurry', 'beefCurry',
+]);
 function detectSpicy(d){ return SPICY_RE.test(d.i18n.zh.name + d.i18n.zh.tag); }
 function detectOptions(d){
-  return Object.keys(OPTION_DETECTORS).filter(key => OPTION_DETECTORS[key].test(d.i18n.zh.tag));
+  const opts = [];
+  // 葱/洋葱/姜/香菜是通用的忌口选项，除了甜品（和不会展示的饮品），其余菜品统一提供
+  if(d.category !== 'dessert' && d.category !== 'drinks'){
+    opts.push('scallion', 'onion', 'ginger', 'cilantro');
+  }
+  if(MEAT_RE.test(d.i18n.zh.tag) && !MEAT_OPTION_EXCLUDE.has(d.id)){
+    opts.push('meat');
+  }
+  return opts;
 }
 
 const MENU = DISH_DATA.map(d => ({
@@ -2140,21 +2154,36 @@ function cartHTML(){
 function orderReviewHTML(){
   const items = cartItemsForCheckout();
   const total = items.reduce((s,it)=>s+it.price*it.qty,0);
+  const count = totalCount();
 
   return `
     ${backRowHTML()}
     <div class="confirm-screen">
       <p class="eyebrow">${t('tableEyebrow')} ${state.table}</p>
       <h2 style="margin-top:6px;">${t('orderReviewTitle')}</h2>
-      <ul class="order-summary">
-        ${items.map(it=>orderLineHTML({
-          name: it.name, qty: it.qty,
-          spice: it.spicy ? displaySpice(it.spice) : '',
-          price: it.price,
-          extra: (it.sizeLabel ? `<span class="spice-tag">${it.sizeLabel}</span>` : '') + it.excludeTags,
-        })).join('')}
-        ${totalRowHTML(total)}
-      </ul>
+      ${items.length === 0
+        ? `<p class="hint">${t('emptyCart')}</p>`
+        : `<ul class="order-summary">
+            ${items.map(it=>`
+              <li class="order-line">
+                <div class="order-line-top">
+                  <span class="order-line-name">${it.name}</span>
+                  <span class="order-line-price">${formatPrice(it.price*it.qty)}</span>
+                </div>
+                <div class="order-line-bottom">
+                  ${it.spicy ? `<span class="spice-tag">${displaySpice(it.spice)}</span>` : ''}
+                  ${it.sizeLabel ? `<span class="spice-tag">${it.sizeLabel}</span>` : ''}
+                  ${it.excludeTags}
+                  <span class="stepper">
+                    <button onclick="changeQty('${it.id}',-1)" aria-label="${t('decreaseQty')}">−</button>
+                    <span class="qty">${it.qty}</span>
+                    <button onclick="changeQty('${it.id}',1)" aria-label="${t('increaseQty')}">+</button>
+                  </span>
+                </div>
+              </li>`).join('')}
+            ${totalRowHTML(total)}
+          </ul>`
+      }
 
       <div class="review-field">
         <input type="text" class="review-input" placeholder="${t('nicknamePlaceholder')}" value="${(state.orderNickname||'').replace(/"/g,'&quot;')}" oninput="state.orderNickname=this.value" maxlength="30">
@@ -2170,7 +2199,7 @@ function orderReviewHTML(){
     </div>
     <div class="bottom-bar">
       <div class="bottom-bar-inner">
-        <button class="submit-btn" onclick="handlePlaceOrderClick()" ${state.submitting?'disabled':''}>
+        <button class="submit-btn" onclick="handlePlaceOrderClick()" ${state.submitting||count===0?'disabled':''}>
           ${state.submitting?t('ordering'):t('orderNow')}
         </button>
       </div>
