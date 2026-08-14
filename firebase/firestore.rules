@@ -26,7 +26,8 @@ service cloud.firestore {
 
       // 建单：严格校验字段形状、类型、长度范围，拒绝多余字段和离谱数值
       // nickname / partySize 是下单确认页新加的字段（昵称 + 就餐人数）
-      allow create: if request.resource.data.keys().hasOnly(['table', 'items', 'createdAt', 'nickname', 'partySize'])
+      // status 是订单状态机的起点，新建订单必须是 'pending'
+      allow create: if request.resource.data.keys().hasOnly(['table', 'items', 'createdAt', 'nickname', 'partySize', 'status'])
                     && request.resource.data.table is string
                     && request.resource.data.table.size() > 0
                     && request.resource.data.table.size() <= 20
@@ -40,10 +41,14 @@ service cloud.firestore {
                     && request.resource.data.nickname.size() <= 30
                     && request.resource.data.partySize is number
                     && request.resource.data.partySize > 0
-                    && request.resource.data.partySize <= 50;
+                    && request.resource.data.partySize <= 50
+                    && request.resource.data.status == 'pending';
 
-      // 订单一旦建立不允许改内容（没有"改单"功能，改单当面找服务员）
-      allow update: if false;
+      // 订单一旦建立，唯一允许的修改是员工端把 status 从 pending 推进到 confirmed
+      // （顾客端据此从“等待确认”切换到“已送入厨房”动画），其余字段一律不可变
+      allow update: if request.resource.data.diff(resource.data).affectedKeys().hasOnly(['status'])
+                    && resource.data.status == 'pending'
+                    && request.resource.data.status == 'confirmed';
 
       // 员工端"已处理，移出看板"需要删除订单；没有登录态，只能开放删
       allow delete: if true;

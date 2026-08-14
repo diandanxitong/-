@@ -72,24 +72,40 @@
   .order-card.warn .elapsed{color:var(--warn);}
   .order-card.urgent .elapsed{color:var(--urgent);}
 
+  .customer-block{display:flex;flex-direction:column;gap:8px;}
+  .customer-name{
+    font-size:13px;font-weight:700;color:var(--text-muted);
+    padding-top:6px;border-top:1px dashed var(--line);
+  }
+  .customer-block:first-of-type .customer-name{border-top:none;padding-top:0;}
+
   .item-list{list-style:none;display:flex;flex-direction:column;gap:8px;}
   .item-list li{
-    display:flex;justify-content:space-between;align-items:center;
+    display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:6px;
     font-size:16px;padding:9px 12px;background:rgba(255,255,255,.04);border-radius:10px;
   }
   .item-list .qty{
     font-family:'Archivo Black',sans-serif;color:var(--warn);margin-right:8px;
   }
   .spice-tag{font-size:11.5px;color:var(--text-muted);border:1px solid var(--line);border-radius:20px;padding:2px 9px;}
+  .exclude-tag{font-size:11.5px;color:var(--urgent);border:1px solid rgba(227,66,31,.5);border-radius:20px;padding:2px 9px;font-weight:700;}
   .new-tag{font-size:11.5px;color:var(--urgent);border:1px solid var(--urgent);border-radius:20px;padding:2px 9px;font-weight:700;}
   .item-list li.is-new{background:rgba(227,66,31,.14);}
 
-  .done-btn{
-    margin-top:2px;background:none;border:1px solid var(--line);color:var(--text-muted);
-    padding:11px;border-radius:10px;font-size:14px;cursor:pointer;font-weight:700;
+  .confirmed-badge{
+    font-size:11px;font-weight:700;color:#5FBE8A;border:1px solid rgba(95,190,138,.5);
+    border-radius:20px;padding:3px 10px;white-space:nowrap;
   }
+
+  .done-btn, .confirm-btn{
+    margin-top:2px;padding:11px;border-radius:10px;font-size:14px;cursor:pointer;font-weight:700;
+  }
+  .done-btn{background:none;border:1px solid var(--line);color:var(--text-muted);}
   .done-btn:hover{border-color:#5FBE8A;color:#5FBE8A;}
   .done-btn:active{background:rgba(95,190,138,.12);}
+  .confirm-btn{background:rgba(232,162,61,.14);border:1px solid var(--warn);color:var(--warn);}
+  .confirm-btn:hover{background:rgba(232,162,61,.22);}
+  .confirm-btn:active{background:rgba(232,162,61,.3);}
 </style>
 </head>
 <body>
@@ -120,8 +136,11 @@ firebase.initializeApp(firebaseConfig);
 const db = firebase.firestore();
 const ordersRef = db.collection('orders');
 
-let orders = [];   // { key, table, items, createdAt }
+let orders = [];   // { key, table, items, createdAt, nickname, partySize, status }
 let loaded = false;
+
+const SIZE_LABELS_ZH = { half:'半份', whole:'整份', large:'大份', small:'小份' };
+const OPTION_LABELS_ZH = { onion:'不要洋葱', scallion:'不要葱', ginger:'不要姜', cilantro:'不要香菜', meat:'不要肉' };
 
 function elapsedInfo(ts){
   const diffMs = Date.now() - ts;
@@ -135,7 +154,11 @@ function elapsedInfo(ts){
 }
 
 ordersRef.onSnapshot(snap => {
-  const results = snap.docs.map(d => ({ key: d.id, table: d.data().table, items: d.data().items, createdAt: d.data().createdAt }));
+  const results = snap.docs.map(d => ({
+    key: d.id, table: d.data().table, items: d.data().items, createdAt: d.data().createdAt,
+    nickname: d.data().nickname || '', partySize: d.data().partySize || null,
+    status: d.data().status || 'pending',
+  }));
   results.sort((a,b) => a.createdAt - b.createdAt);
   orders = results;
   loaded = true;
@@ -145,7 +168,19 @@ ordersRef.onSnapshot(snap => {
   document.getElementById('status').textContent = '连接异常，正在重试…';
 });
 
-async function completeOrder(keys){
+// 第一步：确认订单，推送给顾客端“已送入厨房”动画，但仍留在看板上等待上菜
+async function confirmToKitchen(keys){
+  orders = orders.map(o => keys.includes(o.key) ? Object.assign({}, o, { status: 'confirmed' }) : o);
+  render();
+  try{
+    const batch = db.batch();
+    keys.forEach(key => batch.update(ordersRef.doc(key), { status: 'confirmed' }));
+    await batch.commit();
+  }catch(e){ /* onSnapshot 会在下一次推送时自动纠正 */ }
+}
+
+// 第二步：菜已上齐，彻底移出看板
+async function archiveOrder(keys){
   orders = orders.filter(o => !keys.includes(o.key));
   render();
   try{
@@ -171,14 +206,31 @@ function groupByTable(list){
   return groups;
 }
 
-// 按“菜名+辣度”合并数量；只有第一批之后才出现的菜品标记为“新加”
+// 同一桌可能坐了好几位各自扫码点单的顾客，按昵称把订单分开显示，方便分别记录
+function groupByNickname(batch){
+  const map = new Map();
+  batch.forEach(o => {
+    const name = (o.nickname || '').trim() || '匿名顾客';
+    if(!map.has(name)) map.set(name, []);
+    map.get(name).push(o);
+  });
+  const groups = [];
+  for(const [nickname, docs] of map){
+    docs.sort((a,b) => a.createdAt - b.createdAt);
+    const partySize = docs.slice().reverse().find(d => d.partySize)?.partySize || null;
+    groups.push({ nickname, partySize, items: mergeItems(docs) });
+  }
+  return groups;
+}
+
+// 按“菜名+辣度+份量”合并数量；只有第一批之后才出现的菜品标记为“新加”
 function mergeItems(batch){
   const merged = new Map();
   batch.forEach((o, batchIndex) => {
     o.items.forEach(it => {
-      const itemKey = it.name + '__' + it.spice;
+      const itemKey = it.name + '__' + it.spice + '__' + (it.size || '');
       if(!merged.has(itemKey)){
-        merged.set(itemKey, { name: it.name, spice: it.spice, qty: 0, isNew: batchIndex > 0 });
+        merged.set(itemKey, { name: it.name, spice: it.spice, size: it.size || null, excludes: it.excludes || [], qty: 0, isNew: batchIndex > 0 });
       }
       merged.get(itemKey).qty += it.qty;
     });
@@ -186,19 +238,40 @@ function mergeItems(batch){
   return Array.from(merged.values());
 }
 
+function itemLineHTML(it){
+  const tags = [`<span class="spice-tag">${it.spice}</span>`];
+  if(it.size) tags.push(`<span class="spice-tag">${SIZE_LABELS_ZH[it.size] || it.size}</span>`);
+  it.excludes.forEach(k => tags.push(`<span class="exclude-tag">${OPTION_LABELS_ZH[k] || k}</span>`));
+  if(it.isNew) tags.push('<span class="new-tag">新加</span>');
+  return `<li class="${it.isNew?'is-new':''}"><span><span class="qty">${it.qty}×</span>${it.name}</span><span style="display:flex;gap:6px;align-items:center;flex-wrap:wrap;">${tags.join('')}</span></li>`;
+}
+
+function customerBlockHTML(nGroup){
+  return `
+    <div class="customer-block">
+      <p class="customer-name">${nGroup.nickname}${nGroup.partySize ? ` · ${nGroup.partySize}人` : ''}</p>
+      <ul class="item-list">${nGroup.items.map(itemLineHTML).join('')}</ul>
+    </div>`;
+}
+
 function cardHTML(group){
   const { label, level } = elapsedInfo(group.createdAt);
-  const items = mergeItems(group.batch);
+  const nicknameGroups = groupByNickname(group.batch);
+  const anyPending = group.batch.some(o => o.status !== 'confirmed');
+  const actionBtn = anyPending
+    ? `<button class="confirm-btn" data-keys="${group.keys.join(',')}" onclick="confirmToKitchen(this.dataset.keys.split(','))">🍳 确认，送入厨房</button>`
+    : `<button class="done-btn" data-keys="${group.keys.join(',')}" onclick="archiveOrder(this.dataset.keys.split(','))">✓ 已处理，移出看板</button>`;
   return `
     <div class="order-card ${level}">
       <div class="card-top">
         <span class="table-num">桌 ${group.table}</span>
-        <span class="elapsed">${label}</span>
+        <span style="display:flex;gap:8px;align-items:center;">
+          ${anyPending ? '' : '<span class="confirmed-badge">已确认</span>'}
+          <span class="elapsed">${label}</span>
+        </span>
       </div>
-      <ul class="item-list">
-        ${items.map(it => `<li class="${it.isNew?'is-new':''}"><span><span class="qty">${it.qty}×</span>${it.name}</span><span style="display:flex;gap:6px;align-items:center;"><span class="spice-tag">${it.spice}</span>${it.isNew?'<span class="new-tag">新加</span>':''}</span></li>`).join('')}
-      </ul>
-      <button class="done-btn" data-keys="${group.keys.join(',')}" onclick="completeOrder(this.dataset.keys.split(','))">✓ 已处理，移出看板</button>
+      ${nicknameGroups.map(customerBlockHTML).join('')}
+      ${actionBtn}
     </div>`;
 }
 
