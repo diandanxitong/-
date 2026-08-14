@@ -230,7 +230,7 @@
 
   /* ---------- sticky bottom bar ---------- */
   .bottom-bar{
-    position:fixed;left:0;right:0;bottom:0;display:flex;justify-content:center;
+    position:fixed;left:0;right:0;bottom:0;display:flex;justify-content:center;z-index:30;
     background:linear-gradient(180deg,rgba(27,22,19,0) 0%,var(--bg) 30%);
     padding:20px 16px 26px;
   }
@@ -247,8 +247,8 @@
   .submit-btn:disabled{background:var(--card-line);color:var(--text-muted);cursor:not-allowed;box-shadow:none;border-color:var(--card-line);}
   .submit-btn:not(:disabled):active{background:var(--ember-dark);}
 
-  /* one unified pill spanning ~2/3 of the screen, split into two actions */
-  .action-pill-wrap{width:67%;max-width:320px;min-width:264px;margin:0 auto;}
+  /* one unified pill spanning most of the screen width, slim, split unevenly into two actions */
+  .action-pill-wrap{width:84%;max-width:380px;min-width:280px;margin:0 auto;}
   .action-pill{
     position:relative;display:flex;align-items:stretch;
     border-radius:999px;overflow:hidden;
@@ -260,15 +260,17 @@
     background:linear-gradient(180deg, rgba(255,255,255,.16) 0%, rgba(255,255,255,0) 42%);
   }
   .action-pill::after{
-    content:"";position:absolute;z-index:2;top:16%;bottom:16%;left:50%;width:1px;
+    content:"";position:absolute;z-index:2;top:16%;bottom:16%;left:60%;width:1px;
     background:linear-gradient(180deg, transparent, rgba(232,162,61,.65), transparent);
     pointer-events:none;
   }
   .cart-btn, .order-now-btn{
-    flex:1;min-width:0;border:none;cursor:pointer;font-family:inherit;
-    display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;
-    padding:13px 8px;text-align:center;
+    min-width:0;border:none;cursor:pointer;font-family:inherit;
+    display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px;
+    padding:10px 8px;text-align:center;
   }
+  .cart-btn{flex:3;}
+  .order-now-btn{flex:2;}
   .cart-btn{background:linear-gradient(160deg,var(--jade) 0%,var(--jade-dark) 100%);color:#fff;}
   .order-now-btn{background:linear-gradient(160deg,var(--ember) 0%,var(--ember-dark) 100%);color:#fff;}
   .cart-btn:disabled, .order-now-btn:disabled{background:var(--card-line);color:var(--text-muted);cursor:not-allowed;}
