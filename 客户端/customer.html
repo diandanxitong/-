@@ -219,6 +219,24 @@
   .allergen-chip{
     font-size:10px;font-weight:800;letter-spacing:.02em;color:var(--text-muted);
     border:1px solid var(--card-line);border-radius:6px;padding:2px 6px;cursor:default;
+    background:none;font-family:inherit;
+  }
+  .allergen-row .allergen-chip{cursor:pointer;}
+  .allergen-row .allergen-chip:hover, .allergen-row .allergen-chip:active{
+    border-color:var(--gold);color:var(--gold);background:rgba(232,162,61,.1);
+  }
+  .allergen-popup-overlay{position:fixed;inset:0;z-index:74;background:none;border:none;padding:0;margin:0;cursor:default;}
+  .allergen-popup{
+    position:fixed;z-index:75;transform:translate(-50%,-100%) translateY(-10px);
+    max-width:min(78vw,260px);
+    display:flex;align-items:flex-start;gap:8px;
+    background:var(--card);border:1px solid var(--gold-line);border-radius:10px;
+    padding:9px 12px;box-shadow:0 10px 26px rgba(0,0,0,.5);
+    font-size:12.5px;color:var(--text);line-height:1.4;
+  }
+  .allergen-popup-code{
+    flex-shrink:0;font-weight:900;color:var(--gold);font-size:11px;
+    background:rgba(232,162,61,.14);border-radius:6px;padding:1px 6px;
   }
   .size-row{display:flex;gap:6px;margin-top:12px;}
   .size-pill{
@@ -1841,6 +1859,7 @@ let state = {
   myOrderLoading: false,
   pandaMenuOpen: false,
   allergenInfoOpen: false,
+  allergenPopup: null,   // { code, left, top } for the per-chip explanation bubble
   orderNickname: '',
   orderPartySize: 2,
   upsellOpen: false,
@@ -2036,6 +2055,18 @@ function setCategory(cat){
 
 function toggleAllergenInfo(){
   state.allergenInfoOpen = !state.allergenInfoOpen;
+  render();
+}
+
+function showAllergenPopup(event, code){
+  event.stopPropagation();
+  const rect = event.currentTarget.getBoundingClientRect();
+  state.allergenPopup = { code, left: rect.left + rect.width / 2, top: rect.top };
+  render();
+}
+
+function closeAllergenPopup(){
+  state.allergenPopup = null;
   render();
 }
 
@@ -2313,7 +2344,18 @@ function optionsRowHTML(d, it){
 
 function allergenChipsHTML(codes){
   if(!codes || codes.length===0) return '';
-  return `<div class="allergen-row">${codes.map(c=>`<span class="allergen-chip" title="${tAllergen(c)}">${c}</span>`).join('')}</div>`;
+  return `<div class="allergen-row">${codes.map(c=>`<button class="allergen-chip" onclick="showAllergenPopup(event,'${c}')">${c}</button>`).join('')}</div>`;
+}
+
+function allergenPopupHTML(){
+  const p = state.allergenPopup;
+  if(!p) return '';
+  return `
+    <button class="allergen-popup-overlay" onclick="closeAllergenPopup()" aria-label="${t('closeMenu')}"></button>
+    <div class="allergen-popup" style="left:${p.left}px;top:${p.top}px;">
+      <span class="allergen-popup-code">${p.code}</span>
+      <span>${tAllergen(p.code)}</span>
+    </div>`;
 }
 
 function allergenModalHTML(){
@@ -2441,6 +2483,7 @@ function menuHTML(){
       </div>
     </div>
     ${allergenModalHTML()}
+    ${allergenPopupHTML()}
     <div class="bottom-bar">
       <div class="action-pill-wrap">
         <div class="action-pill">
