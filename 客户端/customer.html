@@ -160,6 +160,11 @@
   .cat-btn:hover{color:var(--text);}
   .dish-panel{flex:1;min-width:0;padding-right:16px;}
   .dish-list{padding:0 0 0 16px;display:flex;flex-direction:column;gap:18px;}
+  .dish-group-header{
+    font-size:13px;font-weight:800;letter-spacing:.04em;color:var(--gold);
+    padding:2px 2px 0;margin-top:2px;
+  }
+  .dish-group-header:first-child{margin-top:0;}
   .dish-card{
     position:relative;overflow:hidden;
     background:linear-gradient(160deg,var(--card) 0%,var(--bg-soft) 100%);
@@ -665,7 +670,7 @@ const I18N = {
     allergensBtn:"过敏原", allergensModalTitle:"过敏原说明", totalLabel:"合计", perPersonSuffix:" /人",
     orderReviewTitle:"确认订单", nicknamePlaceholder:"请输入你的昵称，例如：JOHN", partySizeLabel:"请选择您的就餐人数",
     upsellTitle:"忘了点什么？", addToOrderBtn:"加入到当前订单", laterBtn:"以后再说",
-    categories:{ all:"全部", appetizers:"前菜", dumplings:"饺子", soup:"汤", chefSpecial:"厨师推荐", vegetables:"蔬菜", riceNoodles:"饭/面类", dessert:"甜品" },
+    categories:{ all:"全部", appetizers:"前菜", dumplings:"饺子", soup:"汤", chefSpecial:"厨师推荐", vegetables:"蔬菜", riceNoodles:"饭/面类", dessert:"甜品", drinks:"酒水" },
     spice:["微辣","中辣","特辣"],
   },
   en:{
@@ -687,7 +692,7 @@ const I18N = {
     allergensBtn:"Allergens", allergensModalTitle:"Allergen Guide", totalLabel:"Total", perPersonSuffix:" / person",
     orderReviewTitle:"Confirm Order", nicknamePlaceholder:"Enter your nickname, e.g. JOHN", partySizeLabel:"Select your party size",
     upsellTitle:"Forgot Something?", addToOrderBtn:"Add to Order", laterBtn:"Later",
-    categories:{ all:"All", appetizers:"Appetizers", dumplings:"Dumplings", soup:"Soup", chefSpecial:"Chef's Specials", vegetables:"Vegetables", riceNoodles:"Rice & Noodles", dessert:"Dessert" },
+    categories:{ all:"All", appetizers:"Appetizers", dumplings:"Dumplings", soup:"Soup", chefSpecial:"Chef's Specials", vegetables:"Vegetables", riceNoodles:"Rice & Noodles", dessert:"Dessert", drinks:"Drinks" },
     spice:["Mild","Medium","Extra Spicy"],
   },
   it:{
@@ -709,7 +714,7 @@ const I18N = {
     allergensBtn:"Allergeni", allergensModalTitle:"Guida agli Allergeni", totalLabel:"Totale", perPersonSuffix:" / persona",
     orderReviewTitle:"Conferma Ordine", nicknamePlaceholder:"Inserisci il tuo nome, es. JOHN", partySizeLabel:"Seleziona il numero di persone",
     upsellTitle:"Hai Dimenticato Qualcosa?", addToOrderBtn:"Aggiungi all'Ordine", laterBtn:"Più Tardi",
-    categories:{ all:"Tutti", appetizers:"Antipasti", dumplings:"Ravioli", soup:"Zuppe", chefSpecial:"Specialità dello Chef", vegetables:"Verdure", riceNoodles:"Riso e Noodles", dessert:"Dessert" },
+    categories:{ all:"Tutti", appetizers:"Antipasti", dumplings:"Ravioli", soup:"Zuppe", chefSpecial:"Specialità dello Chef", vegetables:"Verdure", riceNoodles:"Riso e Noodles", dessert:"Dessert", drinks:"Bevande" },
     spice:["Poco Piccante","Piccante","Molto Piccante"],
   },
   fr:{
@@ -731,7 +736,7 @@ const I18N = {
     allergensBtn:"Allergènes", allergensModalTitle:"Guide des Allergènes", totalLabel:"Total", perPersonSuffix:" / personne",
     orderReviewTitle:"Confirmer la Commande", nicknamePlaceholder:"Entrez votre surnom, ex. JOHN", partySizeLabel:"Sélectionnez le nombre de convives",
     upsellTitle:"Vous Avez Oublié Quelque Chose ?", addToOrderBtn:"Ajouter à la Commande", laterBtn:"Plus Tard",
-    categories:{ all:"Tous", appetizers:"Entrées", dumplings:"Raviolis", soup:"Soupes", chefSpecial:"Spécialités du Chef", vegetables:"Légumes", riceNoodles:"Riz et Nouilles", dessert:"Dessert" },
+    categories:{ all:"Tous", appetizers:"Entrées", dumplings:"Raviolis", soup:"Soupes", chefSpecial:"Spécialités du Chef", vegetables:"Légumes", riceNoodles:"Riz et Nouilles", dessert:"Dessert", drinks:"Boissons" },
     spice:["Peu Épicé","Épicé","Très Épicé"],
   },
   es:{
@@ -753,7 +758,7 @@ const I18N = {
     allergensBtn:"Alérgenos", allergensModalTitle:"Guía de Alérgenos", totalLabel:"Total", perPersonSuffix:" / persona",
     orderReviewTitle:"Confirmar Pedido", nicknamePlaceholder:"Introduce tu apodo, ej. JOHN", partySizeLabel:"Selecciona tu número de comensales",
     upsellTitle:"¿Olvidaste Algo?", addToOrderBtn:"Añadir al Pedido", laterBtn:"Más Tarde",
-    categories:{ all:"Todos", appetizers:"Entrantes", dumplings:"Empanadillas", soup:"Sopas", chefSpecial:"Especialidades del Chef", vegetables:"Verduras", riceNoodles:"Arroz y Fideos", dessert:"Postres" },
+    categories:{ all:"Todos", appetizers:"Entrantes", dumplings:"Empanadillas", soup:"Sopas", chefSpecial:"Especialidades del Chef", vegetables:"Verduras", riceNoodles:"Arroz y Fideos", dessert:"Postres", drinks:"Bebidas" },
     spice:["Poco Picante","Picante","Muy Picante"],
   },
 };
@@ -781,7 +786,19 @@ const SIZE_LABELS = {
   whole:{zh:'整只',en:'Whole',it:'Intera',fr:'Entier',es:'Entera'},
   large:{zh:'大份',en:'Large',it:'Grande',fr:'Grande',es:'Grande'},
   small:{zh:'小份',en:'Small',it:'Piccola',fr:'Petite',es:'Pequeña'},
+  glass:{zh:'杯',en:'Glass',it:'Calice',fr:'Verre',es:'Copa'},
+  bottle:{zh:'瓶',en:'Bottle',it:'Bottiglia',fr:'Bouteille',es:'Botella'},
 };
+const SUBGROUP_LABELS = {
+  whiteWine:{zh:'白葡萄酒',en:'White Wine',it:'Vino Bianco',fr:'Vin Blanc',es:'Vino Blanco'},
+  redWine:{zh:'红葡萄酒',en:'Red Wine',it:'Vino Rosso',fr:'Vin Rouge',es:'Vino Tinto'},
+  rose:{zh:'桃红',en:'Rosé',it:'Rosé',fr:'Rosé',es:'Rosado'},
+  sparkling:{zh:'起泡酒',en:'Sparkling',it:'Spumante',fr:'Pétillant',es:'Espumoso'},
+  softDrink:{zh:'软饮 + 水',en:'Soft Drinks & Water',it:'Bibite e Acqua',fr:'Boissons et Eau',es:'Refrescos y Agua'},
+  juice:{zh:'果汁',en:'Juices',it:'Succhi di Frutta',fr:'Jus de Fruits',es:'Zumos'},
+  beer:{zh:'啤酒',en:'Beer',it:'Birra',fr:'Bière',es:'Cerveza'},
+};
+function tSubGroup(key){ return (SUBGROUP_LABELS[key] || {})[state.lang] || SUBGROUP_LABELS[key].zh; }
 const OPTION_LABELS = {
   scallion:{zh:'不要葱',en:'No Spring Onion',it:'Senza Cipollotto',fr:'Sans Oignon Vert',es:'Sin Cebolleta'},
   onion:{zh:'不要洋葱',en:'No Onion',it:'Senza Cipolla',fr:'Sans Oignon',es:'Sin Cebolla'},
@@ -824,7 +841,7 @@ function dishPriceLabel(d, item){
   return label;
 }
 
-const CATEGORIES = ['all','appetizers','dumplings','soup','chefSpecial','vegetables','riceNoodles','dessert'];
+const CATEGORIES = ['all','appetizers','dumplings','soup','chefSpecial','vegetables','riceNoodles','dessert','drinks'];
 const SPICE_LEVELS = ['微辣','中辣','特辣'];
 
 // Each entry: id, category, price (or sizes[]+unit), allergens[], img, and i18n{lang:{name,tag}}
@@ -1435,36 +1452,307 @@ const DISH_DATA = [
       es:{name:'Sagú de Mango y Pomelo', tag:'Mango, pomelo, perlas de sagú'},
     }},
 
-  // ---------- 饮品 Drinks (not shown as a browsable category — only used as add-on picks at checkout) ----------
-  { id:'coke', category:'drinks', price:3.00, allergens:[],
+  // ---------- 酒水单 Drinks ----------
+  // 白葡萄酒 White Wine
+  { id:'wineMurariPinotGrigio', category:'drinks', sub:'whiteWine', sizes:[{key:'glass',price:7.90},{key:'bottle',price:28}], allergens:['SU'],
     i18n:{
-      zh:{name:'可乐', tag:''}, en:{name:'Coke', tag:''}, it:{name:'Coca-Cola', tag:''},
-      fr:{name:'Coca-Cola', tag:''}, es:{name:'Coca-Cola', tag:''},
+      zh:{name:'Murari Pinot Grigio 卡斯特拉尼灰皮诺', tag:'Veneto, Italy'},
+      en:{name:'Murari Pinot Grigio', tag:'Veneto, Italy'},
+      it:{name:'Murari Pinot Grigio', tag:'Veneto, Italia'},
+      fr:{name:'Murari Pinot Grigio', tag:'Vénétie, Italie'},
+      es:{name:'Murari Pinot Grigio', tag:'Véneto, Italia'},
     }},
-  { id:'sprite', category:'drinks', price:3.00, allergens:[],
+  { id:'wineBouchardSauvignonBlanc', category:'drinks', sub:'whiteWine', sizes:[{key:'glass',price:8.50},{key:'bottle',price:32}], allergens:['SU'],
     i18n:{
-      zh:{name:'雪碧', tag:''}, en:{name:'Sprite', tag:''}, it:{name:'Sprite', tag:''},
-      fr:{name:'Sprite', tag:''}, es:{name:'Sprite', tag:''},
+      zh:{name:'Bouchard Aine & Fils Sauvignon Blanc 长相思', tag:'Languedoc, France'},
+      en:{name:'Bouchard Aine & Fils Sauvignon Blanc', tag:'Languedoc, France'},
+      it:{name:'Bouchard Aine & Fils Sauvignon Blanc', tag:'Linguadoca, Francia'},
+      fr:{name:'Bouchard Aine & Fils Sauvignon Blanc', tag:'Languedoc, France'},
+      es:{name:'Bouchard Aine & Fils Sauvignon Blanc', tag:'Languedoc, Francia'},
     }},
-  { id:'icedLemonTea', category:'drinks', price:3.50, allergens:[],
+  { id:'winePeterRiesling', category:'drinks', sub:'whiteWine', sizes:[{key:'glass',price:9.90},{key:'bottle',price:36}], allergens:['SU'],
     i18n:{
-      zh:{name:'冰镇柠檬茶', tag:''}, en:{name:'Iced Lemon Tea', tag:''}, it:{name:'Tè al Limone Freddo', tag:''},
-      fr:{name:'Thé Glacé au Citron', tag:''}, es:{name:'Té Helado de Limón', tag:''},
+      zh:{name:'Peter & Peter Riesling', tag:'Mosel, Germany'},
+      en:{name:'Peter & Peter Riesling', tag:'Mosel, Germany'},
+      it:{name:'Peter & Peter Riesling', tag:'Mosella, Germania'},
+      fr:{name:'Peter & Peter Riesling', tag:'Moselle, Allemagne'},
+      es:{name:'Peter & Peter Riesling', tag:'Mosela, Alemania'},
     }},
-  { id:'jasmineTea', category:'drinks', price:2.80, allergens:[],
+  { id:'wineNauMaiSauvignonBlanc', category:'drinks', sub:'whiteWine', sizes:[{key:'bottle',price:39}], allergens:['SU'],
     i18n:{
-      zh:{name:'茉莉花茶', tag:''}, en:{name:'Jasmine Tea', tag:''}, it:{name:'Tè al Gelsomino', tag:''},
-      fr:{name:'Thé au Jasmin', tag:''}, es:{name:'Té de Jazmín', tag:''},
+      zh:{name:'Nau Mai Sauvignon Blanc', tag:'Marlborough, New Zealand'},
+      en:{name:'Nau Mai Sauvignon Blanc', tag:'Marlborough, New Zealand'},
+      it:{name:'Nau Mai Sauvignon Blanc', tag:'Marlborough, Nuova Zelanda'},
+      fr:{name:'Nau Mai Sauvignon Blanc', tag:'Marlborough, Nouvelle-Zélande'},
+      es:{name:'Nau Mai Sauvignon Blanc', tag:'Marlborough, Nueva Zelanda'},
     }},
-  { id:'sparklingWater', category:'drinks', price:3.20, allergens:[],
+  { id:'wineCasalVentozelaAlvarinho', category:'drinks', sub:'whiteWine', sizes:[{key:'bottle',price:45}], allergens:['SU'],
     i18n:{
-      zh:{name:'气泡水', tag:''}, en:{name:'Sparkling Water', tag:''}, it:{name:'Acqua Frizzante', tag:''},
-      fr:{name:'Eau Gazeuse', tag:''}, es:{name:'Agua con Gas', tag:''},
+      zh:{name:'Casal de Ventozela Alvarinho 阿瓦里诺', tag:'Vinho Verde, Portugal'},
+      en:{name:'Casal de Ventozela Alvarinho', tag:'Vinho Verde, Portugal'},
+      it:{name:'Casal de Ventozela Alvarinho', tag:'Vinho Verde, Portogallo'},
+      fr:{name:'Casal de Ventozela Alvarinho', tag:'Vinho Verde, Portugal'},
+      es:{name:'Casal de Ventozela Alvarinho', tag:'Vinho Verde, Portugal'},
     }},
-  { id:'tsingtaoBeer', category:'drinks', price:4.50, allergens:['GW','GB'],
+  { id:'wineDomaneWachauGruner', category:'drinks', sub:'whiteWine', sizes:[{key:'bottle',price:49}], allergens:['SU'],
     i18n:{
-      zh:{name:'青岛啤酒', tag:''}, en:{name:'Tsingtao Beer', tag:''}, it:{name:'Birra Tsingtao', tag:''},
-      fr:{name:'Bière Tsingtao', tag:''}, es:{name:'Cerveza Tsingtao', tag:''},
+      zh:{name:'Domäne Wachau Grüner Veltliner Federspiel', tag:'Wachau, Austria'},
+      en:{name:'Domäne Wachau Grüner Veltliner Federspiel', tag:'Wachau, Austria'},
+      it:{name:'Domäne Wachau Grüner Veltliner Federspiel', tag:'Wachau, Austria'},
+      fr:{name:'Domäne Wachau Grüner Veltliner Federspiel', tag:'Wachau, Autriche'},
+      es:{name:'Domäne Wachau Grüner Veltliner Federspiel', tag:'Wachau, Austria'},
+    }},
+  { id:'wineLouisJadotChardonnay', category:'drinks', sub:'whiteWine', sizes:[{key:'bottle',price:65}], allergens:['SU'],
+    i18n:{
+      zh:{name:"Louis Jadot Bourgogne Chardonnay 'Couvent des Jacobins' 勃艮第霞多丽", tag:'Burgundy, France'},
+      en:{name:"Louis Jadot Bourgogne Chardonnay 'Couvent des Jacobins'", tag:'Burgundy, France'},
+      it:{name:"Louis Jadot Bourgogne Chardonnay 'Couvent des Jacobins'", tag:'Borgogna, Francia'},
+      fr:{name:"Louis Jadot Bourgogne Chardonnay 'Couvent des Jacobins'", tag:'Bourgogne, France'},
+      es:{name:"Louis Jadot Bourgogne Chardonnay 'Couvent des Jacobins'", tag:'Borgoña, Francia'},
+    }},
+  { id:'wineMarquisGoulaineSancerre', category:'drinks', sub:'whiteWine', sizes:[{key:'bottle',price:79}], allergens:['SU'],
+    i18n:{
+      zh:{name:"Marquis de Goulaine Sancerre 'Les Lorys' 桑塞尔", tag:'Loire Valley, France'},
+      en:{name:"Marquis de Goulaine Sancerre 'Les Lorys'", tag:'Loire Valley, France'},
+      it:{name:"Marquis de Goulaine Sancerre 'Les Lorys'", tag:'Valle della Loira, Francia'},
+      fr:{name:"Marquis de Goulaine Sancerre 'Les Lorys'", tag:'Vallée de la Loire, France'},
+      es:{name:"Marquis de Goulaine Sancerre 'Les Lorys'", tag:'Valle del Loira, Francia'},
+    }},
+
+  // 红葡萄酒 Red Wine
+  { id:'wineOrquestraTempranillo', category:'drinks', sub:'redWine', sizes:[{key:'glass',price:7.90},{key:'bottle',price:28}], allergens:['SU'],
+    i18n:{
+      zh:{name:'Orquestra Tempranillo 丹魄乐团', tag:'La Mancha, Spain'},
+      en:{name:'Orquestra Tempranillo', tag:'La Mancha, Spain'},
+      it:{name:'Orquestra Tempranillo', tag:'La Mancha, Spagna'},
+      fr:{name:'Orquestra Tempranillo', tag:'La Mancha, Espagne'},
+      es:{name:'Orquestra Tempranillo', tag:'La Mancha, España'},
+    }},
+  { id:'wineReserveAubeSyrahMerlot', category:'drinks', sub:'redWine', sizes:[{key:'glass',price:8.50},{key:'bottle',price:32}], allergens:['SU'],
+    i18n:{
+      zh:{name:"Reserve de L'Aube Syrah Merlot 奥布西拉梅洛珍藏", tag:'Languedoc, France'},
+      en:{name:"Reserve de L'Aube Syrah Merlot", tag:'Languedoc, France'},
+      it:{name:"Reserve de L'Aube Syrah Merlot", tag:'Linguadoca, Francia'},
+      fr:{name:"Reserve de L'Aube Syrah Merlot", tag:'Languedoc, France'},
+      es:{name:"Reserve de L'Aube Syrah Merlot", tag:'Languedoc, Francia'},
+    }},
+  { id:'wineChateauGrandVallons', category:'drinks', sub:'redWine', sizes:[{key:'glass',price:10.95},{key:'bottle',price:39}], allergens:['SU'],
+    i18n:{
+      zh:{name:'Château Les Grand Vallons 波尔多-城堡', tag:'Blaye, Côtes de Bordeaux, France'},
+      en:{name:'Château Les Grand Vallons', tag:'Blaye, Côtes de Bordeaux, France'},
+      it:{name:'Château Les Grand Vallons', tag:'Blaye, Côtes de Bordeaux, Francia'},
+      fr:{name:'Château Les Grand Vallons', tag:'Blaye, Côtes de Bordeaux, France'},
+      es:{name:'Château Les Grand Vallons', tag:'Blaye, Côtes de Bordeaux, Francia'},
+    }},
+  { id:'wineFincaMonicaCrianza', category:'drinks', sub:'redWine', sizes:[{key:'bottle',price:42}], allergens:['SU'],
+    i18n:{
+      zh:{name:'Finca Mónica Crianza', tag:'Rioja, Spain'},
+      en:{name:'Finca Mónica Crianza', tag:'Rioja, Spain'},
+      it:{name:'Finca Mónica Crianza', tag:'Rioja, Spagna'},
+      fr:{name:'Finca Mónica Crianza', tag:'Rioja, Espagne'},
+      es:{name:'Finca Mónica Crianza', tag:'Rioja, España'},
+    }},
+  { id:'wineFinDelMundoMalbec', category:'drinks', sub:'redWine', sizes:[{key:'bottle',price:45}], allergens:['SU'],
+    i18n:{
+      zh:{name:'Fin del Mundo Reserva Malbec 珍藏马尔贝克', tag:'Patagonia, Argentina'},
+      en:{name:'Fin del Mundo Reserva Malbec', tag:'Patagonia, Argentina'},
+      it:{name:'Fin del Mundo Reserva Malbec', tag:'Patagonia, Argentina'},
+      fr:{name:'Fin del Mundo Reserva Malbec', tag:'Patagonie, Argentine'},
+      es:{name:'Fin del Mundo Reserva Malbec', tag:'Patagonia, Argentina'},
+    }},
+  { id:'wineSuraniPrimitivo', category:'drinks', sub:'redWine', sizes:[{key:'bottle',price:49}], allergens:['SU'],
+    i18n:{
+      zh:{name:'Surani Primitivo di Manduria', tag:'Puglia, Italy'},
+      en:{name:'Surani Primitivo di Manduria', tag:'Puglia, Italy'},
+      it:{name:'Surani Primitivo di Manduria', tag:'Puglia, Italia'},
+      fr:{name:'Surani Primitivo di Manduria', tag:'Pouilles, Italie'},
+      es:{name:'Surani Primitivo di Manduria', tag:'Apulia, Italia'},
+    }},
+  { id:'wineLouisJadotPinotNoir', category:'drinks', sub:'redWine', sizes:[{key:'bottle',price:69}], allergens:['SU'],
+    i18n:{
+      zh:{name:"Louis Jadot Bourgogne Pinot Noir 'Couvent des Jacobins' 勃艮第黑皮诺", tag:'Burgundy, France'},
+      en:{name:"Louis Jadot Bourgogne Pinot Noir 'Couvent des Jacobins'", tag:'Burgundy, France'},
+      it:{name:"Louis Jadot Bourgogne Pinot Noir 'Couvent des Jacobins'", tag:'Borgogna, Francia'},
+      fr:{name:"Louis Jadot Bourgogne Pinot Noir 'Couvent des Jacobins'", tag:'Bourgogne, France'},
+      es:{name:"Louis Jadot Bourgogne Pinot Noir 'Couvent des Jacobins'", tag:'Borgoña, Francia'},
+    }},
+  { id:'wineHautsLynchMoussas', category:'drinks', sub:'redWine', sizes:[{key:'bottle',price:89}], allergens:['SU'],
+    i18n:{
+      zh:{name:'Les Hauts de Lynch Moussas 上梦多克', tag:'Haut-Médoc, Bordeaux, France'},
+      en:{name:'Les Hauts de Lynch Moussas', tag:'Haut-Médoc, Bordeaux, France'},
+      it:{name:'Les Hauts de Lynch Moussas', tag:'Haut-Médoc, Bordeaux, Francia'},
+      fr:{name:'Les Hauts de Lynch Moussas', tag:'Haut-Médoc, Bordeaux, France'},
+      es:{name:'Les Hauts de Lynch Moussas', tag:'Haut-Médoc, Burdeos, Francia'},
+    }},
+
+  // 桃红 Rosé
+  { id:'roseColombetteGrenache', category:'drinks', sub:'rose', sizes:[{key:'glass',price:8},{key:'bottle',price:29}], allergens:['SU'],
+    i18n:{
+      zh:{name:'Domaine La Colombette Grenache Rosé 歌海娜玫瑰庄', tag:'Languedoc, France'},
+      en:{name:'Domaine La Colombette Grenache Rosé', tag:'Languedoc, France'},
+      it:{name:'Domaine La Colombette Grenache Rosé', tag:'Linguadoca, Francia'},
+      fr:{name:'Domaine La Colombette Grenache Rosé', tag:'Languedoc, France'},
+      es:{name:'Domaine La Colombette Grenache Rosé', tag:'Languedoc, Francia'},
+    }},
+  { id:'roseChateauBerneRomance', category:'drinks', sub:'rose', sizes:[{key:'glass',price:10.95},{key:'bottle',price:39}], allergens:['SU'],
+    i18n:{
+      zh:{name:'Château de Berne Romance Rosé 普罗旺斯玫瑰', tag:'Provence, France'},
+      en:{name:'Château de Berne Romance Rosé', tag:'Provence, France'},
+      it:{name:'Château de Berne Romance Rosé', tag:'Provenza, Francia'},
+      fr:{name:'Château de Berne Romance Rosé', tag:'Provence, France'},
+      es:{name:'Château de Berne Romance Rosé', tag:'Provenza, Francia'},
+    }},
+
+  // 起泡酒 Sparkling
+  { id:'proseccoSerenaFrizzante', category:'drinks', sub:'sparkling', sizes:[{key:'bottle',price:9.95}], allergens:['SU'],
+    i18n:{
+      zh:{name:'Serena Prosecco Frizzante 罗普罗蜜克', tag:'单人装 20cl'},
+      en:{name:'Serena Prosecco Frizzante', tag:'Single serving 20cl'},
+      it:{name:'Serena Prosecco Frizzante', tag:'Monodose 20cl'},
+      fr:{name:'Serena Prosecco Frizzante', tag:'Format individuel 20cl'},
+      es:{name:'Serena Prosecco Frizzante', tag:'Formato individual 20cl'},
+    }},
+  { id:'sparklingMontegrandeBianco', category:'drinks', sub:'sparkling', sizes:[{key:'bottle',price:29}], allergens:['SU'],
+    i18n:{
+      zh:{name:'Montegrande Bianco Frizzante 蒙特格兰德', tag:''},
+      en:{name:'Montegrande Bianco Frizzante', tag:''},
+      it:{name:'Montegrande Bianco Frizzante', tag:''},
+      fr:{name:'Montegrande Bianco Frizzante', tag:''},
+      es:{name:'Montegrande Bianco Frizzante', tag:''},
+    }},
+  { id:'champagneTheophileBrut', category:'drinks', sub:'sparkling', sizes:[{key:'bottle',price:89}], allergens:['SU'],
+    i18n:{
+      zh:{name:'Champagne Theophile Brut NV 香槟', tag:''},
+      en:{name:'Champagne Theophile Brut NV', tag:''},
+      it:{name:'Champagne Theophile Brut NV', tag:''},
+      fr:{name:'Champagne Theophile Brut NV', tag:''},
+      es:{name:'Champagne Theophile Brut NV', tag:''},
+    }},
+
+  // 软饮 + 水 Soft Drinks + Water
+  { id:'coke', category:'drinks', sub:'softDrink', price:3.80, allergens:[],
+    i18n:{
+      zh:{name:'可乐', tag:'330ml'}, en:{name:'Coke', tag:'330ml'}, it:{name:'Coca-Cola', tag:'330ml'},
+      fr:{name:'Coca-Cola', tag:'330ml'}, es:{name:'Coca-Cola', tag:'330ml'},
+    }},
+  { id:'cokeZero', category:'drinks', sub:'softDrink', price:3.80, allergens:[],
+    i18n:{
+      zh:{name:'无糖可乐', tag:'330ml'}, en:{name:'Coke Zero', tag:'330ml'}, it:{name:'Coca-Cola Zero', tag:'330ml'},
+      fr:{name:'Coca-Cola Zero', tag:'330ml'}, es:{name:'Coca-Cola Zero', tag:'330ml'},
+    }},
+  { id:'dietCoke', category:'drinks', sub:'softDrink', price:3.80, allergens:[],
+    i18n:{
+      zh:{name:'健怡可乐', tag:'330ml'}, en:{name:'Diet Coke', tag:'330ml'}, it:{name:'Coca-Cola Light', tag:'330ml'},
+      fr:{name:'Coca-Cola Light', tag:'330ml'}, es:{name:'Coca-Cola Light', tag:'330ml'},
+    }},
+  { id:'sevenUp', category:'drinks', sub:'softDrink', price:3.80, allergens:[],
+    i18n:{
+      zh:{name:'七喜', tag:'300ml'}, en:{name:'7up', tag:'300ml'}, it:{name:'7up', tag:'300ml'},
+      fr:{name:'7up', tag:'300ml'}, es:{name:'7up', tag:'300ml'},
+    }},
+  { id:'sevenUpFree', category:'drinks', sub:'softDrink', price:3.80, allergens:[],
+    i18n:{
+      zh:{name:'无糖七喜', tag:'300ml'}, en:{name:'7up Free', tag:'300ml'}, it:{name:'7up Free', tag:'300ml'},
+      fr:{name:'7up Free', tag:'300ml'}, es:{name:'7up Free', tag:'300ml'},
+    }},
+  { id:'fanta', category:'drinks', sub:'softDrink', price:3.80, allergens:[],
+    i18n:{
+      zh:{name:'芬达', tag:'300ml'}, en:{name:'Fanta', tag:'300ml'}, it:{name:'Fanta', tag:'300ml'},
+      fr:{name:'Fanta', tag:'300ml'}, es:{name:'Fanta', tag:'300ml'},
+    }},
+  { id:'jiaduobao', category:'drinks', sub:'softDrink', price:3.80, allergens:[],
+    i18n:{
+      zh:{name:'加多宝', tag:''}, en:{name:'Jiaduobao', tag:''}, it:{name:'Jiaduobao', tag:''},
+      fr:{name:'Jiaduobao', tag:''}, es:{name:'Jiaduobao', tag:''},
+    }},
+  { id:'aloeJuiceRegular', category:'drinks', sub:'softDrink', price:3.80, allergens:[],
+    i18n:{
+      zh:{name:'芦荟汁', tag:''}, en:{name:'Aloe Juice', tag:'Regular'}, it:{name:"Succo d'Aloe", tag:'Normale'},
+      fr:{name:"Jus d'Aloès", tag:'Normal'}, es:{name:'Zumo de Aloe', tag:'Normal'},
+    }},
+  { id:'aloeJuiceLarge', category:'drinks', sub:'softDrink', price:9.00, allergens:[],
+    i18n:{
+      zh:{name:'芦荟汁(大)', tag:''}, en:{name:'Aloe Juice', tag:'Large'}, it:{name:"Succo d'Aloe", tag:'Grande'},
+      fr:{name:"Jus d'Aloès", tag:'Grand'}, es:{name:'Zumo de Aloe', tag:'Grande'},
+    }},
+  { id:'soyDrink', category:'drinks', sub:'softDrink', price:4.60, allergens:['S'],
+    i18n:{
+      zh:{name:'维他豆奶(小)', tag:''}, en:{name:'Soy Drink', tag:''}, it:{name:'Bevanda di Soia', tag:''},
+      fr:{name:'Boisson au Soja', tag:''}, es:{name:'Bebida de Soja', tag:''},
+    }},
+  { id:'coconutJuice', category:'drinks', sub:'softDrink', price:4.60, allergens:[],
+    i18n:{
+      zh:{name:'椰树牌椰汁', tag:''}, en:{name:'Coconut Juice', tag:''}, it:{name:'Succo di Cocco', tag:''},
+      fr:{name:'Jus de Coco', tag:''}, es:{name:'Zumo de Coco', tag:''},
+    }},
+  { id:'stillWaterSmall', category:'drinks', sub:'softDrink', price:3.80, allergens:[],
+    i18n:{
+      zh:{name:'小纯净水', tag:'330ml'}, en:{name:'Still Water', tag:'Small, 330ml'}, it:{name:'Acqua Naturale', tag:'Piccola, 330ml'},
+      fr:{name:'Eau Plate', tag:'Petite, 330ml'}, es:{name:'Agua sin Gas', tag:'Pequeña, 330ml'},
+    }},
+  { id:'sparklingWaterSmall', category:'drinks', sub:'softDrink', price:3.80, allergens:[],
+    i18n:{
+      zh:{name:'小气泡水', tag:'330ml'}, en:{name:'Sparkling Water', tag:'Small, 330ml'}, it:{name:'Acqua Frizzante', tag:'Piccola, 330ml'},
+      fr:{name:'Eau Gazeuse', tag:'Petite, 330ml'}, es:{name:'Agua con Gas', tag:'Pequeña, 330ml'},
+    }},
+  { id:'stillWaterLarge', category:'drinks', sub:'softDrink', price:6.00, allergens:[],
+    i18n:{
+      zh:{name:'大纯净水', tag:'750ml'}, en:{name:'Still Water', tag:'Large, 750ml'}, it:{name:'Acqua Naturale', tag:'Grande, 750ml'},
+      fr:{name:'Eau Plate', tag:'Grande, 750ml'}, es:{name:'Agua sin Gas', tag:'Grande, 750ml'},
+    }},
+  { id:'sparklingWaterLarge', category:'drinks', sub:'softDrink', price:6.00, allergens:[],
+    i18n:{
+      zh:{name:'大气泡水', tag:'750ml'}, en:{name:'Sparkling Water', tag:'Large, 750ml'}, it:{name:'Acqua Frizzante', tag:'Grande, 750ml'},
+      fr:{name:'Eau Gazeuse', tag:'Grande, 750ml'}, es:{name:'Agua con Gas', tag:'Grande, 750ml'},
+    }},
+
+  // 果汁 Juices
+  { id:'appleJuice', category:'drinks', sub:'juice', sizes:[{key:'glass',price:2.80},{key:'bottle',price:8.80}], allergens:[],
+    i18n:{
+      zh:{name:'苹果汁', tag:''}, en:{name:'Apple Juice', tag:''}, it:{name:'Succo di Mela', tag:''},
+      fr:{name:'Jus de Pomme', tag:''}, es:{name:'Zumo de Manzana', tag:''},
+    }},
+  { id:'orangeJuice', category:'drinks', sub:'juice', sizes:[{key:'glass',price:2.80},{key:'bottle',price:8.80}], allergens:[],
+    i18n:{
+      zh:{name:'橙汁', tag:''}, en:{name:'Orange Juice', tag:''}, it:{name:"Succo d'Arancia", tag:''},
+      fr:{name:"Jus d'Orange", tag:''}, es:{name:'Zumo de Naranja', tag:''},
+    }},
+  { id:'cranberryJuice', category:'drinks', sub:'juice', sizes:[{key:'glass',price:2.80},{key:'bottle',price:8.80}], allergens:[],
+    i18n:{
+      zh:{name:'蔓越莓汁', tag:''}, en:{name:'Cranberry Juice', tag:''}, it:{name:'Succo di Mirtillo Rosso', tag:''},
+      fr:{name:'Jus de Canneberge', tag:''}, es:{name:'Zumo de Arándano Rojo', tag:''},
+    }},
+
+  // 啤酒 Beer
+  { id:'tsingtaoBeer', category:'drinks', sub:'beer', price:5.95, allergens:['GW','GB'],
+    i18n:{
+      zh:{name:'青岛啤酒', tag:'330ml'}, en:{name:'Tsingtao Beer', tag:'330ml'}, it:{name:'Birra Tsingtao', tag:'330ml'},
+      fr:{name:'Bière Tsingtao', tag:'330ml'}, es:{name:'Cerveza Tsingtao', tag:'330ml'},
+    }},
+  { id:'asahiBeer', category:'drinks', sub:'beer', price:5.95, allergens:['GW','GB'],
+    i18n:{
+      zh:{name:'朝日啤酒', tag:'330ml'}, en:{name:'Asahi Beer', tag:'330ml'}, it:{name:'Birra Asahi', tag:'330ml'},
+      fr:{name:'Bière Asahi', tag:'330ml'}, es:{name:'Cerveza Asahi', tag:'330ml'},
+    }},
+  { id:'heinekenBeer', category:'drinks', sub:'beer', price:5.95, allergens:['GW','GB'],
+    i18n:{
+      zh:{name:'喜力啤酒', tag:'330ml'}, en:{name:'Heineken', tag:'330ml'}, it:{name:'Heineken', tag:'330ml'},
+      fr:{name:'Heineken', tag:'330ml'}, es:{name:'Heineken', tag:'330ml'},
+    }},
+  { id:'heinekenZero', category:'drinks', sub:'beer', price:5.50, allergens:['GW','GB'],
+    i18n:{
+      zh:{name:'喜力0.0', tag:'330ml'}, en:{name:'Heineken 0.0%', tag:'330ml'}, it:{name:'Heineken 0.0%', tag:'330ml'},
+      fr:{name:'Heineken 0.0%', tag:'330ml'}, es:{name:'Heineken 0.0%', tag:'330ml'},
+    }},
+  { id:'guinnessBeer', category:'drinks', sub:'beer', price:7.95, allergens:['GB'],
+    i18n:{
+      zh:{name:'健力士啤酒', tag:'500ml'}, en:{name:'Guinness', tag:'500ml'}, it:{name:'Guinness', tag:'500ml'},
+      fr:{name:'Guinness', tag:'500ml'}, es:{name:'Guinness', tag:'500ml'},
+    }},
+  { id:'guinnessZero', category:'drinks', sub:'beer', price:7.50, allergens:['GB'],
+    i18n:{
+      zh:{name:'健力士0.0', tag:'500ml'}, en:{name:'Guinness 0.0%', tag:'500ml'}, it:{name:'Guinness 0.0%', tag:'500ml'},
+      fr:{name:'Guinness 0.0%', tag:'500ml'}, es:{name:'Guinness 0.0%', tag:'500ml'},
     }},
 ];
 
@@ -1495,8 +1783,8 @@ function detectOptions(d){
 }
 
 const MENU = DISH_DATA.map(d => ({
-  id: d.id, category: d.category, price: d.price, sizes: d.sizes, unit: d.unit,
-  allergens: d.allergens, img: `https://picsum.photos/seed/${d.id}-dish/640/480`,
+  id: d.id, category: d.category, sub: d.sub, price: d.price, sizes: d.sizes, unit: d.unit,
+  allergens: d.allergens, img: d.img || `https://picsum.photos/seed/${d.id}-dish/640/480`,
   spicy: detectSpicy(d), options: detectOptions(d),
 }));
 LANG_ORDER.forEach(lang => {
@@ -1809,7 +2097,8 @@ function handlePlaceOrderClick(){
 }
 
 function openUpsell(){
-  const pool = MENU.filter(d => d.category === 'drinks' || d.category === 'dessert');
+  const casualDrinkSubs = new Set(['softDrink','juice','beer']);
+  const pool = MENU.filter(d => (d.category === 'drinks' && casualDrinkSubs.has(d.sub)) || d.category === 'dessert');
   state.upsellItems = shuffle(pool.map(d => d.id)).slice(0, 4);
   state.upsellSelected = {};
   state.upsellOpen = true;
@@ -2017,11 +2306,15 @@ function menuHTML(){
   const activeCat = state.activeCategory || 'all';
   const filteredMenu = activeCat === 'all' ? MENU : MENU.filter(d=>d.category===activeCat);
 
+  let lastSub = null;
   const dishesHTML = filteredMenu.map(d=>{
     const it = getItem(d.id);
     const name = tDish(d.id,'name');
     const tag = tDish(d.id,'tag');
+    const groupHeaderHTML = (d.sub && d.sub !== lastSub) ? `<div class="dish-group-header">${tSubGroup(d.sub)}</div>` : '';
+    lastSub = d.sub || lastSub;
     return `
+      ${groupHeaderHTML}
       <div class="dish-card">
         <div class="dish-photo-wrap">
           <img class="dish-photo" src="${d.img}" alt="${name}" loading="lazy" decoding="async" onerror="this.style.display='none'">
