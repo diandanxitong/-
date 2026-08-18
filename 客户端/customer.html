@@ -668,6 +668,7 @@
 <body>
 <div id="app"></div>
 <div id="panda-nav"></div>
+<div id="allergen-popup-root"></div>
 
 <script src="https://www.gstatic.com/firebasejs/12.17.1/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/12.17.1/firebase-firestore-compat.js"></script>
@@ -1859,7 +1860,6 @@ let state = {
   myOrderLoading: false,
   pandaMenuOpen: false,
   allergenInfoOpen: false,
-  allergenPopup: null,   // { code, left, top } for the per-chip explanation bubble
   orderNickname: '',
   orderPartySize: 2,
   upsellOpen: false,
@@ -2058,11 +2058,26 @@ function toggleAllergenInfo(){
   render();
 }
 
+let allergenPopupTimer = null;
+
+function closeAllergenPopup(){
+  clearTimeout(allergenPopupTimer);
+  allergenPopupTimer = null;
+  document.getElementById('allergen-popup-root').innerHTML = '';
+}
+
 function showAllergenPopup(event, code){
   event.stopPropagation();
+  clearTimeout(allergenPopupTimer);
   const rect = event.currentTarget.getBoundingClientRect();
-  state.allergenPopup = { code, left: rect.left + rect.width / 2, top: rect.top };
-  render();
+  const left = rect.left + rect.width / 2;
+  const top = rect.top;
+  document.getElementById('allergen-popup-root').innerHTML = `
+    <div class="allergen-popup" style="left:${left}px;top:${top}px;">
+      <span class="allergen-popup-code">${code}</span>
+      <span>${tAllergen(code)}</span>
+    </div>`;
+  allergenPopupTimer = setTimeout(closeAllergenPopup, 750);
 }
 
 async function goToMyOrder(){
@@ -2344,19 +2359,7 @@ function allergenChipsHTML(codes){
     <p class="allergen-tap-hint">${t('allergenTapHint')}</p>`;
 }
 
-function allergenPopupHTML(){
-  const p = state.allergenPopup;
-  if(!p) return '';
-  return `
-    <div class="allergen-popup" style="left:${p.left}px;top:${p.top}px;">
-      <span class="allergen-popup-code">${p.code}</span>
-      <span>${tAllergen(p.code)}</span>
-    </div>`;
-}
-
-document.addEventListener('click', ()=>{
-  if(state.allergenPopup){ state.allergenPopup = null; render(); }
-});
+document.addEventListener('click', closeAllergenPopup);
 
 function allergenModalHTML(){
   if(!state.allergenInfoOpen) return '';
@@ -2483,7 +2486,6 @@ function menuHTML(){
       </div>
     </div>
     ${allergenModalHTML()}
-    ${allergenPopupHTML()}
     <div class="bottom-bar">
       <div class="action-pill-wrap">
         <div class="action-pill">
