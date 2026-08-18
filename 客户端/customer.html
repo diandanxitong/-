@@ -225,7 +225,7 @@
   .allergen-row .allergen-chip:hover, .allergen-row .allergen-chip:active{
     border-color:var(--gold);color:var(--gold);background:rgba(232,162,61,.1);
   }
-  .allergen-popup-overlay{position:fixed;inset:0;z-index:74;background:none;border:none;padding:0;margin:0;cursor:default;}
+  .allergen-tap-hint{font-size:10.5px;color:var(--text-muted);margin-top:5px;}
   .allergen-popup{
     position:fixed;z-index:75;transform:translate(-50%,-100%) translateY(-10px);
     max-width:min(78vw,260px);
@@ -710,7 +710,7 @@ const I18N = {
     emptyCart:"购物车是空的，去菜单选几道菜吧～",
     orderFailed:"下单失败，请重试一次，或直接告诉服务员～",
     languageLabel:"语言", closeMenu:"关闭菜单", decreaseQty:"减少数量", increaseQty:"增加数量",
-    allergensBtn:"过敏原", allergensModalTitle:"过敏原说明", totalLabel:"合计", perPersonSuffix:" /人",
+    allergensBtn:"过敏原", allergensModalTitle:"过敏原说明", allergenTapHint:"点击查看过敏原", totalLabel:"合计", perPersonSuffix:" /人",
     orderReviewTitle:"确认订单", nicknamePlaceholder:"请输入你的昵称，例如：JOHN", partySizeLabel:"请选择您的就餐人数",
     upsellTitle:"忘了点什么？", addToOrderBtn:"加入到当前订单", laterBtn:"以后再说",
     categories:{ all:"全部", appetizers:"前菜", dumplings:"饺子", soup:"汤", chefSpecial:"厨师推荐", vegetables:"蔬菜", riceNoodles:"饭/面类", dessert:"甜品", drinks:"酒水" },
@@ -732,7 +732,7 @@ const I18N = {
     emptyCart:"Your cart is empty — pick some dishes from the menu~",
     orderFailed:"Order failed, please try again or let staff know~",
     languageLabel:"Language", closeMenu:"Close menu", decreaseQty:"Decrease quantity", increaseQty:"Increase quantity",
-    allergensBtn:"Allergens", allergensModalTitle:"Allergen Guide", totalLabel:"Total", perPersonSuffix:" / person",
+    allergensBtn:"Allergens", allergensModalTitle:"Allergen Guide", allergenTapHint:"Tap to view allergen", totalLabel:"Total", perPersonSuffix:" / person",
     orderReviewTitle:"Confirm Order", nicknamePlaceholder:"Enter your nickname, e.g. JOHN", partySizeLabel:"Select your party size",
     upsellTitle:"Forgot Something?", addToOrderBtn:"Add to Order", laterBtn:"Later",
     categories:{ all:"All", appetizers:"Appetizers", dumplings:"Dumplings", soup:"Soup", chefSpecial:"Chef's Specials", vegetables:"Vegetables", riceNoodles:"Rice & Noodles", dessert:"Dessert", drinks:"Drinks" },
@@ -754,7 +754,7 @@ const I18N = {
     emptyCart:"Il carrello è vuoto — scegli qualche piatto dal menu~",
     orderFailed:"Ordine non riuscito, riprova o avvisa lo staff~",
     languageLabel:"Lingua", closeMenu:"Chiudi menu", decreaseQty:"Diminuisci quantità", increaseQty:"Aumenta quantità",
-    allergensBtn:"Allergeni", allergensModalTitle:"Guida agli Allergeni", totalLabel:"Totale", perPersonSuffix:" / persona",
+    allergensBtn:"Allergeni", allergensModalTitle:"Guida agli Allergeni", allergenTapHint:"Tocca per vedere l'allergene", totalLabel:"Totale", perPersonSuffix:" / persona",
     orderReviewTitle:"Conferma Ordine", nicknamePlaceholder:"Inserisci il tuo nome, es. JOHN", partySizeLabel:"Seleziona il numero di persone",
     upsellTitle:"Hai Dimenticato Qualcosa?", addToOrderBtn:"Aggiungi all'Ordine", laterBtn:"Più Tardi",
     categories:{ all:"Tutti", appetizers:"Antipasti", dumplings:"Ravioli", soup:"Zuppe", chefSpecial:"Specialità dello Chef", vegetables:"Verdure", riceNoodles:"Riso e Noodles", dessert:"Dessert", drinks:"Bevande" },
@@ -776,7 +776,7 @@ const I18N = {
     emptyCart:"Votre panier est vide — choisissez des plats dans le menu~",
     orderFailed:"Échec de la commande, veuillez réessayer ou prévenir le personnel~",
     languageLabel:"Langue", closeMenu:"Fermer le menu", decreaseQty:"Diminuer la quantité", increaseQty:"Augmenter la quantité",
-    allergensBtn:"Allergènes", allergensModalTitle:"Guide des Allergènes", totalLabel:"Total", perPersonSuffix:" / personne",
+    allergensBtn:"Allergènes", allergensModalTitle:"Guide des Allergènes", allergenTapHint:"Touchez pour voir l'allergène", totalLabel:"Total", perPersonSuffix:" / personne",
     orderReviewTitle:"Confirmer la Commande", nicknamePlaceholder:"Entrez votre surnom, ex. JOHN", partySizeLabel:"Sélectionnez le nombre de convives",
     upsellTitle:"Vous Avez Oublié Quelque Chose ?", addToOrderBtn:"Ajouter à la Commande", laterBtn:"Plus Tard",
     categories:{ all:"Tous", appetizers:"Entrées", dumplings:"Raviolis", soup:"Soupes", chefSpecial:"Spécialités du Chef", vegetables:"Légumes", riceNoodles:"Riz et Nouilles", dessert:"Dessert", drinks:"Boissons" },
@@ -798,7 +798,7 @@ const I18N = {
     emptyCart:"Tu carrito está vacío — elige algunos platos del menú~",
     orderFailed:"Error al pedir, inténtalo de nuevo o avisa al personal~",
     languageLabel:"Idioma", closeMenu:"Cerrar menú", decreaseQty:"Disminuir cantidad", increaseQty:"Aumentar cantidad",
-    allergensBtn:"Alérgenos", allergensModalTitle:"Guía de Alérgenos", totalLabel:"Total", perPersonSuffix:" / persona",
+    allergensBtn:"Alérgenos", allergensModalTitle:"Guía de Alérgenos", allergenTapHint:"Toca para ver el alérgeno", totalLabel:"Total", perPersonSuffix:" / persona",
     orderReviewTitle:"Confirmar Pedido", nicknamePlaceholder:"Introduce tu apodo, ej. JOHN", partySizeLabel:"Selecciona tu número de comensales",
     upsellTitle:"¿Olvidaste Algo?", addToOrderBtn:"Añadir al Pedido", laterBtn:"Más Tarde",
     categories:{ all:"Todos", appetizers:"Entrantes", dumplings:"Empanadillas", soup:"Sopas", chefSpecial:"Especialidades del Chef", vegetables:"Verduras", riceNoodles:"Arroz y Fideos", dessert:"Postres", drinks:"Bebidas" },
@@ -2065,11 +2065,6 @@ function showAllergenPopup(event, code){
   render();
 }
 
-function closeAllergenPopup(){
-  state.allergenPopup = null;
-  render();
-}
-
 async function goToMyOrder(){
   state.pandaMenuOpen = false;
   if(state.screen !== 'myOrder') screenHistory.push(state.screen);
@@ -2344,19 +2339,24 @@ function optionsRowHTML(d, it){
 
 function allergenChipsHTML(codes){
   if(!codes || codes.length===0) return '';
-  return `<div class="allergen-row">${codes.map(c=>`<button class="allergen-chip" onclick="showAllergenPopup(event,'${c}')">${c}</button>`).join('')}</div>`;
+  return `
+    <div class="allergen-row">${codes.map(c=>`<button class="allergen-chip" onclick="showAllergenPopup(event,'${c}')">${c}</button>`).join('')}</div>
+    <p class="allergen-tap-hint">${t('allergenTapHint')}</p>`;
 }
 
 function allergenPopupHTML(){
   const p = state.allergenPopup;
   if(!p) return '';
   return `
-    <button class="allergen-popup-overlay" onclick="closeAllergenPopup()" aria-label="${t('closeMenu')}"></button>
     <div class="allergen-popup" style="left:${p.left}px;top:${p.top}px;">
       <span class="allergen-popup-code">${p.code}</span>
       <span>${tAllergen(p.code)}</span>
     </div>`;
 }
+
+document.addEventListener('click', ()=>{
+  if(state.allergenPopup){ state.allergenPopup = null; render(); }
+});
 
 function allergenModalHTML(){
   if(!state.allergenInfoOpen) return '';
