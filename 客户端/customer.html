@@ -2062,20 +2062,20 @@ function changeQty(id, delta){
   const cur = getItem(id);
   const qty = Math.max(0, Math.min(20, cur.qty + delta));
   state.items[id] = { qty, spice: cur.spice, size: cur.size, excludes: cur.excludes };
-  render();
+  updateItemUI(id);
 }
 
 function setSpice(id, level){
   const cur = getItem(id);
   if(cur.qty <= 0) return;
   state.items[id] = { qty: cur.qty, spice: level, size: cur.size, excludes: cur.excludes };
-  render();
+  updateItemUI(id);
 }
 
 function setSize(id, key){
   const cur = getItem(id);
   state.items[id] = { qty: cur.qty, spice: cur.spice, size: key, excludes: cur.excludes };
-  render();
+  updateItemUI(id);
 }
 
 function toggleExclude(id, key){
@@ -2083,7 +2083,46 @@ function toggleExclude(id, key){
   if(cur.qty <= 0) return;
   const excludes = Object.assign({}, cur.excludes, { [key]: !cur.excludes[key] });
   state.items[id] = { qty: cur.qty, spice: cur.spice, size: cur.size, excludes };
-  render();
+  updateItemUI(id);
+}
+
+// Patches just the affected dish card (+ cart badge/panel) instead of the
+// full render(), so tapping qty/spice/size/exclude on the menu doesn't
+// rebuild every dish photo on screen and flash the page.
+function updateItemUI(id){
+  if(state.screen !== 'menu'){ render(); return; }
+
+  const card = document.querySelector(`.dish-card[data-id="${id}"]`);
+  if(card){
+    const wrap = document.createElement('div');
+    wrap.innerHTML = dishCardHTML(MENU_BY_ID[id]).trim();
+    card.replaceWith(wrap.firstElementChild);
+  }
+
+  if(state.cartPopupOpen){
+    const body = document.getElementById('cart-side-body');
+    if(body) body.innerHTML = cartSideBodyHTML();
+  }
+
+  const count = totalCount();
+  const fab = document.querySelector('.cart-side-fab');
+  if(fab){
+    let badge = fab.querySelector('.cart-side-fab-badge');
+    if(count > 0){
+      if(!badge){
+        badge = document.createElement('span');
+        badge.className = 'cart-side-fab-badge';
+        fab.appendChild(badge);
+      }
+      badge.textContent = count;
+    }else if(badge){
+      badge.remove();
+    }
+  }
+  const cartBtn = document.querySelector('.cart-btn');
+  const orderBtn = document.querySelector('.order-now-btn');
+  if(cartBtn) cartBtn.disabled = count === 0;
+  if(orderBtn) orderBtn.disabled = count === 0;
 }
 
 function setCategory(cat){
@@ -2458,20 +2497,12 @@ function chefCarouselHTML(){
     </div>`;
 }
 
-function menuHTML(){
-  const activeCat = state.activeCategory || 'all';
-  const filteredMenu = activeCat === 'all' ? MENU : MENU.filter(d=>d.category===activeCat);
-
-  let lastSub = null;
-  const dishesHTML = filteredMenu.map(d=>{
-    const it = getItem(d.id);
-    const name = tDish(d.id,'name');
-    const tag = tDish(d.id,'tag');
-    const groupHeaderHTML = (d.sub && d.sub !== lastSub) ? `<div class="dish-group-header">${tSubGroup(d.sub)}</div>` : '';
-    lastSub = d.sub || lastSub;
-    return `
-      ${groupHeaderHTML}
-      <div class="dish-card">
+function dishCardHTML(d){
+  const it = getItem(d.id);
+  const name = tDish(d.id,'name');
+  const tag = tDish(d.id,'tag');
+  return `
+      <div class="dish-card" data-id="${d.id}">
         <div class="dish-photo-wrap">
           <img class="dish-photo" src="${d.img}" alt="${name}" loading="lazy" decoding="async" onerror="this.style.display='none'">
         </div>
@@ -2500,6 +2531,17 @@ function menuHTML(){
           ${it.qty>0 && d.options.length>0 ? optionsRowHTML(d, it) : ''}
         </div>
       </div>`;
+}
+
+function menuHTML(){
+  const activeCat = state.activeCategory || 'all';
+  const filteredMenu = activeCat === 'all' ? MENU : MENU.filter(d=>d.category===activeCat);
+
+  let lastSub = null;
+  const dishesHTML = filteredMenu.map(d=>{
+    const groupHeaderHTML = (d.sub && d.sub !== lastSub) ? `<div class="dish-group-header">${tSubGroup(d.sub)}</div>` : '';
+    lastSub = d.sub || lastSub;
+    return groupHeaderHTML + dishCardHTML(d);
   }).join('');
 
   const categoryNavHTML = CATEGORIES.map(cat=>`
@@ -2637,10 +2679,16 @@ function cartItemsForCheckout(){
     .filter(Boolean);
 }
 
-function cartPopupHTML(){
-  if(!state.cartPopupOpen) return '';
+function cartSideBodyHTML(){
   const items = cartItemsForCheckout();
   const total = items.reduce((s,it)=>s+it.price*it.qty,0);
+  return items.length === 0
+    ? `<p class="hint" style="margin:0;">${t('emptyCart')}</p>`
+    : editableOrderSummaryHTML(items, total);
+}
+
+function cartPopupHTML(){
+  if(!state.cartPopupOpen) return '';
   return `
     <button class="cart-side-overlay" onclick="toggleCartPopup()" aria-label="${t('closeMenu')}"></button>
     <div class="cart-side-panel">
@@ -2648,10 +2696,7 @@ function cartPopupHTML(){
         <p class="cart-side-title">${t('cart')}</p>
         <button class="cart-side-close" onclick="toggleCartPopup()" aria-label="${t('closeMenu')}">✕</button>
       </div>
-      ${items.length === 0
-        ? `<p class="hint" style="margin:0;">${t('emptyCart')}</p>`
-        : editableOrderSummaryHTML(items, total)
-      }
+      <div id="cart-side-body">${cartSideBodyHTML()}</div>
     </div>`;
 }
 
