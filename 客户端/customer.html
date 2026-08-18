@@ -140,6 +140,32 @@
   .allergen-modal{padding-bottom:8px;}
   .allergen-grid{padding:4px 18px 16px;display:grid;grid-template-columns:1fr 1fr;gap:9px 14px;}
   .allergen-grid-item{display:flex;align-items:center;gap:8px;font-size:12px;color:var(--text);}
+  /* ---------- chef's-special carousel ---------- */
+  .chef-carousel{padding:18px 0 6px;}
+  .chef-carousel-label{padding:0 24px 10px;}
+  .chef-carousel-viewport{
+    width:100%;overflow:hidden;
+    -webkit-mask-image:linear-gradient(90deg, transparent 0, #000 24px, #000 calc(100% - 24px), transparent 100%);
+    mask-image:linear-gradient(90deg, transparent 0, #000 24px, #000 calc(100% - 24px), transparent 100%);
+  }
+  .chef-carousel-track{display:flex;gap:12px;width:max-content;}
+  @media (prefers-reduced-motion:no-preference){
+    .chef-carousel-track{animation:chef-scroll 60s linear infinite;}
+    .chef-carousel-track:hover{animation-play-state:paused;}
+  }
+  @keyframes chef-scroll{from{transform:translateX(0);}to{transform:translateX(-50%);}}
+  .chef-slide{
+    position:relative;flex:0 0 auto;width:clamp(150px,44vw,204px);aspect-ratio:4/3;
+    border-radius:14px;overflow:hidden;border:1px solid var(--card-line);
+    background:var(--card);padding:0;cursor:pointer;font-family:inherit;display:block;
+  }
+  .chef-slide-photo{position:relative;width:100%;height:100%;object-fit:cover;display:block;}
+  .chef-slide-caption{
+    position:absolute;left:0;right:0;bottom:0;padding:20px 10px 8px;
+    background:linear-gradient(0deg, rgba(0,0,0,.72) 0%, rgba(0,0,0,0) 100%);
+    color:#fff;font-size:12px;font-weight:800;text-align:left;
+    overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
+  }
   .menu-body{display:flex;align-items:flex-start;}
   .category-nav{
     width:84px;flex-shrink:0;display:flex;flex-direction:column;
@@ -163,7 +189,7 @@
   .cat-btn.active::before{opacity:1;}
   .cat-btn:hover{color:var(--text);}
   .dish-panel{flex:1;min-width:0;padding-right:16px;}
-  .dish-list{padding:0 0 0 16px;display:flex;flex-direction:column;gap:18px;}
+  .dish-list{padding:0 0 0 16px;display:flex;flex-direction:column;gap:14px;}
   .dish-group-header{
     font-size:13px;font-weight:800;letter-spacing:.04em;color:var(--gold);
     padding:2px 2px 0;margin-top:2px;
@@ -180,19 +206,19 @@
     background:linear-gradient(180deg,var(--cinnabar),var(--gold));
   }
   .dish-photo-wrap{
-    position:relative;width:100%;aspect-ratio:4/3;overflow:hidden;
+    position:relative;width:100%;aspect-ratio:3/2;overflow:hidden;
     background:linear-gradient(160deg,var(--bg-soft) 0%,var(--card) 100%);
     display:flex;align-items:center;justify-content:center;
   }
   .dish-photo-wrap::before{
-    content:"🍽";font-size:42px;opacity:.28;position:absolute;
+    content:"🍽";font-size:36px;opacity:.28;position:absolute;
   }
   .dish-photo{position:relative;z-index:1;width:100%;height:100%;object-fit:cover;display:block;}
-  .dish-body{padding:16px 18px 16px 21px;}
+  .dish-body{padding:13px 16px 13px 18px;}
   .dish-title-row{display:flex;justify-content:space-between;align-items:flex-start;gap:10px;}
-  .dish-name{font-size:16px;font-weight:900;letter-spacing:.01em;line-height:1.32;color:var(--text);}
+  .dish-name{font-size:14.5px;font-weight:900;letter-spacing:.01em;line-height:1.32;color:var(--text);}
   .dish-price{
-    flex-shrink:0;font-family:'Archivo Black',sans-serif;font-size:14px;color:var(--gold);
+    flex-shrink:0;font-family:'Archivo Black',sans-serif;font-size:13px;color:var(--gold);
     white-space:nowrap;padding-top:2px;
   }
   .dish-body .tag{font-size:12.5px;color:var(--text-muted);margin-top:6px;line-height:1.55;overflow-wrap:break-word;}
@@ -235,6 +261,8 @@
     width:30px;text-align:center;font-weight:700;font-size:16px;
     font-family:'Archivo Black',sans-serif;
   }
+  .dish-card .stepper button{width:28px;height:28px;font-size:16px;}
+  .dish-card .stepper .qty{width:26px;font-size:14px;}
   .spice-row{display:flex;gap:6px;margin-top:14px;padding-top:14px;border-top:1px dashed var(--card-line);}
   .spice-pill{
     flex:1;min-width:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;
@@ -2306,6 +2334,25 @@ function allergenModalHTML(){
     </div>`;
 }
 
+function chefCarouselHTML(){
+  const chefItems = MENU.filter(d=>d.category==='chefSpecial');
+  if(chefItems.length===0) return '';
+  const slidesHTML = chefItems.map(d=>{
+    const name = tDish(d.id,'name');
+    return `<button class="chef-slide" onclick="setCategory('chefSpecial')">
+      <img class="chef-slide-photo" src="${d.img}" alt="${name}" loading="lazy" decoding="async" onerror="this.style.display='none'">
+      <span class="chef-slide-caption">${name}</span>
+    </button>`;
+  }).join('');
+  return `
+    <div class="chef-carousel">
+      <p class="eyebrow chef-carousel-label">${tCat('chefSpecial')}</p>
+      <div class="chef-carousel-viewport">
+        <div class="chef-carousel-track">${slidesHTML}${slidesHTML}</div>
+      </div>
+    </div>`;
+}
+
 function menuHTML(){
   const activeCat = state.activeCategory || 'all';
   const filteredMenu = activeCat === 'all' ? MENU : MENU.filter(d=>d.category===activeCat);
@@ -2365,6 +2412,7 @@ function menuHTML(){
         ${!state.lockedByUrl ? `<button class="change-table" onclick="changeTable()">${t('changeTable')}</button>` : ''}
       </div>
     </header>
+    ${chefCarouselHTML()}
     <div class="menu-title-row">
       <p class="menu-title">${t('menuTitle')}</p>
       <button class="allergen-info-btn" onclick="toggleAllergenInfo()">ⓘ ${t('allergensBtn')}</button>
