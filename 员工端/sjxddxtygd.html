@@ -257,9 +257,10 @@ function customerBlockHTML(nGroup){
 function cardHTML(group){
   const { label, level } = elapsedInfo(group.createdAt);
   const nicknameGroups = groupByNickname(group.batch);
-  const anyPending = group.batch.some(o => o.status !== 'confirmed');
+  const pendingKeys = group.batch.filter(o => o.status !== 'confirmed').map(o => o.key);
+  const anyPending = pendingKeys.length > 0;
   const actionBtn = anyPending
-    ? `<button class="confirm-btn" data-keys="${group.keys.join(',')}" onclick="confirmToKitchen(this.dataset.keys.split(','))">🍳 确认，送入厨房</button>`
+    ? `<button class="confirm-btn" data-keys="${pendingKeys.join(',')}" onclick="confirmToKitchen(this.dataset.keys.split(','))">🍳 确认，送入厨房</button>`
     : `<button class="done-btn" data-keys="${group.keys.join(',')}" onclick="archiveOrder(this.dataset.keys.split(','))">✓ 已处理，移出看板</button>`;
   return `
     <div class="order-card ${level}">
