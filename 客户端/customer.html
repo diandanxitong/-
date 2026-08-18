@@ -144,7 +144,11 @@
   .category-nav{
     width:84px;flex-shrink:0;display:flex;flex-direction:column;
     border-right:1px solid var(--card-line);
+    position:sticky;top:0;align-self:flex-start;
+    max-height:100vh;overflow-y:auto;
+    scrollbar-width:none;
   }
+  .category-nav::-webkit-scrollbar{display:none;}
   .cat-btn{
     position:relative;
     background:none;border:none;color:var(--text-muted);
