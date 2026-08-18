@@ -308,7 +308,7 @@
   .submit-btn:not(:disabled):active{background:var(--ember-dark);}
 
   /* one unified pill spanning most of the screen width, slim, split unevenly into two actions */
-  .action-pill-wrap{width:84%;max-width:380px;min-width:280px;margin:0 auto;}
+  .action-pill-wrap{position:relative;width:84%;max-width:380px;min-width:280px;margin:0 auto;}
   .action-pill{
     position:relative;display:flex;align-items:stretch;
     border-radius:999px;overflow:hidden;
@@ -338,6 +338,43 @@
   .order-now-btn:not(:disabled):active{background:var(--ember-dark);}
   .cart-btn-title, .order-now-title{font-size:16px;font-weight:900;letter-spacing:.02em;overflow-wrap:break-word;}
   .cart-btn-sub, .order-now-sub{font-size:10px;font-weight:500;opacity:.85;overflow-wrap:break-word;}
+
+  /* ---------- floating cart icon + quick-cart popup ---------- */
+  .cart-fab{
+    position:absolute;left:60%;top:0;transform:translate(-50%,-50%);z-index:3;
+    width:46px;height:46px;border-radius:50%;
+    background:linear-gradient(160deg,var(--gold) 0%,var(--ember-dark) 100%);
+    border:2px solid var(--bg);color:#fff;font-size:20px;cursor:pointer;
+    display:flex;align-items:center;justify-content:center;
+    box-shadow:0 8px 18px rgba(0,0,0,.4);
+  }
+  .cart-fab-badge{
+    position:absolute;top:-4px;right:-4px;min-width:18px;height:18px;padding:0 4px;
+    border-radius:999px;background:var(--cinnabar);color:#fff;
+    font-size:10px;font-weight:800;display:flex;align-items:center;justify-content:center;
+    border:1.5px solid var(--bg);
+  }
+  .cart-popup-overlay{position:fixed;inset:0;z-index:70;background:rgba(0,0,0,.45);border:none;padding:0;margin:0;cursor:default;}
+  .cart-popup{
+    position:fixed;left:50%;bottom:114px;transform:translateX(-50%);transform-origin:bottom center;
+    animation:cart-popup-in .28s cubic-bezier(.2,1,.3,1);
+    z-index:71;width:calc(100% - 48px);max-width:420px;max-height:56vh;overflow-y:auto;
+    background:var(--card);border:1px solid var(--gold-line);border-radius:18px;
+    box-shadow:0 20px 50px rgba(0,0,0,.6);padding:18px 18px 14px;
+  }
+  @keyframes cart-popup-in{
+    from{opacity:0;transform:translateX(-50%) translateY(16px) scale(.92);}
+    to{opacity:1;transform:translateX(-50%) translateY(0) scale(1);}
+  }
+  .cart-popup-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;}
+  .cart-popup-title{font-family:var(--brush);font-weight:400;font-size:20px;color:var(--gold);}
+  .cart-popup-close{
+    flex-shrink:0;background:none;border:1px solid var(--card-line);color:var(--text-muted);
+    width:26px;height:26px;border-radius:50%;font-size:12px;cursor:pointer;
+    display:flex;align-items:center;justify-content:center;
+  }
+  .cart-popup-close:hover{color:var(--gold);border-color:var(--gold-line);}
+  .cart-popup .order-summary{margin:0;}
 
   /* ---------- add-to-cart dumpling/hotpot animation ---------- */
   .hotpot-toast{
@@ -1860,6 +1897,7 @@ let state = {
   myOrderLoading: false,
   pandaMenuOpen: false,
   allergenInfoOpen: false,
+  cartPopupOpen: false,
   orderNickname: '',
   orderPartySize: 2,
   upsellOpen: false,
@@ -2055,6 +2093,11 @@ function setCategory(cat){
 
 function toggleAllergenInfo(){
   state.allergenInfoOpen = !state.allergenInfoOpen;
+  render();
+}
+
+function toggleCartPopup(){
+  state.cartPopupOpen = !state.cartPopupOpen;
   render();
 }
 
@@ -2488,6 +2531,10 @@ function menuHTML(){
     ${allergenModalHTML()}
     <div class="bottom-bar">
       <div class="action-pill-wrap">
+        <button class="cart-fab" onclick="toggleCartPopup()" aria-label="${t('cart')}">
+          🛒
+          ${count > 0 ? `<span class="cart-fab-badge">${count}</span>` : ''}
+        </button>
         <div class="action-pill">
           <button class="cart-btn" onclick="celebrateAddToCart()" ${count===0?'disabled':''}>
             <span class="cart-btn-title">${t('addToCart')}</span>
@@ -2499,7 +2546,8 @@ function menuHTML(){
           </button>
         </div>
       </div>
-    </div>`;
+    </div>
+    ${cartPopupHTML()}`;
 }
 
 function orderLineHTML({name, qty, spice, price, extra}){
@@ -2515,6 +2563,28 @@ function orderLineHTML({name, qty, spice, price, extra}){
 }
 function totalRowHTML(total){
   return `<li class="order-total-line"><span>${t('totalLabel')}</span><span>${formatPrice(total)}</span></li>`;
+}
+function editableOrderSummaryHTML(items, total){
+  return `<ul class="order-summary">
+    ${items.map(it=>`
+      <li class="order-line">
+        <div class="order-line-top">
+          <span class="order-line-name">${it.name}</span>
+          <span class="order-line-price">${formatPrice(it.price*it.qty)}</span>
+        </div>
+        <div class="order-line-bottom">
+          ${it.spicy ? `<span class="spice-tag">${displaySpice(it.spice)}</span>` : ''}
+          ${it.sizeLabel ? `<span class="spice-tag">${it.sizeLabel}</span>` : ''}
+          ${it.excludeTags}
+          <span class="stepper">
+            <button onclick="changeQty('${it.id}',-1)" aria-label="${t('decreaseQty')}">−</button>
+            <span class="qty">${it.qty}</span>
+            <button onclick="changeQty('${it.id}',1)" aria-label="${t('increaseQty')}">+</button>
+          </span>
+        </div>
+      </li>`).join('')}
+    ${totalRowHTML(total)}
+  </ul>`;
 }
 function excludesTagsHTML(excludes){
   if(!excludes || excludes.length === 0) return '';
@@ -2567,6 +2637,24 @@ function cartItemsForCheckout(){
     .filter(Boolean);
 }
 
+function cartPopupHTML(){
+  if(!state.cartPopupOpen) return '';
+  const items = cartItemsForCheckout();
+  const total = items.reduce((s,it)=>s+it.price*it.qty,0);
+  return `
+    <button class="cart-popup-overlay" onclick="toggleCartPopup()" aria-label="${t('closeMenu')}"></button>
+    <div class="cart-popup">
+      <div class="cart-popup-head">
+        <p class="cart-popup-title">${t('cart')}</p>
+        <button class="cart-popup-close" onclick="toggleCartPopup()" aria-label="${t('closeMenu')}">✕</button>
+      </div>
+      ${items.length === 0
+        ? `<p class="hint" style="margin:0;">${t('emptyCart')}</p>`
+        : editableOrderSummaryHTML(items, total)
+      }
+    </div>`;
+}
+
 function cartHTML(){
   const items = cartItemsForCheckout();
   const count = totalCount();
@@ -2579,26 +2667,7 @@ function cartHTML(){
       <h2 style="margin-top:6px;">${t('cart')}</h2>
       ${items.length === 0
         ? `<p class="hint">${t('emptyCart')}</p>`
-        : `<ul class="order-summary">
-            ${items.map(it=>`
-              <li class="order-line">
-                <div class="order-line-top">
-                  <span class="order-line-name">${it.name}</span>
-                  <span class="order-line-price">${formatPrice(it.price*it.qty)}</span>
-                </div>
-                <div class="order-line-bottom">
-                  ${it.spicy ? `<span class="spice-tag">${displaySpice(it.spice)}</span>` : ''}
-                  ${it.sizeLabel ? `<span class="spice-tag">${it.sizeLabel}</span>` : ''}
-                  ${it.excludeTags}
-                  <span class="stepper">
-                    <button onclick="changeQty('${it.id}',-1)" aria-label="${t('decreaseQty')}">−</button>
-                    <span class="qty">${it.qty}</span>
-                    <button onclick="changeQty('${it.id}',1)" aria-label="${t('increaseQty')}">+</button>
-                  </span>
-                </div>
-              </li>`).join('')}
-            ${totalRowHTML(total)}
-          </ul>`
+        : editableOrderSummaryHTML(items, total)
       }
       <button class="ghost-btn" onclick="goBack()">${t('backToMenu')}</button>
     </div>
@@ -2624,26 +2693,7 @@ function orderReviewHTML(){
       <h2 style="margin-top:6px;">${t('orderReviewTitle')}</h2>
       ${items.length === 0
         ? `<p class="hint">${t('emptyCart')}</p>`
-        : `<ul class="order-summary">
-            ${items.map(it=>`
-              <li class="order-line">
-                <div class="order-line-top">
-                  <span class="order-line-name">${it.name}</span>
-                  <span class="order-line-price">${formatPrice(it.price*it.qty)}</span>
-                </div>
-                <div class="order-line-bottom">
-                  ${it.spicy ? `<span class="spice-tag">${displaySpice(it.spice)}</span>` : ''}
-                  ${it.sizeLabel ? `<span class="spice-tag">${it.sizeLabel}</span>` : ''}
-                  ${it.excludeTags}
-                  <span class="stepper">
-                    <button onclick="changeQty('${it.id}',-1)" aria-label="${t('decreaseQty')}">−</button>
-                    <span class="qty">${it.qty}</span>
-                    <button onclick="changeQty('${it.id}',1)" aria-label="${t('increaseQty')}">+</button>
-                  </span>
-                </div>
-              </li>`).join('')}
-            ${totalRowHTML(total)}
-          </ul>`
+        : editableOrderSummaryHTML(items, total)
       }
 
       <div class="review-field">
