@@ -131,12 +131,16 @@
     font-size:26px;font-weight:400;color:var(--gold);
     font-family:var(--brush);letter-spacing:.04em;
   }
-  .allergen-info-btn{
-    flex-shrink:0;background:none;border:1px solid var(--gold-line);color:var(--gold);
-    font-size:11px;font-weight:700;padding:6px 12px;border-radius:20px;cursor:pointer;
+  .allergen-fab{
+    position:fixed;right:18px;bottom:124px;z-index:45;
+    display:flex;align-items:center;gap:6px;
+    background:var(--card);border:1px solid var(--gold-line);color:var(--gold);
+    font-size:12px;font-weight:700;padding:10px 16px;border-radius:999px;cursor:pointer;
     white-space:nowrap;font-family:inherit;
+    box-shadow:0 10px 24px rgba(0,0,0,.45);
   }
-  .allergen-info-btn:hover{background:rgba(232,162,61,.1);}
+  .allergen-fab:hover{background:rgba(232,162,61,.12);border-color:var(--gold);}
+  .allergen-fab .fab-icon{font-size:14px;line-height:1;}
   .allergen-modal{padding-bottom:8px;}
   .allergen-grid{padding:4px 18px 16px;display:grid;grid-template-columns:1fr 1fr;gap:9px 14px;}
   .allergen-grid-item{display:flex;align-items:center;gap:8px;font-size:12px;color:var(--text);}
@@ -2432,7 +2436,6 @@ function menuHTML(){
     ${chefCarouselHTML()}
     <div class="menu-title-row">
       <p class="menu-title">${t('menuTitle')}</p>
-      <button class="allergen-info-btn" onclick="toggleAllergenInfo()">ⓘ ${t('allergensBtn')}</button>
     </div>
     <div class="menu-body">
       <nav class="category-nav">${categoryNavHTML}</nav>
@@ -2440,6 +2443,9 @@ function menuHTML(){
         <div class="dish-list">${dishesHTML}</div>
       </div>
     </div>
+    <button class="allergen-fab" onclick="toggleAllergenInfo()" aria-label="${t('allergensBtn')}">
+      <span class="fab-icon">ⓘ</span>${t('allergensBtn')}
+    </button>
     ${allergenModalHTML()}
     <div class="bottom-bar">
       <div class="action-pill-wrap">
