@@ -39,8 +39,10 @@
     display:inline-flex;align-items:center;gap:6px;text-decoration:none;
     background:var(--card);border:1px solid var(--line);color:var(--text-muted);
     font-size:13px;font-weight:700;padding:8px 14px;border-radius:20px;
+    font-family:inherit;cursor:pointer;
   }
   .control-btn:hover{color:var(--text);border-color:var(--text-muted);}
+  .control-btn:disabled{color:#5FBE8A;border-color:#5FBE8A;cursor:default;opacity:.9;}
 
   header{display:flex;align-items:baseline;justify-content:space-between;margin-bottom:22px;flex-wrap:wrap;gap:10px;}
   header h1{font-family:'Archivo Black',sans-serif;font-size:22px;letter-spacing:.02em;}
@@ -164,6 +166,7 @@
 <header>
   <h1><span class="live-dot"></span>接单看板</h1>
   <div style="display:flex;align-items:center;gap:12px;">
+    <button class="control-btn" id="sound-toggle" onclick="unlockAudio()">🔊 开启提示音</button>
     <span class="status" id="status">加载中…</span>
     <span class="count-pill">待处理 <b id="count">0</b> 桌</span>
   </div>
@@ -189,6 +192,30 @@ const ordersRef = db.collection('orders');
 let orders = [];   // { key, table, items, createdAt, nickname, partySize, status }
 let loaded = false;
 
+// 提示音：顾客呼叫 / 顾客下单。浏览器要求先有一次用户交互才允许播放音频，
+// 所以需要员工手动点一下"开启提示音"，这里顺带做一次静音播放来解锁。
+const callSound = new Audio('提示音/顾客呼叫.mp3');
+const orderSound = new Audio('提示音/顾客下单.mp3');
+let audioUnlocked = false;
+
+function unlockAudio(){
+  if(audioUnlocked) return;
+  audioUnlocked = true;
+  [callSound, orderSound].forEach(a => {
+    a.muted = true;
+    a.play().then(()=>{ a.pause(); a.currentTime = 0; a.muted = false; }).catch(()=>{ a.muted = false; });
+  });
+  const btn = document.getElementById('sound-toggle');
+  if(btn){ btn.textContent = '🔔 提示音已开启'; btn.disabled = true; }
+}
+
+function playSound(audio){
+  try{
+    const clone = audio.cloneNode();
+    clone.play().catch(()=>{});
+  }catch(e){}
+}
+
 const SIZE_LABELS_ZH = { half:'半份', whole:'整份', large:'大份', small:'小份' };
 const OPTION_LABELS_ZH = { onion:'不要洋葱', scallion:'不要葱', ginger:'不要姜', cilantro:'不要香菜', meat:'不要肉' };
 
@@ -203,7 +230,20 @@ function elapsedInfo(ts){
   return { label, level };
 }
 
+let firstSnapshot = true;   // 首次快照会把已有订单全部标记为 "added"，不能当成新单播放提示音
+
 ordersRef.onSnapshot(snap => {
+  if(!firstSnapshot){
+    let hasNewCall = false, hasNewOrder = false;
+    snap.docChanges().forEach(change => {
+      if(change.type !== 'added') return;
+      if(change.doc.data().call) hasNewCall = true; else hasNewOrder = true;
+    });
+    if(hasNewCall) playSound(callSound);
+    if(hasNewOrder) playSound(orderSound);
+  }
+  firstSnapshot = false;
+
   const results = snap.docs.map(d => ({
     key: d.id, table: d.data().table, items: d.data().items, createdAt: d.data().createdAt,
     nickname: d.data().nickname || '', partySize: d.data().partySize || null,
