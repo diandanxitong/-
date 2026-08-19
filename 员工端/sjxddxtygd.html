@@ -47,6 +47,10 @@
     background:rgba(232,162,61,.16);border-color:var(--warn);color:var(--warn);font-weight:900;
   }
   .sold-out-entry-btn:hover{background:rgba(232,162,61,.26);color:var(--warn);border-color:var(--warn);}
+  .daily-report-entry-btn{
+    background:rgba(95,190,138,.16);border-color:#5FBE8A;color:#5FBE8A;font-weight:900;
+  }
+  .daily-report-entry-btn:hover{background:rgba(95,190,138,.26);color:#5FBE8A;border-color:#5FBE8A;}
 
   header{display:flex;align-items:baseline;justify-content:space-between;margin-bottom:22px;flex-wrap:wrap;gap:10px;}
   header h1{font-family:'Archivo Black',sans-serif;font-size:22px;letter-spacing:.02em;}
@@ -171,6 +175,7 @@
   <h1><span class="live-dot"></span>接单看板</h1>
   <div style="display:flex;align-items:center;gap:12px;">
     <a class="control-btn sold-out-entry-btn" href="gqcp.html">🚫 沽清菜品</a>
+    <a class="control-btn daily-report-entry-btn" href="jrpd.html">📊 今日盘点</a>
     <button class="control-btn" id="sound-toggle" onclick="unlockAudio()">🔊 开启提示音</button>
     <span class="status" id="status">加载中…</span>
     <span class="count-pill">待处理 <b id="count">0</b> 桌</span>
@@ -304,22 +309,60 @@ async function archiveOrder(keys){
 
 // “顾客已离开，移除看板”会误删还在用餐的桌，先弹窗二次确认
 let confirmKeys = null;
+let confirmTable = null;
 
-function confirmLeave(keys){
+function confirmLeave(keys, table){
   confirmKeys = keys;
+  confirmTable = table;
   renderConfirmModal();
 }
 
 function cancelLeave(){
   confirmKeys = null;
+  confirmTable = null;
   renderConfirmModal();
 }
 
 function confirmLeaveYes(){
   const keys = confirmKeys;
+  const table = confirmTable;
   confirmKeys = null;
+  confirmTable = null;
   renderConfirmModal();
+  // 先把这一桌的流水记进“今日盘点”，再删单——记账失败也不能卡住移除看板，
+  // 所以这里不等它，且内部自己吞掉错误
+  recordDailyCheckout(keys, table);
   archiveOrder(keys);
+}
+
+function todayKey(d){
+  d = d || new Date();
+  const pad = n => String(n).padStart(2,'0');
+  return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`;
+}
+
+// “今日盘点”流水：#001、#002……每天从 1 开始，靠 Firestore 事务原子地读计数器+1，
+// 避免多个员工同时结账时编号冲突或重复
+async function recordDailyCheckout(keys, table){
+  const batchOrders = orders.filter(o => keys.includes(o.key));
+  const items = [];
+  batchOrders.forEach(o => (o.items || []).forEach(it => {
+    items.push({ name: it.name, qty: it.qty, price: it.price || 0 });
+  }));
+  if(items.length === 0) return;
+  const revenue = items.reduce((s, it) => s + it.price * it.qty, 0);
+  const date = todayKey();
+  try{
+    await db.runTransaction(async tx => {
+      const counterRef = db.collection('counters').doc('dailyOrderSeq');
+      const snap = await tx.get(counterRef);
+      const prev = snap.exists ? snap.data() : null;
+      const seq = (prev && prev.date === date) ? prev.seq + 1 : 1;
+      tx.set(counterRef, { date, seq });
+      const recordRef = db.collection('dailyOrders').doc();
+      tx.set(recordRef, { seq, date, table, items, revenue, archivedAt: Date.now() });
+    });
+  }catch(e){ /* 记账失败就不记了，不阻塞移除看板；今日盘点里会少这一笔，需要人工核对 */ }
 }
 
 function renderConfirmModal(){
@@ -423,7 +466,7 @@ function cardHTML(group){
   const anyPending = pendingKeys.length > 0;
   const actionBtn = !hasRealContent ? '' : (anyPending
     ? `<button class="confirm-btn" data-keys="${pendingKeys.join(',')}" onclick="confirmToKitchen(this.dataset.keys.split(','))">🍳 确认，送入厨房</button>`
-    : `<button class="done-btn" data-keys="${realBatch.map(o=>o.key).join(',')}" onclick="confirmLeave(this.dataset.keys.split(','))">✓ 顾客已离开，移除看板</button>`);
+    : `<button class="done-btn" data-keys="${realBatch.map(o=>o.key).join(',')}" onclick="confirmLeave(this.dataset.keys.split(','), '${group.table}')">✓ 顾客已离开，移除看板</button>`);
   return `
     <div class="order-card ${level}">
       <div class="card-top">

@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex, nofollow">
+<title>今日盘点</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;700;900&family=Archivo+Black&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#121012;
+    --card:#1C191A;
+    --line:#332E2C;
+    --text:#F5F1EC;
+    --text-muted:#8E8883;
+    --warn:#E8A23D;
+    --urgent:#E3421F;
+    --ok:#5FBE8A;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{
+    background:var(--bg);color:var(--text);
+    font-family:'Noto Sans SC','PingFang SC','Microsoft YaHei',sans-serif;
+    min-height:100vh;padding:22px 26px 60px;
+  }
+  .top-nav{margin-bottom:16px;}
+  .control-btn{
+    display:inline-flex;align-items:center;gap:6px;text-decoration:none;
+    background:var(--card);border:1px solid var(--line);color:var(--text-muted);
+    font-size:13px;font-weight:700;padding:8px 14px;border-radius:20px;
+    font-family:inherit;cursor:pointer;
+  }
+  .control-btn:hover{color:var(--text);border-color:var(--text-muted);}
+
+  header{display:flex;align-items:center;justify-content:space-between;margin-bottom:18px;flex-wrap:wrap;gap:14px;}
+  header h1{font-family:'Archivo Black',sans-serif;font-size:22px;letter-spacing:.02em;}
+  .report-btn{
+    font-family:inherit;font-size:15px;font-weight:900;cursor:pointer;
+    padding:13px 22px;border-radius:12px;white-space:nowrap;
+    background:rgba(95,190,138,.16);border:1.5px solid var(--ok);color:var(--ok);
+  }
+  .report-btn:hover{background:rgba(95,190,138,.26);}
+
+  .revenue-banner{
+    background:linear-gradient(160deg,var(--card) 0%,var(--bg) 100%);
+    border:1px solid var(--line);border-radius:16px;
+    padding:20px 24px;margin-bottom:24px;
+    display:flex;align-items:baseline;justify-content:space-between;flex-wrap:wrap;gap:8px;
+  }
+  .revenue-label{font-size:14px;font-weight:700;color:var(--text-muted);}
+  .revenue-amount{font-family:'Archivo Black',sans-serif;font-size:34px;color:var(--ok);letter-spacing:.01em;}
+  .revenue-sub{font-size:12.5px;color:var(--text-muted);width:100%;}
+
+  .record-list{list-style:none;display:flex;flex-direction:column;gap:8px;}
+  .record-row{
+    background:var(--card);border:1px solid var(--line);border-radius:10px;
+    padding:12px 16px;display:flex;align-items:center;gap:14px;flex-wrap:wrap;
+  }
+  .record-seq{font-family:'Archivo Black',sans-serif;font-size:13px;color:var(--warn);white-space:nowrap;}
+  .record-table{font-size:14px;font-weight:900;white-space:nowrap;}
+  .record-time{font-size:12px;color:var(--text-muted);white-space:nowrap;}
+  .record-items{font-size:12px;color:var(--text-muted);flex:1;min-width:120px;}
+  .record-revenue{font-family:'Archivo Black',sans-serif;font-size:15px;color:var(--ok);white-space:nowrap;margin-left:auto;}
+  .empty-hint{color:var(--text-muted);font-size:14px;padding:20px 2px;}
+
+  .modal-overlay{
+    position:fixed;inset:0;z-index:100;background:rgba(0,0,0,.65);
+    display:flex;align-items:center;justify-content:center;padding:20px;
+  }
+  .modal-box{
+    background:var(--card);border:1px solid var(--line);border-radius:16px;
+    padding:24px 22px 22px;max-width:420px;width:100%;
+  }
+  .report-total-row{
+    display:flex;justify-content:space-between;align-items:baseline;
+    padding-bottom:16px;margin-bottom:16px;border-bottom:1px dashed var(--line);
+  }
+  .report-total-label{font-size:14px;font-weight:700;color:var(--text-muted);}
+  .report-total-amount{font-family:'Archivo Black',sans-serif;font-size:26px;color:var(--ok);}
+  .report-top5-title{font-size:13px;font-weight:900;color:var(--warn);margin-bottom:10px;}
+  .report-top5-list{list-style:none;display:flex;flex-direction:column;gap:8px;margin-bottom:18px;}
+  .report-top5-list li{
+    display:flex;align-items:center;gap:10px;
+    background:rgba(255,255,255,.04);border-radius:8px;padding:9px 12px;
+  }
+  .rank-badge{
+    font-family:'Archivo Black',sans-serif;font-size:12px;
+    width:22px;height:22px;border-radius:50%;flex-shrink:0;
+    display:flex;align-items:center;justify-content:center;
+    background:var(--bg);color:var(--text-muted);
+  }
+  .report-top5-list li:nth-child(1) .rank-badge{background:var(--warn);color:#1a1408;}
+  .report-top5-list li:nth-child(2) .rank-badge{background:#B8B0A6;color:#1a1408;}
+  .report-top5-list li:nth-child(3) .rank-badge{background:#B0784A;color:#1a1408;}
+  .report-dish-name{flex:1;font-size:14px;font-weight:700;}
+  .report-dish-qty{font-size:13px;color:var(--text-muted);white-space:nowrap;}
+  .modal-close-btn{
+    width:100%;padding:12px;border-radius:10px;font-size:14px;font-weight:700;cursor:pointer;font-family:inherit;
+    background:none;border:1px solid var(--line);color:var(--text-muted);
+  }
+  .modal-close-btn:hover{border-color:var(--text-muted);color:var(--text);}
+</style>
+</head>
+<body>
+<nav class="top-nav">
+  <a class="control-btn" href="sjxddxtygd.html">← 接单看板</a>
+</nav>
+<header>
+  <h1>今日盘点</h1>
+  <button class="report-btn" onclick="openReport()">📊 生成报告</button>
+</header>
+<div class="revenue-banner">
+  <span class="revenue-label">当天所有桌总营业额</span>
+  <span class="revenue-amount" id="totalRevenue">€0.00</span>
+  <span class="revenue-sub" id="recordCountHint"></span>
+</div>
+<div id="app"></div>
+<div id="modal-root"></div>
+
+<script src="https://www.gstatic.com/firebasejs/12.17.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/12.17.1/firebase-firestore-compat.js"></script>
+<script>
+const firebaseConfig = {
+  apiKey: 'AIzaSyBUFdqFcmnmGyuS1-ZWq7bEv0fUxTNNAFU',
+  authDomain: 'ddxt-bc353.firebaseapp.com',
+  projectId: 'ddxt-bc353',
+  storageBucket: 'ddxt-bc353.firebasestorage.app',
+  messagingSenderId: '624541373179',
+  appId: '1:624541373179:web:72e5f44322ad337406165e',
+};
+firebase.initializeApp(firebaseConfig);
+const db = firebase.firestore();
+db.settings({ experimentalAutoDetectLongPolling: true });
+const dailyOrdersRef = db.collection('dailyOrders');
+
+function todayKey(d){
+  d = d || new Date();
+  const pad = n => String(n).padStart(2,'0');
+  return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`;
+}
+function formatPrice(v){ return '€' + v.toFixed(2); }
+function formatTime(ms){
+  const d = new Date(ms);
+  const pad = n => String(n).padStart(2,'0');
+  return `${pad(d.getHours())}:${pad(d.getMinutes())}`;
+}
+
+let records = [];
+let loaded = false;
+let reportOpen = false;
+
+dailyOrdersRef.where('date', '==', todayKey()).onSnapshot(snap => {
+  records = snap.docs.map(d => d.data()).sort((a,b) => a.seq - b.seq);
+  loaded = true;
+  render();
+}, err => {});
+
+function totalRevenue(){
+  return records.reduce((s, r) => s + (r.revenue || 0), 0);
+}
+
+// 汇总当天所有流水记录里的菜品数量，取点选频次前五
+function topDishes(n){
+  const counts = new Map();
+  records.forEach(r => {
+    (r.items || []).forEach(it => {
+      counts.set(it.name, (counts.get(it.name) || 0) + it.qty);
+    });
+  });
+  return Array.from(counts.entries())
+    .sort((a, b) => b[1] - a[1])
+    .slice(0, n);
+}
+
+function openReport(){
+  reportOpen = true;
+  renderModal();
+}
+function closeReport(){
+  reportOpen = false;
+  renderModal();
+}
+
+function recordRowHTML(r){
+  const itemSummary = (r.items || []).map(it => `${it.name}×${it.qty}`).join('、');
+  return `
+    <li class="record-row">
+      <span class="record-seq">#${String(r.seq).padStart(3,'0')}</span>
+      <span class="record-table">桌 ${r.table}</span>
+      <span class="record-time">${formatTime(r.archivedAt)}</span>
+      <span class="record-items">${itemSummary}</span>
+      <span class="record-revenue">${formatPrice(r.revenue || 0)}</span>
+    </li>`;
+}
+
+function renderModal(){
+  const root = document.getElementById('modal-root');
+  if(!reportOpen){ root.innerHTML = ''; return; }
+  const top5 = topDishes(5);
+  const rankMedals = ['🥇','🥈','🥉','4','5'];
+  root.innerHTML = `
+    <div class="modal-overlay" onclick="if(event.target===this) closeReport()">
+      <div class="modal-box">
+        <div class="report-total-row">
+          <span class="report-total-label">今日总营业额</span>
+          <span class="report-total-amount">${formatPrice(totalRevenue())}</span>
+        </div>
+        <p class="report-top5-title">今日点选频次 TOP 5</p>
+        <ul class="report-top5-list">
+          ${top5.length === 0
+            ? `<li style="color:var(--text-muted);font-size:13px;">暂无数据</li>`
+            : top5.map(([name, qty], i) => `
+              <li>
+                <span class="rank-badge">${rankMedals[i]}</span>
+                <span class="report-dish-name">${name}</span>
+                <span class="report-dish-qty">${qty} 份</span>
+              </li>`).join('')}
+        </ul>
+        <button class="modal-close-btn" onclick="closeReport()">关闭</button>
+      </div>
+    </div>`;
+}
+
+function render(){
+  document.getElementById('totalRevenue').textContent = formatPrice(totalRevenue());
+  document.getElementById('recordCountHint').textContent = loaded ? `今日共 ${records.length} 桌已结账` : '';
+
+  const app = document.getElementById('app');
+  if(!loaded){
+    app.innerHTML = '';
+  }else if(records.length === 0){
+    app.innerHTML = `<p class="empty-hint">今天还没有桌子结账离开，盘点记录会在员工点"顾客已离开，移除看板"后自动生成。</p>`;
+  }else{
+    app.innerHTML = `<ul class="record-list">${records.map(recordRowHTML).join('')}</ul>`;
+  }
+
+  renderModal();
+}
+
+render();
+</script>
+</body>
+</html>

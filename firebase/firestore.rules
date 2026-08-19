@@ -66,6 +66,40 @@ service cloud.firestore {
                     && request.resource.data.ids.size() <= 200;
     }
 
+    // 今日盘点：每次员工点"顾客已离开，移除看板"，写入这一个自增计数器，
+    // 用来给当天的结账流水编号（#001、#002……每天从 1 重新开始）
+    match /counters/{docId} {
+      allow read: if true;
+      allow write: if docId == 'dailyOrderSeq'
+                    && request.resource.data.keys().hasOnly(['date', 'seq'])
+                    && request.resource.data.date is string
+                    && request.resource.data.date.size() == 10
+                    && request.resource.data.seq is number
+                    && request.resource.data.seq > 0;
+    }
+
+    // 今日盘点：每次结账生成一条不可变的当日流水记录（桌号/菜品/营业额），
+    // 用于"今日盘点"页面的列表和"生成报告"汇总——只允许创建，不允许改/删，保证账目可信
+    match /dailyOrders/{recordId} {
+      allow read: if true;
+      allow create: if request.resource.data.keys().hasOnly(['seq', 'date', 'table', 'items', 'revenue', 'archivedAt'])
+                    && request.resource.data.seq is number
+                    && request.resource.data.seq > 0
+                    && request.resource.data.date is string
+                    && request.resource.data.date.size() == 10
+                    && request.resource.data.table is string
+                    && request.resource.data.table.size() > 0
+                    && request.resource.data.table.size() <= 20
+                    && request.resource.data.items is list
+                    && request.resource.data.items.size() > 0
+                    && request.resource.data.items.size() <= 100
+                    && request.resource.data.revenue is number
+                    && request.resource.data.revenue >= 0
+                    && request.resource.data.revenue < 100000
+                    && request.resource.data.archivedAt is number
+                    && math.abs(request.time.toMillis() - request.resource.data.archivedAt) < 10 * 60 * 1000;
+    }
+
     // 兜底：其他任何 collection 一律拒绝，避免规则之外的路径被意外读写
     match /{document=**} {
       allow read, write: if false;
