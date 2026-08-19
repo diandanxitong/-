@@ -63,6 +63,27 @@
   .order-card.warn{border-left-color:var(--warn);}
   .order-card.urgent{border-left-color:var(--urgent);}
 
+  .card-body-wrap{position:relative;display:flex;flex-direction:column;}
+  .card-body{display:flex;flex-direction:column;gap:12px;}
+  .card-body.blurred{filter:blur(6px);pointer-events:none;user-select:none;}
+  .call-overlay{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;text-align:center;}
+  .call-overlay-abs{position:absolute;inset:0;background:rgba(18,16,18,.45);border-radius:12px;z-index:5;}
+  .call-overlay-inline{padding:26px 0 6px;}
+  .call-bell{font-size:42px;line-height:1;animation:bell-ring 1s ease-in-out infinite;}
+  @keyframes bell-ring{
+    0%,100%{transform:rotate(0);}
+    20%{transform:rotate(-14deg);}
+    40%{transform:rotate(11deg);}
+    60%{transform:rotate(-8deg);}
+    80%{transform:rotate(5deg);}
+  }
+  .call-caption{font-weight:700;font-size:15px;color:var(--text);}
+  .call-dismiss-btn{
+    padding:9px 18px;border-radius:20px;border:1px solid var(--urgent);
+    background:rgba(227,66,31,.18);color:var(--urgent);font-weight:700;cursor:pointer;font-size:13px;
+  }
+  .call-dismiss-btn:hover{background:rgba(227,66,31,.28);}
+
   .card-top{display:flex;justify-content:space-between;align-items:flex-start;}
   .table-num{font-family:'Archivo Black',sans-serif;font-size:30px;line-height:1;}
   .elapsed{
@@ -157,7 +178,7 @@ ordersRef.onSnapshot(snap => {
   const results = snap.docs.map(d => ({
     key: d.id, table: d.data().table, items: d.data().items, createdAt: d.data().createdAt,
     nickname: d.data().nickname || '', partySize: d.data().partySize || null,
-    status: d.data().status || 'pending',
+    status: d.data().status || 'pending', call: !!d.data().call,
   }));
   results.sort((a,b) => a.createdAt - b.createdAt);
   orders = results;
@@ -254,25 +275,44 @@ function customerBlockHTML(nGroup){
     </div>`;
 }
 
+function callOverlayHTML(callKeys, isAbs){
+  return `
+    <div class="call-overlay ${isAbs ? 'call-overlay-abs' : 'call-overlay-inline'}">
+      <span class="call-bell">🔔</span>
+      <p class="call-caption">顾客呼叫</p>
+      <button class="call-dismiss-btn" data-keys="${callKeys.join(',')}" onclick="archiveOrder(this.dataset.keys.split(','))">✓ 已处理</button>
+    </div>`;
+}
+
 function cardHTML(group){
   const { label, level } = elapsedInfo(group.createdAt);
-  const nicknameGroups = groupByNickname(group.batch);
-  const pendingKeys = group.batch.filter(o => o.status !== 'confirmed').map(o => o.key);
+  const realBatch = group.batch.filter(o => !o.call);
+  const callKeys = group.batch.filter(o => o.call).map(o => o.key);
+  const hasCall = callKeys.length > 0;
+  const nicknameGroups = groupByNickname(realBatch).filter(g => g.items.length > 0);
+  const hasRealContent = nicknameGroups.length > 0;
+  const pendingKeys = realBatch.filter(o => o.status !== 'confirmed').map(o => o.key);
   const anyPending = pendingKeys.length > 0;
-  const actionBtn = anyPending
+  const actionBtn = !hasRealContent ? '' : (anyPending
     ? `<button class="confirm-btn" data-keys="${pendingKeys.join(',')}" onclick="confirmToKitchen(this.dataset.keys.split(','))">🍳 确认，送入厨房</button>`
-    : `<button class="done-btn" data-keys="${group.keys.join(',')}" onclick="archiveOrder(this.dataset.keys.split(','))">✓ 已处理，移出看板</button>`;
+    : `<button class="done-btn" data-keys="${realBatch.map(o=>o.key).join(',')}" onclick="archiveOrder(this.dataset.keys.split(','))">✓ 已处理，移出看板</button>`);
   return `
     <div class="order-card ${level}">
       <div class="card-top">
         <span class="table-num">桌 ${group.table}</span>
         <span style="display:flex;gap:8px;align-items:center;">
-          ${anyPending ? '' : '<span class="confirmed-badge">已确认</span>'}
+          ${hasRealContent && !anyPending ? '<span class="confirmed-badge">已确认</span>' : ''}
           <span class="elapsed">${label}</span>
         </span>
       </div>
-      ${nicknameGroups.map(customerBlockHTML).join('')}
-      ${actionBtn}
+      ${hasRealContent ? `
+      <div class="card-body-wrap">
+        <div class="card-body${hasCall ? ' blurred' : ''}">
+          ${nicknameGroups.map(customerBlockHTML).join('')}
+          ${actionBtn}
+        </div>
+        ${hasCall ? callOverlayHTML(callKeys, true) : ''}
+      </div>` : (hasCall ? callOverlayHTML(callKeys, false) : '')}
     </div>`;
 }
 

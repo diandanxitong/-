@@ -353,6 +353,7 @@
     display:flex;align-items:center;justify-content:center;
     box-shadow:0 10px 24px rgba(0,0,0,.45);
   }
+  .cart-side-fab-icon{width:26px;height:26px;object-fit:contain;pointer-events:none;}
   .cart-side-fab-badge{
     position:absolute;top:-4px;right:-4px;min-width:19px;height:19px;padding:0 4px;
     border-radius:999px;background:var(--cinnabar);color:#fff;
@@ -430,6 +431,14 @@
     background:var(--card);border:1px solid var(--card-line);color:var(--text);
     font-size:12.5px;font-weight:700;padding:6px 14px;border-radius:20px;
     opacity:0;animation:hotpot-caption-in .4s ease .9s forwards;
+  }
+  .call-toast-bell{font-size:48px;line-height:1;animation:call-bell-ring .5s ease-in-out .1s 3;}
+  @keyframes call-bell-ring{
+    0%,100%{transform:rotate(0);}
+    20%{transform:rotate(-18deg);}
+    40%{transform:rotate(14deg);}
+    60%{transform:rotate(-10deg);}
+    80%{transform:rotate(6deg);}
   }
   @keyframes hotpot-caption-in{
     0%{opacity:0;transform:translateY(6px);}
@@ -744,6 +753,7 @@ const I18N = {
     tablePrefix:"桌 ", tableEyebrow:"桌号", changeTable:"切换桌号",
     menuTitle:"菜单", myPot:"我的小锅", cart:"购物车", orderedItems:"已点菜品",
     addToCart:"加入购物车", addToCartSub:"小纠结？先丢进购物车！",
+    callWaiter:"呼叫服务员", callWaiterSub:"有需要？点一下就好", calling:"呼叫中…", waiterCalled:"已呼叫服务员！",
     orderNow:"立即下单", orderNowSub:"不再犹豫！", ordering:"下单中…",
     addedToCart:"已加入购物车！", back:"返回",
     addOnSuccess:"加单成功", orderPlaced:"已下单", waitConfirm:"请稍候，服务员马上确认～",
@@ -766,6 +776,7 @@ const I18N = {
     tablePrefix:"Table ", tableEyebrow:"Table", changeTable:"Change Table",
     menuTitle:"Menu", myPot:"My Pot", cart:"Cart", orderedItems:"Items Ordered",
     addToCart:"Add to Cart", addToCartSub:"Still deciding? Add it to your cart!",
+    callWaiter:"Call Waiter", callWaiterSub:"Need something? Just tap!", calling:"Calling…", waiterCalled:"Waiter called!",
     orderNow:"Order Now", orderNowSub:"No more hesitating!", ordering:"Ordering…",
     addedToCart:"Added to cart!", back:"Back",
     addOnSuccess:"Add-on Placed", orderPlaced:"Order Placed", waitConfirm:"Please wait, staff will confirm shortly~",
@@ -788,6 +799,7 @@ const I18N = {
     tablePrefix:"Tavolo ", tableEyebrow:"Tavolo", changeTable:"Cambia Tavolo",
     menuTitle:"Menu", myPot:"La Mia Pentola", cart:"Carrello", orderedItems:"Piatti Ordinati",
     addToCart:"Aggiungi al Carrello", addToCartSub:"Ancora indeciso? Mettilo nel carrello!",
+    callWaiter:"Chiama il Cameriere", callWaiterSub:"Hai bisogno di qualcosa? Basta un tocco!", calling:"Chiamata in corso…", waiterCalled:"Cameriere chiamato!",
     orderNow:"Ordina Ora", orderNowSub:"Non esitare più!", ordering:"Ordinazione in corso…",
     addedToCart:"Aggiunto al carrello!", back:"Indietro",
     addOnSuccess:"Aggiunta Effettuata", orderPlaced:"Ordine Effettuato", waitConfirm:"Attendere, lo staff confermerà a breve~",
@@ -810,6 +822,7 @@ const I18N = {
     tablePrefix:"Table ", tableEyebrow:"Table", changeTable:"Changer de Table",
     menuTitle:"Menu", myPot:"Mon Petit Pot", cart:"Panier", orderedItems:"Plats Commandés",
     addToCart:"Ajouter au Panier", addToCartSub:"Pas encore décidé ? Mettez-le dans le panier !",
+    callWaiter:"Appeler le Serveur", callWaiterSub:"Besoin de quelque chose ? Il suffit d'appuyer !", calling:"Appel en cours…", waiterCalled:"Serveur appelé !",
     orderNow:"Commander", orderNowSub:"N'hésitez plus !", ordering:"Commande en cours…",
     addedToCart:"Ajouté au panier !", back:"Retour",
     addOnSuccess:"Ajout Effectué", orderPlaced:"Commande Passée", waitConfirm:"Veuillez patienter, le personnel confirmera bientôt~",
@@ -832,6 +845,7 @@ const I18N = {
     tablePrefix:"Mesa ", tableEyebrow:"Mesa", changeTable:"Cambiar Mesa",
     menuTitle:"Menú", myPot:"Mi Ollita", cart:"Carrito", orderedItems:"Platos Pedidos",
     addToCart:"Añadir al Carrito", addToCartSub:"¿Aún indeciso? ¡Añádelo al carrito!",
+    callWaiter:"Llamar al Camarero", callWaiterSub:"¿Necesitas algo? ¡Solo toca!", calling:"Llamando…", waiterCalled:"¡Camarero llamado!",
     orderNow:"Pedir Ahora", orderNowSub:"¡No lo dudes más!", ordering:"Pidiendo…",
     addedToCart:"¡Añadido al carrito!", back:"Atrás",
     addOnSuccess:"Pedido Adicional Realizado", orderPlaced:"Pedido Realizado", waitConfirm:"Espere, el personal confirmará en breve~",
@@ -1898,6 +1912,7 @@ let state = {
   activeCategory: 'all',
   lastOrder: null,
   submitting: false,
+  callingWaiter: false,
   myOrderItems: null,
   myOrderLoading: false,
   pandaMenuOpen: false,
@@ -2066,6 +2081,7 @@ function changeQty(id, delta){
   const cur = getItem(id);
   const qty = Math.max(0, Math.min(20, cur.qty + delta));
   state.items[id] = { qty, spice: cur.spice, size: cur.size, excludes: cur.excludes };
+  if(delta > 0 && qty > cur.qty) celebrateAddToCart();
   updateItemUI(id);
 }
 
@@ -2123,9 +2139,7 @@ function updateItemUI(id){
       badge.remove();
     }
   }
-  const cartBtn = document.querySelector('.cart-btn');
   const orderBtn = document.querySelector('.order-now-btn');
-  if(cartBtn) cartBtn.disabled = count === 0;
   if(orderBtn) orderBtn.disabled = count === 0;
 }
 
@@ -2209,6 +2223,38 @@ function celebrateAddToCart(){
   toast.addEventListener('animationend', (ev)=>{
     if(ev.target === toast) toast.remove();
   });
+}
+
+function celebrateCallWaiter(){
+  const existing = document.querySelector('.hotpot-toast');
+  if(existing) existing.remove();
+
+  const toast = document.createElement('div');
+  toast.className = 'hotpot-toast';
+  toast.innerHTML = `
+    <span class="call-toast-bell">🔔</span>
+    <p class="hotpot-caption">${t('waiterCalled')}</p>
+  `;
+  document.body.appendChild(toast);
+  toast.addEventListener('animationend', (ev)=>{
+    if(ev.target === toast) toast.remove();
+  });
+}
+
+async function callWaiter(){
+  if(state.callingWaiter || !state.table) return;
+  state.callingWaiter = true;
+  render();
+  try{
+    await ordersRef.add({
+      table: state.table, items: [], createdAt: Date.now(),
+      nickname: state.orderNickname || '', partySize: state.orderPartySize || 1,
+      status: 'pending', call: true,
+    });
+    celebrateCallWaiter();
+  }catch(e){ /* onSnapshot on the staff board just won't see this ping; customer can retry */ }
+  state.callingWaiter = false;
+  render();
 }
 
 function goToCart(){
@@ -2578,15 +2624,15 @@ function menuHTML(){
     </div>
     ${allergenModalHTML()}
     <button class="cart-side-fab" onclick="toggleCartPopup()" aria-label="${t('cart')}">
-      🛒
+      <img class="cart-side-fab-icon" src="../image/LOGO/CART.png" alt="${t('cart')}"/>
       ${count > 0 ? `<span class="cart-side-fab-badge">${count}</span>` : ''}
     </button>
     <div class="bottom-bar">
       <div class="action-pill-wrap">
         <div class="action-pill">
-          <button class="cart-btn" onclick="celebrateAddToCart()" ${count===0?'disabled':''}>
-            <span class="cart-btn-title">${t('addToCart')}</span>
-            <span class="cart-btn-sub">${t('addToCartSub')}</span>
+          <button class="cart-btn" onclick="callWaiter()" ${state.callingWaiter?'disabled':''}>
+            <span class="cart-btn-title">${state.callingWaiter ? t('calling') : t('callWaiter')}</span>
+            <span class="cart-btn-sub">${t('callWaiterSub')}</span>
           </button>
           <button class="order-now-btn" onclick="goToOrderReview()" ${count===0?'disabled':''}>
             <span class="order-now-title">${t('orderNow')}</span>
