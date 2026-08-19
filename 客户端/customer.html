@@ -511,6 +511,11 @@
   }
   .spice-tag{font-size:11.5px;color:var(--gold);border:1px solid var(--gold-line);border-radius:20px;padding:2px 9px;}
   .hint{color:var(--text-muted);font-size:13.5px;margin-bottom:26px;}
+  .order-removed-notice{
+    color:var(--cinnabar);font-size:13.5px;font-weight:700;line-height:1.5;
+    background:rgba(200,30,44,.1);border:1px solid rgba(200,30,44,.35);
+    border-radius:var(--radius);padding:12px 16px;margin-bottom:22px;
+  }
   .ghost-btn{
     background:none;border:1px solid var(--card-line);color:var(--text-muted);
     padding:11px 22px;border-radius:12px;font-size:14px;cursor:pointer;
@@ -785,6 +790,7 @@ const I18N = {
     addedToCart:"已加入购物车！", back:"返回",
     addOnSuccess:"加单成功", orderPlaced:"已下单", waitConfirm:"请稍候，服务员马上确认～",
     kitchenSentTitle:"订单已送进厨房", kitchenSentHint:"大厨已经开炒，请耐心等候上菜～",
+    orderRemovedNotice:"这笔订单已被工作人员删除，如有疑问请联系服务员～",
     continueOrdering:"继续点单", myOrder:"我的订单", removeHint:"如需退菜，请联系服务员哦～",
     loading:"加载中…", noOrderYet:"还没有点菜，去菜单看看吧～", backToMenu:"返回菜单",
     emptyCart:"购物车是空的，去菜单选几道菜吧～",
@@ -809,6 +815,7 @@ const I18N = {
     addedToCart:"Added to cart!", back:"Back",
     addOnSuccess:"Add-on Placed", orderPlaced:"Order Placed", waitConfirm:"Please wait, staff will confirm shortly~",
     kitchenSentTitle:"Sent to the Kitchen", kitchenSentHint:"The chef is already cooking — thanks for your patience~",
+    orderRemovedNotice:"This order was removed by staff. Please ask your waiter if you have questions~",
     continueOrdering:"Continue Ordering", myOrder:"My Order", removeHint:"To remove an item, please contact staff~",
     loading:"Loading…", noOrderYet:"No items yet — check out the menu~", backToMenu:"Back to Menu",
     emptyCart:"Your cart is empty — pick some dishes from the menu~",
@@ -833,6 +840,7 @@ const I18N = {
     addedToCart:"Aggiunto al carrello!", back:"Indietro",
     addOnSuccess:"Aggiunta Effettuata", orderPlaced:"Ordine Effettuato", waitConfirm:"Attendere, lo staff confermerà a breve~",
     kitchenSentTitle:"Inviato in Cucina", kitchenSentHint:"Lo chef sta già cucinando, grazie per la pazienza~",
+    orderRemovedNotice:"Questo ordine è stato rimosso dallo staff. Per domande, contatta il cameriere~",
     continueOrdering:"Continua a Ordinare", myOrder:"Il Mio Ordine", removeHint:"Per rimuovere un piatto, contattare lo staff~",
     loading:"Caricamento…", noOrderYet:"Nessun piatto ancora — dai un'occhiata al menu~", backToMenu:"Torna al Menu",
     emptyCart:"Il carrello è vuoto — scegli qualche piatto dal menu~",
@@ -857,6 +865,7 @@ const I18N = {
     addedToCart:"Ajouté au panier !", back:"Retour",
     addOnSuccess:"Ajout Effectué", orderPlaced:"Commande Passée", waitConfirm:"Veuillez patienter, le personnel confirmera bientôt~",
     kitchenSentTitle:"Envoyée en Cuisine", kitchenSentHint:"Le chef cuisine déjà, merci de patienter~",
+    orderRemovedNotice:"Cette commande a été supprimée par le personnel. Contactez votre serveur pour toute question~",
     continueOrdering:"Continuer à Commander", myOrder:"Ma Commande", removeHint:"Pour retirer un plat, veuillez contacter le personnel~",
     loading:"Chargement…", noOrderYet:"Aucun plat pour l'instant — jetez un œil au menu~", backToMenu:"Retour au Menu",
     emptyCart:"Votre panier est vide — choisissez des plats dans le menu~",
@@ -881,6 +890,7 @@ const I18N = {
     addedToCart:"¡Añadido al carrito!", back:"Atrás",
     addOnSuccess:"Pedido Adicional Realizado", orderPlaced:"Pedido Realizado", waitConfirm:"Espere, el personal confirmará en breve~",
     kitchenSentTitle:"Enviado a la Cocina", kitchenSentHint:"El chef ya está cocinando, gracias por tu paciencia~",
+    orderRemovedNotice:"Este pedido fue eliminado por el personal. Si tienes dudas, consulta al camarero~",
     continueOrdering:"Seguir Pidiendo", myOrder:"Mi Pedido", removeHint:"Para quitar un plato, por favor contacte al personal~",
     loading:"Cargando…", noOrderYet:"Aún no hay platos — eche un vistazo al menú~", backToMenu:"Volver al Menú",
     emptyCart:"Tu carrito está vacío — elige algunos platos del menú~",
@@ -1968,22 +1978,42 @@ let state = {
 
 let screenHistory = [];   // 记录来源页面，供“返回”按钮回退用
 let welcomeTimer = null;
-let orderStatusUnsub = null;   // 监听“确认下单”页对应订单 status 字段变化的取消订阅函数
 
-function watchOrderStatus(docId){
-  stopWatchingOrderStatus();
-  orderStatusUnsub = ordersRef.doc(docId).onSnapshot(snap => {
-    const data = snap.data();
-    if(!data || !state.lastOrder || state.lastOrder.docId !== docId) return;
-    if(data.status && data.status !== state.lastOrder.status){
-      state.lastOrder.status = data.status;
-      render();
-    }
-  });
+// 本桌订单的实时镜像：一旦选定桌号就一直监听，不管顾客在看菜单/下单确认页/我的订单页。
+// 员工在接单看板上单品删除或整单删除，都是直接改/删 Firestore 里的 order 文档，这个监听
+// 会立刻收到推送——用来把"下单确认页"和"我的订单页"的展示实时同步过来，而不是等顾客
+// 手动刷新或重新进入页面才发现菜品已经被后台删掉了。
+let liveTableOrdersUnsub = null;
+let liveTableOrders = [];
+let liveTableOrdersLoaded = false;
+
+function watchTableOrders(table){
+  if(liveTableOrdersUnsub){ liveTableOrdersUnsub(); liveTableOrdersUnsub = null; }
+  liveTableOrders = [];
+  liveTableOrdersLoaded = false;
+  if(!table) return;
+  liveTableOrdersUnsub = ordersRef.where('table', '==', String(table)).onSnapshot(snap => {
+    liveTableOrders = snap.docs.map(d => Object.assign({ id: d.id }, d.data()));
+    liveTableOrdersLoaded = true;
+    onTableOrdersChanged();
+  }, err => {});
 }
 
-function stopWatchingOrderStatus(){
-  if(orderStatusUnsub){ orderStatusUnsub(); orderStatusUnsub = null; }
+function onTableOrdersChanged(){
+  const foodOrders = liveTableOrders.filter(o => !o.call);
+
+  if(state.myOrderItems !== null){
+    state.myOrderItems = mergeItems(foodOrders);
+  }
+
+  if(state.lastOrder){
+    const doc = liveTableOrders.find(o => o.id === state.lastOrder.docId);
+    state.lastOrder.summaryItems = mergeItems(foodOrders);
+    state.lastOrder.removed = !doc;
+    if(doc && doc.status) state.lastOrder.status = doc.status;
+  }
+
+  if(state.screen === 'myOrder' || state.screen === 'confirm') render();
 }
 
 function applyLanguage(code){
@@ -2236,17 +2266,13 @@ function showAllergenPopup(event, code){
   allergenPopupTimer = setTimeout(closeAllergenPopup, 750);
 }
 
-async function goToMyOrder(){
+function goToMyOrder(){
   state.pandaMenuOpen = false;
   if(state.screen !== 'myOrder') screenHistory.push(state.screen);
   state.screen = 'myOrder';
-  state.myOrderLoading = true;
-  state.myOrderItems = null;
-  render();
-
-  const orders = await fetchTableOrders(state.table);
-  state.myOrderItems = mergeItems(orders);
-  state.myOrderLoading = false;
+  // liveTableOrders 从选桌那一刻就在实时监听了，通常这里已经有数据，不用再等一次网络请求
+  state.myOrderLoading = !liveTableOrdersLoaded;
+  state.myOrderItems = liveTableOrdersLoaded ? mergeItems(liveTableOrders.filter(o => !o.call)) : null;
   render();
 }
 
@@ -2408,6 +2434,7 @@ function selectTable(n){
   screenHistory.push(state.screen);
   state.table = String(n);
   state.screen = 'menu';
+  watchTableOrders(state.table);
   render();
 }
 
@@ -2498,11 +2525,10 @@ async function submitOrder(){
     state.lastOrder = {
       table: order.table, items: order.items, summaryItems, isAddOn,
       nickname: order.nickname, partySize: order.partySize,
-      docId: docRef.id, status: 'pending',
+      docId: docRef.id, status: 'pending', removed: false,
     };
     screenHistory.push('menu');
     state.screen = 'confirm';
-    watchOrderStatus(docRef.id);
   }catch(e){
     alert(t('orderFailed'));
   }
@@ -2971,13 +2997,14 @@ function confirmHTML(order){
       ${backRowHTML()}
       <div class="stamp-ring"><span>${order.isAddOn ? t('addOnSuccess') : t('orderPlaced')}</span></div>
       <h2>${t('tableEyebrow')} ${order.table}</h2>
-      ${isConfirmed ? `
+      ${order.removed ? `<p class="order-removed-notice">${t('orderRemovedNotice')}</p>` : (isConfirmed ? `
         ${chefCookingHTML()}
         <p class="kitchen-sent-title">${t('kitchenSentTitle')}</p>
         <p class="hint">${t('kitchenSentHint')}</p>
-      ` : `<p class="hint">${t('waitConfirm')}</p>`}
+      ` : `<p class="hint">${t('waitConfirm')}</p>`)}
       <button class="ghost-btn" onclick="resetToMenu()">${t('continueOrdering')}</button>
 
+      ${order.summaryItems.length === 0 ? '' : `
       <div class="my-order-card">
         <p class="my-order-title">${t('myOrder')}</p>
         <ul class="order-summary">
@@ -2995,7 +3022,7 @@ function confirmHTML(order){
         </ul>
         <p class="hint my-order-note">${t('removeHint')}</p>
         <button class="text-link-btn" onclick="resetToMenu()">${t('continueOrdering')} →</button>
-      </div>
+      </div>`}
     </div>`;
 }
 
@@ -3025,9 +3052,9 @@ function render(){
   else{ stopWelcomeCycle(); }
   if(state.screen === 'menu'){ startChefCarousel(); }
   else{ stopChefCarousel(); }
-  if(state.screen !== 'confirm'){ stopWatchingOrderStatus(); }
 }
 
+if(state.table) watchTableOrders(state.table);
 render();
 </script>
 </body>

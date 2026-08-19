@@ -100,9 +100,11 @@ service cloud.firestore {
                     && math.abs(request.time.toMillis() - request.resource.data.archivedAt) < 10 * 60 * 1000;
     }
 
-    // 员工操作日志：单品删除/整单删除都要求先填操作人姓名，这里记一条不可变的审计记录
+    // 员工操作日志：单品删除/整单删除都要求先填操作人姓名，这里记一条审计记录，
     // 供"员工操作日志"页面查看——这个 collection 本身没有登录态保护（这套系统压根没有
-    // 账号体系），页面上的用户名/密码只是前端一道软性关卡，不是真正的访问控制
+    // 账号体系），页面上的用户名/密码只是前端一道软性关卡，不是真正的访问控制。
+    // 允许 delete 是为了配合日志页右上角的"清除记录"按钮（同样没有真正的权限控制，
+    // 只要知道路径谁都能删——这点和这套系统其它 collection 的信任模型是一致的）。
     match /staffActionLogs/{logId} {
       allow read: if true;
       allow create: if request.resource.data.keys().hasOnly(['action', 'operator', 'table', 'detail', 'createdAt'])
@@ -117,6 +119,7 @@ service cloud.firestore {
                     && request.resource.data.detail.size() <= 500
                     && request.resource.data.createdAt is number
                     && math.abs(request.time.toMillis() - request.resource.data.createdAt) < 10 * 60 * 1000;
+      allow delete: if true;
     }
 
     // 兜底：其他任何 collection 一律拒绝，避免规则之外的路径被意外读写
