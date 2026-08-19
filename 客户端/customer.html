@@ -2038,7 +2038,7 @@ function welcomeHTML(){
         <div class="welcome-btn-wrap ${v}" id="welcome-btn-wrap">
           ${state.langMenuOpen ? `<button class="panda-overlay" onclick="toggleWelcomeLangMenu()" aria-label="${t('closeMenu')}"></button>` : ''}
           <button class="lang-select-btn" onclick="toggleWelcomeLangMenu()">
-            <span>选择语言并开始点单 · Start to Order</span>
+            <span>Start to Order</span>
           </button>
           ${state.langMenuOpen ? langPanelHTML('selectLanguage') : ''}
         </div>
