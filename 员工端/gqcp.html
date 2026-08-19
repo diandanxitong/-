@@ -73,6 +73,16 @@
   .search-clear-btn:hover{color:var(--text);}
   .no-results{color:var(--text-muted);font-size:14px;padding:10px 2px;}
 
+  .filter-row{margin-bottom:18px;}
+  .view-toggle-btn{
+    display:inline-flex;align-items:center;gap:6px;
+    background:var(--card);border:1px solid var(--line);color:var(--text-muted);
+    font-size:13px;font-weight:700;padding:8px 14px;border-radius:20px;
+    font-family:inherit;cursor:pointer;
+  }
+  .view-toggle-btn:hover{color:var(--text);border-color:var(--text-muted);}
+  .view-toggle-btn.active{background:rgba(227,66,31,.16);border-color:var(--urgent);color:var(--urgent);}
+
   .cat-section{margin-bottom:22px;}
   .cat-section h2{font-size:14px;font-weight:900;color:var(--warn);letter-spacing:.03em;margin-bottom:10px;padding-left:2px;}
   .dish-list{list-style:none;display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:8px;}
@@ -141,6 +151,9 @@
 <div class="search-bar">
   <input type="text" id="searchInput" placeholder="搜索菜品或酒水名称…" oninput="onSearchInput(this.value)" autocomplete="off">
   <button class="search-clear-btn" id="searchClearBtn" onclick="clearSearch()">✕</button>
+</div>
+<div class="filter-row">
+  <button class="view-toggle-btn" id="viewToggleBtn" onclick="toggleSoldOutOnlyView()">显示已沽清菜品</button>
 </div>
 <div id="app"></div>
 <div id="modal-root"></div>
@@ -292,6 +305,15 @@ let selected = new Set();
 let modal = null;   // null | 'soldOut' | 'restore'
 let loaded = false;
 let searchQuery = '';
+let showSoldOutOnly = false;
+
+function toggleSoldOutOnlyView(){
+  showSoldOutOnly = !showSoldOutOnly;
+  const btn = document.getElementById('viewToggleBtn');
+  btn.textContent = showSoldOutOnly ? '展示所有菜品' : '显示已沽清菜品';
+  btn.classList.toggle('active', showSoldOutOnly);
+  renderList();
+}
 
 function onSearchInput(value){
   searchQuery = value;
@@ -307,7 +329,8 @@ function clearSearch(){
   renderList();
 }
 
-function matchesSearch(d){
+function matchesFilters(d){
+  if(showSoldOutOnly && !soldOutIds.has(d.id)) return false;
   if(!searchQuery.trim()) return true;
   return d.name.toLowerCase().includes(searchQuery.trim().toLowerCase());
 }
@@ -415,11 +438,11 @@ function renderList(){
     return;
   }
   const sections = CATEGORY_ORDER.map(cat => {
-    const items = DISH_LIST.filter(d => d.category === cat && matchesSearch(d));
+    const items = DISH_LIST.filter(d => d.category === cat && matchesFilters(d));
     if(items.length === 0) return '';
     return `<section class="cat-section"><h2>${CATEGORY_LABELS[cat]}</h2><ul class="dish-list">${items.map(dishRowHTML).join('')}</ul></section>`;
   }).join('');
-  app.innerHTML = sections || '<p class="no-results">没有找到匹配的菜品</p>';
+  app.innerHTML = sections || `<p class="no-results">${showSoldOutOnly ? '目前没有已沽清的菜品' : '没有找到匹配的菜品'}</p>`;
 }
 
 function render(){
