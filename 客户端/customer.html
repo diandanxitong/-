@@ -2247,7 +2247,7 @@ async function callWaiter(){
       status: 'pending', call: true,
     });
     celebrateCallWaiter();
-  }catch(e){ /* onSnapshot on the staff board just won't see this ping; customer can retry */ }
+  }catch(e){ alert(t('orderFailed')); }
   state.callingWaiter = false;
   render();
 }
