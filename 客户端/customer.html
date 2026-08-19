@@ -347,13 +347,12 @@
   /* ---------- side-floating cart button + slide-in panel ---------- */
   .cart-side-fab{
     position:fixed;right:14px;top:58%;transform:translateY(-50%);z-index:40;
-    width:50px;height:50px;border-radius:50%;
-    background:linear-gradient(160deg,var(--gold) 0%,var(--ember-dark) 100%);
-    border:1px solid var(--gold-line);color:#fff;font-size:21px;cursor:pointer;
+    width:50px;height:50px;
+    background:none;border:none;color:#fff;font-size:21px;cursor:pointer;
     display:flex;align-items:center;justify-content:center;
-    box-shadow:0 10px 24px rgba(0,0,0,.45);
+    filter:drop-shadow(0 6px 14px rgba(0,0,0,.45));
   }
-  .cart-side-fab-icon{width:26px;height:26px;object-fit:contain;pointer-events:none;}
+  .cart-side-fab-icon{width:40px;height:40px;object-fit:contain;pointer-events:none;}
   .cart-side-fab-badge{
     position:absolute;top:-4px;right:-4px;min-width:19px;height:19px;padding:0 4px;
     border-radius:999px;background:var(--cinnabar);color:#fff;
