@@ -100,6 +100,25 @@ service cloud.firestore {
                     && math.abs(request.time.toMillis() - request.resource.data.archivedAt) < 10 * 60 * 1000;
     }
 
+    // 员工操作日志：单品删除/整单删除都要求先填操作人姓名，这里记一条不可变的审计记录
+    // 供"员工操作日志"页面查看——这个 collection 本身没有登录态保护（这套系统压根没有
+    // 账号体系），页面上的用户名/密码只是前端一道软性关卡，不是真正的访问控制
+    match /staffActionLogs/{logId} {
+      allow read: if true;
+      allow create: if request.resource.data.keys().hasOnly(['action', 'operator', 'table', 'detail', 'createdAt'])
+                    && request.resource.data.action in ['deleteItem', 'deleteOrder']
+                    && request.resource.data.operator is string
+                    && request.resource.data.operator.size() > 0
+                    && request.resource.data.operator.size() <= 30
+                    && request.resource.data.table is string
+                    && request.resource.data.table.size() > 0
+                    && request.resource.data.table.size() <= 20
+                    && request.resource.data.detail is string
+                    && request.resource.data.detail.size() <= 500
+                    && request.resource.data.createdAt is number
+                    && math.abs(request.time.toMillis() - request.resource.data.createdAt) < 10 * 60 * 1000;
+    }
+
     // 兜底：其他任何 collection 一律拒绝，避免规则之外的路径被意外读写
     match /{document=**} {
       allow read, write: if false;
