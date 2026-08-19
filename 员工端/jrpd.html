@@ -53,13 +53,18 @@
   .revenue-amount{font-family:'Archivo Black',sans-serif;font-size:34px;color:var(--ok);letter-spacing:.01em;}
   .revenue-sub{font-size:12.5px;color:var(--text-muted);width:100%;}
 
+  .table-group{padding-bottom:18px;margin-bottom:18px;border-bottom:1px dashed var(--line);}
+  .table-group:last-child{border-bottom:none;margin-bottom:0;padding-bottom:0;}
+  .table-group-head{display:flex;align-items:baseline;justify-content:space-between;gap:10px;margin-bottom:10px;flex-wrap:wrap;}
+  .table-group-num{font-family:'Archivo Black',sans-serif;font-size:17px;letter-spacing:.01em;}
+  .table-group-meta{font-size:12.5px;color:var(--text-muted);}
+  .table-group-meta b{color:var(--ok);font-size:14px;}
   .record-list{list-style:none;display:flex;flex-direction:column;gap:8px;}
   .record-row{
     background:var(--card);border:1px solid var(--line);border-radius:10px;
     padding:12px 16px;display:flex;align-items:center;gap:14px;flex-wrap:wrap;
   }
   .record-seq{font-family:'Archivo Black',sans-serif;font-size:13px;color:var(--warn);white-space:nowrap;}
-  .record-table{font-size:14px;font-weight:900;white-space:nowrap;}
   .record-time{font-size:12px;color:var(--text-muted);white-space:nowrap;}
   .record-items{font-size:12px;color:var(--text-muted);flex:1;min-width:120px;}
   .record-revenue{font-family:'Archivo Black',sans-serif;font-size:15px;color:var(--ok);white-space:nowrap;margin-left:auto;}
@@ -188,11 +193,41 @@ function recordRowHTML(r){
   return `
     <li class="record-row">
       <span class="record-seq">#${String(r.seq).padStart(3,'0')}</span>
-      <span class="record-table">桌 ${r.table}</span>
       <span class="record-time">${formatTime(r.archivedAt)}</span>
       <span class="record-items">${itemSummary}</span>
       <span class="record-revenue">${formatPrice(r.revenue || 0)}</span>
     </li>`;
+}
+
+// 按桌号分组：桌1只展示桌1的记录，桌与桌之间用分割线隔开（见 .table-group 的 border-bottom）
+function groupByTable(list){
+  const map = new Map();
+  list.forEach(r => {
+    if(!map.has(r.table)) map.set(r.table, []);
+    map.get(r.table).push(r);
+  });
+  const groups = Array.from(map.entries()).map(([table, recs]) => ({
+    table,
+    records: recs.slice().sort((a, b) => a.seq - b.seq),
+    revenue: recs.reduce((s, r) => s + (r.revenue || 0), 0),
+  }));
+  groups.sort((a, b) => {
+    const na = parseFloat(a.table), nb = parseFloat(b.table);
+    if(!isNaN(na) && !isNaN(nb) && na !== nb) return na - nb;
+    return String(a.table).localeCompare(String(b.table));
+  });
+  return groups;
+}
+
+function tableGroupHTML(g){
+  return `
+    <section class="table-group">
+      <div class="table-group-head">
+        <span class="table-group-num">桌 ${g.table}</span>
+        <span class="table-group-meta">共 ${g.records.length} 笔 · 今日小计 <b>${formatPrice(g.revenue)}</b></span>
+      </div>
+      <ul class="record-list">${g.records.map(recordRowHTML).join('')}</ul>
+    </section>`;
 }
 
 function renderModal(){
@@ -225,15 +260,18 @@ function renderModal(){
 
 function render(){
   document.getElementById('totalRevenue').textContent = formatPrice(totalRevenue());
-  document.getElementById('recordCountHint').textContent = loaded ? `今日共 ${records.length} 桌已结账` : '';
 
   const app = document.getElementById('app');
   if(!loaded){
+    document.getElementById('recordCountHint').textContent = '';
     app.innerHTML = '';
   }else if(records.length === 0){
+    document.getElementById('recordCountHint').textContent = '';
     app.innerHTML = `<p class="empty-hint">今天还没有桌子结账离开，盘点记录会在员工点"顾客已离开，移除看板"后自动生成。</p>`;
   }else{
-    app.innerHTML = `<ul class="record-list">${records.map(recordRowHTML).join('')}</ul>`;
+    const groups = groupByTable(records);
+    document.getElementById('recordCountHint').textContent = `今日共 ${groups.length} 桌 · ${records.length} 笔结账`;
+    app.innerHTML = groups.map(tableGroupHTML).join('');
   }
 
   renderModal();
