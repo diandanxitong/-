@@ -213,8 +213,10 @@
     white-space:nowrap;padding-top:2px;
   }
   .dish-body .tag{font-size:12.5px;color:var(--text-muted);margin-top:6px;line-height:1.55;overflow-wrap:break-word;}
-  .dish-card.sold-out .dish-photo{filter:grayscale(1);opacity:.55;}
-  .dish-card.sold-out .dish-photo-wrap::before{opacity:.14;}
+  .dish-card.sold-out .dish-photo-wrap::after{
+    content:"";position:absolute;inset:0;z-index:2;
+    background:rgba(245,241,236,.6);
+  }
   .dish-card.sold-out .dish-name{color:var(--text-muted);}
   .sold-out-msg{font-size:13px;font-weight:800;color:var(--gold);text-align:center;margin-top:10px;}
   .allergen-row{display:flex;flex-wrap:wrap;gap:5px;margin-top:10px;}
@@ -720,6 +722,7 @@
 <body>
 <div id="app"></div>
 <div id="panda-nav"></div>
+<div id="cart-popup-root"></div>
 <div id="allergen-popup-root"></div>
 
 <script src="https://www.gstatic.com/firebasejs/12.17.1/firebase-app-compat.js"></script>
@@ -2180,9 +2183,16 @@ function toggleAllergenInfo(){
   render();
 }
 
+// Cart popup lives in its own root (see renderCartPopup) so opening/closing
+// it doesn't rebuild the whole menu screen and flash every dish photo behind it.
 function toggleCartPopup(){
   state.cartPopupOpen = !state.cartPopupOpen;
-  render();
+  renderCartPopup();
+}
+
+function renderCartPopup(){
+  document.getElementById('cart-popup-root').innerHTML =
+    (state.screen === 'menu' && state.cartPopupOpen) ? cartPopupHTML() : '';
 }
 
 let allergenPopupTimer = null;
@@ -2331,9 +2341,13 @@ function openUpsell(){
   render();
 }
 
+// Patches just the tapped tile's selected state instead of a full render(),
+// so tapping a photo to select it doesn't rebuild (and flash) every photo
+// in the upsell grid.
 function toggleUpsellItem(id){
   state.upsellSelected[id] = !state.upsellSelected[id];
-  render();
+  const tile = document.querySelector(`.upsell-tile[data-id="${id}"]`);
+  if(tile) tile.classList.toggle('selected', state.upsellSelected[id]);
 }
 
 function confirmUpsellAdd(){
@@ -2354,15 +2368,21 @@ function skipUpsell(){
   submitOrder();
 }
 
+// panda-nav lives in its own root (see render()), so toggling the dropdown
+// only needs to repaint that root, not the whole menu screen behind it.
+function renderPandaNav(){
+  document.getElementById('panda-nav').innerHTML = state.screen === 'welcome' ? '' : pandaNavHTML();
+}
+
 function togglePandaMenu(){
   state.pandaMenuOpen = !state.pandaMenuOpen;
-  render();
+  renderPandaNav();
 }
 
 function closePandaMenu(){
   if(!state.pandaMenuOpen) return;
   state.pandaMenuOpen = false;
-  render();
+  renderPandaNav();
 }
 
 function selectTable(n){
@@ -2684,8 +2704,7 @@ function menuHTML(){
           </button>
         </div>
       </div>
-    </div>
-    ${cartPopupHTML()}`;
+    </div>`;
 }
 
 function orderLineHTML({name, qty, spice, price, extra}){
@@ -2870,7 +2889,7 @@ function upsellModalHTML(){
         ${items.map(d=>{
           const selected = !!state.upsellSelected[d.id];
           return `
-          <button class="upsell-tile ${selected?'selected':''}" onclick="toggleUpsellItem('${d.id}')">
+          <button class="upsell-tile ${selected?'selected':''}" data-id="${d.id}" onclick="toggleUpsellItem('${d.id}')">
             <span class="upsell-photo-wrap">
               <img class="upsell-photo" src="${d.img}" alt="${tDish(d.id,'name')}" loading="lazy">
               <span class="upsell-check">✓</span>
@@ -2969,7 +2988,8 @@ function render(){
     </div>` : '';
 
   app.innerHTML = screenHtml + overlayHtml;
-  document.getElementById('panda-nav').innerHTML = state.screen === 'welcome' ? '' : pandaNavHTML();
+  renderPandaNav();
+  renderCartPopup();
 
   if(state.screen === 'welcome'){ mountWelcomeScreen(); }
   else{ stopWelcomeCycle(); }
