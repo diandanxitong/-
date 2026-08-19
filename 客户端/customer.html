@@ -946,10 +946,10 @@ const SPICE_LEVELS = ['微辣','中辣','特辣'];
 // Each entry: id, category, price (or sizes[]+unit), allergens[], img, and i18n{lang:{name,tag}}
 const DISH_DATA = [
   // ---------- 前菜 Appetizers ----------
-  { id:'spicyBag', category:'appetizers', price:11.80, allergens:[],
+  { id:'spicyBag', category:'appetizers', price:11.80, allergens:[], img:'../image/菜品/spice bag.jpg',
     i18n:{
       zh:{name:'辣袋', tag:'薯条、洋葱、红甜椒、鸡柳'},
-      en:{name:'Spicy Bag', tag:'French fries, onion, red bell pepper, chicken strips'},
+      en:{name:'Spice Bag', tag:'French fries, onion, red bell pepper, chicken strips'},
       it:{name:'Sacchetto Piccante', tag:'Patatine fritte, cipolla, peperone rosso, straccetti di pollo'},
       fr:{name:'Sachet Épicé', tag:'Frites, oignon, poivron rouge, aiguillettes de poulet'},
       es:{name:'Bolsa Picante', tag:'Patatas fritas, cebolla, pimiento rojo, tiras de pollo'},
@@ -2111,12 +2111,8 @@ function toggleExclude(id, key){
 function updateItemUI(id){
   if(state.screen !== 'menu'){ render(); return; }
 
-  const card = document.querySelector(`.dish-card[data-id="${id}"]`);
-  if(card){
-    const wrap = document.createElement('div');
-    wrap.innerHTML = dishCardHTML(MENU_BY_ID[id]).trim();
-    card.replaceWith(wrap.firstElementChild);
-  }
+  const body = document.querySelector(`.dish-card[data-id="${id}"] .dish-body`);
+  if(body) body.innerHTML = dishBodyHTML(MENU_BY_ID[id]);
 
   if(state.cartPopupOpen){
     const body = document.getElementById('cart-side-body');
@@ -2548,16 +2544,11 @@ function chefCarouselHTML(){
     </div>`;
 }
 
-function dishCardHTML(d){
+function dishBodyHTML(d){
   const it = getItem(d.id);
   const name = tDish(d.id,'name');
   const tag = tDish(d.id,'tag');
   return `
-      <div class="dish-card" data-id="${d.id}">
-        <div class="dish-photo-wrap">
-          <img class="dish-photo" src="${d.img}" alt="${name}" loading="lazy" decoding="async" onerror="this.style.display='none'">
-        </div>
-        <div class="dish-body">
           <div class="dish-title-row">
             <h3 class="dish-name">${name}</h3>
             <span class="dish-price">${dishPriceLabel(d, it)}</span>
@@ -2579,8 +2570,20 @@ function dishCardHTML(d){
                   <span class="flames">${flameIcons(i+1)}</span><span class="spice-label">${tSpice(i)}</span>
                 </button>`).join('')}
             </div>` : ''}
-          ${it.qty>0 && d.options.length>0 ? optionsRowHTML(d, it) : ''}
+          ${it.qty>0 && d.options.length>0 ? optionsRowHTML(d, it) : ''}`;
+}
+
+// Photo wrapper is rendered once per card and never touched again by
+// updateItemUI — only .dish-body gets patched — so tapping qty/spice/
+// size/exclude never re-creates the <img> and flashes the photo.
+function dishCardHTML(d){
+  const name = tDish(d.id,'name');
+  return `
+      <div class="dish-card" data-id="${d.id}">
+        <div class="dish-photo-wrap">
+          <img class="dish-photo" src="${d.img}" alt="${name}" loading="lazy" decoding="async" onerror="this.style.display='none'">
         </div>
+        <div class="dish-body">${dishBodyHTML(d)}</div>
       </div>`;
 }
 
