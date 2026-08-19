@@ -239,6 +239,7 @@ function playSound(kind){
 
 const SIZE_LABELS_ZH = { half:'半份', whole:'整份', large:'大份', small:'小份' };
 const OPTION_LABELS_ZH = { onion:'不要洋葱', scallion:'不要葱', ginger:'不要姜', cilantro:'不要香菜', meat:'不要肉' };
+const COOK_METHOD_LABELS_ZH = { steamed:'蒸', panFried:'煎' };
 
 function elapsedInfo(ts){
   const diffMs = Date.now() - ts;
@@ -374,9 +375,9 @@ function mergeItems(batch){
   const merged = new Map();
   batch.forEach((o, batchIndex) => {
     o.items.forEach(it => {
-      const itemKey = it.name + '__' + it.spice + '__' + (it.size || '');
+      const itemKey = it.name + '__' + it.spice + '__' + (it.size || '') + '__' + (it.cookMethod || '');
       if(!merged.has(itemKey)){
-        merged.set(itemKey, { name: it.name, spice: it.spice, size: it.size || null, excludes: it.excludes || [], qty: 0, isNew: batchIndex > 0 });
+        merged.set(itemKey, { name: it.name, spice: it.spice, size: it.size || null, cookMethod: it.cookMethod || null, excludes: it.excludes || [], qty: 0, isNew: batchIndex > 0 });
       }
       merged.get(itemKey).qty += it.qty;
     });
@@ -387,6 +388,7 @@ function mergeItems(batch){
 function itemLineHTML(it){
   const tags = [`<span class="spice-tag">${it.spice}</span>`];
   if(it.size) tags.push(`<span class="spice-tag">${SIZE_LABELS_ZH[it.size] || it.size}</span>`);
+  if(it.cookMethod) tags.push(`<span class="spice-tag">${COOK_METHOD_LABELS_ZH[it.cookMethod] || it.cookMethod}</span>`);
   it.excludes.forEach(k => tags.push(`<span class="exclude-tag">${OPTION_LABELS_ZH[k] || k}</span>`));
   if(it.isNew) tags.push('<span class="new-tag">新加</span>');
   return `<li class="${it.isNew?'is-new':''}"><span><span class="qty">${it.qty}×</span>${it.name}</span><span style="display:flex;gap:6px;align-items:center;flex-wrap:wrap;">${tags.join('')}</span></li>`;

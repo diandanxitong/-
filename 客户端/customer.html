@@ -921,6 +921,11 @@ const SIZE_LABELS = {
   glass:{zh:'杯',en:'Glass',it:'Calice',fr:'Verre',es:'Copa'},
   bottle:{zh:'瓶',en:'Bottle',it:'Bottiglia',fr:'Bouteille',es:'Botella'},
 };
+// 饺子/烧卖不提供忌口选项，只需要选蒸/煎的做法
+const COOK_METHOD_LABELS = {
+  steamed:{zh:'蒸',en:'Steamed',it:'Al vapore',fr:'Vapeur',es:'Al vapor'},
+  panFried:{zh:'煎',en:'Pan-Fried',it:'In padella',fr:'Poêlé',es:'A la plancha'},
+};
 const SUBGROUP_LABELS = {
   whiteWine:{zh:'白葡萄酒',en:'White Wine',it:'Vino Bianco',fr:'Vin Blanc',es:'Vino Blanco'},
   redWine:{zh:'红葡萄酒',en:'Red Wine',it:'Vino Rosso',fr:'Vin Rouge',es:'Vino Tinto'},
@@ -948,6 +953,7 @@ function tSpice(idx){ return (I18N[state.lang] || I18N.zh).spice[idx]; }
 function tDish(id, field){ return (I18N[state.lang] || I18N.zh).dishes[id][field]; }
 function tAllergen(code){ return (ALLERGEN_NAMES[code] || {})[state.lang] || ALLERGEN_NAMES[code].zh; }
 function tSize(key){ return (SIZE_LABELS[key] || {})[state.lang] || SIZE_LABELS[key].zh; }
+function tCookMethod(key){ return (COOK_METHOD_LABELS[key] || {})[state.lang] || COOK_METHOD_LABELS[key].zh; }
 function tOption(key){ return (OPTION_LABELS[key] || {})[state.lang] || OPTION_LABELS[key].zh; }
 function displayDishName(zhName){
   const id = ZH_NAME_TO_ID[zhName];
@@ -1903,6 +1909,8 @@ const MEAT_OPTION_EXCLUDE = new Set([
 ]);
 function detectSpicy(d){ return SPICY_RE.test(d.i18n.zh.name + d.i18n.zh.tag); }
 function detectOptions(d){
+  // 饺子/烧卖不需要忌口选项，改用蒸/煎的做法选择（见 dishBodyHTML 里的 cook-method-row）
+  if(d.category === 'dumplings') return [];
   const opts = [];
   // 葱/洋葱/姜/香菜是通用的忌口选项，除了甜品（和不会展示的饮品），其余菜品统一提供
   if(d.category !== 'dessert' && d.category !== 'drinks'){
@@ -2106,13 +2114,13 @@ function backRowHTML(){
 }
 
 function getItem(id){
-  return state.items[id] || { qty:0, spice:'中辣', size:null, excludes:{} };
+  return state.items[id] || { qty:0, spice:'中辣', size:null, excludes:{}, cookMethod:'steamed' };
 }
 
 function changeQty(id, delta){
   const cur = getItem(id);
   const qty = Math.max(0, Math.min(20, cur.qty + delta));
-  state.items[id] = { qty, spice: cur.spice, size: cur.size, excludes: cur.excludes };
+  state.items[id] = { qty, spice: cur.spice, size: cur.size, excludes: cur.excludes, cookMethod: cur.cookMethod };
   if(delta > 0 && qty > cur.qty) celebrateAddToCart();
   updateItemUI(id);
 }
@@ -2120,13 +2128,13 @@ function changeQty(id, delta){
 function setSpice(id, level){
   const cur = getItem(id);
   if(cur.qty <= 0) return;
-  state.items[id] = { qty: cur.qty, spice: level, size: cur.size, excludes: cur.excludes };
+  state.items[id] = { qty: cur.qty, spice: level, size: cur.size, excludes: cur.excludes, cookMethod: cur.cookMethod };
   updateItemUI(id);
 }
 
 function setSize(id, key){
   const cur = getItem(id);
-  state.items[id] = { qty: cur.qty, spice: cur.spice, size: key, excludes: cur.excludes };
+  state.items[id] = { qty: cur.qty, spice: cur.spice, size: key, excludes: cur.excludes, cookMethod: cur.cookMethod };
   updateItemUI(id);
 }
 
@@ -2134,7 +2142,14 @@ function toggleExclude(id, key){
   const cur = getItem(id);
   if(cur.qty <= 0) return;
   const excludes = Object.assign({}, cur.excludes, { [key]: !cur.excludes[key] });
-  state.items[id] = { qty: cur.qty, spice: cur.spice, size: cur.size, excludes };
+  state.items[id] = { qty: cur.qty, spice: cur.spice, size: cur.size, excludes, cookMethod: cur.cookMethod };
+  updateItemUI(id);
+}
+
+function setCookMethod(id, method){
+  const cur = getItem(id);
+  if(cur.qty <= 0) return;
+  state.items[id] = { qty: cur.qty, spice: cur.spice, size: cur.size, excludes: cur.excludes, cookMethod: method };
   updateItemUI(id);
 }
 
@@ -2429,8 +2444,8 @@ function mergeItems(ordersList){
   const merged = new Map();
   ordersList.forEach(o => {
     o.items.forEach(it => {
-      const key = it.name + '__' + it.spice + '__' + (it.size || '');
-      if(!merged.has(key)) merged.set(key, { name: it.name, spice: it.spice, size: it.size || null, price: it.price, qty: 0 });
+      const key = it.name + '__' + it.spice + '__' + (it.size || '') + '__' + (it.cookMethod || '');
+      if(!merged.has(key)) merged.set(key, { name: it.name, spice: it.spice, size: it.size || null, cookMethod: it.cookMethod || null, price: it.price, qty: 0 });
       merged.get(key).qty += it.qty;
     });
   });
@@ -2447,6 +2462,7 @@ async function submitOrder(){
       if(it.qty <= 0) return null;
       const entry = { name: zhDishName(d.id), qty: it.qty, spice: it.spice, price: dishUnitPrice(d, it) };
       if(d.sizes) entry.size = it.size || d.sizes[0].key;
+      if(d.category === 'dumplings') entry.cookMethod = it.cookMethod || 'steamed';
       const excludeKeys = Object.keys(it.excludes || {}).filter(k => it.excludes[k]);
       if(excludeKeys.length) entry.excludes = excludeKeys;
       return entry;
@@ -2620,6 +2636,13 @@ function dishBodyHTML(d){
                   <span class="flames">${flameIcons(i+1)}</span><span class="spice-label">${tSpice(i)}</span>
                 </button>`).join('')}
             </div>` : ''}
+          ${it.qty>0 && d.category==='dumplings' ? `
+            <div class="spice-row">
+              ${['steamed','panFried'].map(m=>`
+                <button class="spice-pill ${(it.cookMethod||'steamed')===m?'active':''}" onclick="setCookMethod('${d.id}','${m}')">
+                  <span class="spice-label">${tCookMethod(m)}</span>
+                </button>`).join('')}
+            </div>` : ''}
           ${it.qty>0 && d.options.length>0 ? optionsRowHTML(d, it) : ''}`;
 }
 
@@ -2732,6 +2755,7 @@ function editableOrderSummaryHTML(items, total){
         <div class="order-line-bottom">
           ${it.spicy ? `<span class="spice-tag">${displaySpice(it.spice)}</span>` : ''}
           ${it.sizeLabel ? `<span class="spice-tag">${it.sizeLabel}</span>` : ''}
+          ${it.cookMethodLabel ? `<span class="spice-tag">${it.cookMethodLabel}</span>` : ''}
           ${it.excludeTags}
           <span class="stepper">
             <button onclick="changeQty('${it.id}',-1)" aria-label="${t('decreaseQty')}">−</button>
@@ -2768,7 +2792,7 @@ function myOrderHTML(){
                   qty: it.qty,
                   spice: dish && dish.spicy ? displaySpice(it.spice) : '',
                   price: it.price,
-                  extra: (it.size ? `<span class="spice-tag">${tSize(it.size)}</span>` : '') + excludesTagsHTML(it.excludes),
+                  extra: (it.size ? `<span class="spice-tag">${tSize(it.size)}</span>` : '') + (it.cookMethod ? `<span class="spice-tag">${tCookMethod(it.cookMethod)}</span>` : '') + excludesTagsHTML(it.excludes),
                 });
               }).join('')}
               ${totalRowHTML(total)}
@@ -2788,6 +2812,7 @@ function cartItemsForCheckout(){
         id: d.id, name: tDish(d.id,'name'), qty: it.qty, spice: it.spice, spicy: d.spicy,
         price: dishUnitPrice(d, it),
         sizeLabel: d.sizes ? tSize(it.size || d.sizes[0].key) : null,
+        cookMethodLabel: d.category==='dumplings' ? tCookMethod(it.cookMethod || 'steamed') : null,
         excludeTags: excludesTagsHTML(Object.keys(it.excludes||{}).filter(k=>it.excludes[k])),
       };
     })
@@ -2958,7 +2983,7 @@ function confirmHTML(order){
               qty: it.qty,
               spice: dish && dish.spicy ? displaySpice(it.spice) : '',
               price: it.price,
-              extra: (it.size ? `<span class="spice-tag">${tSize(it.size)}</span>` : '') + excludesTagsHTML(it.excludes),
+              extra: (it.size ? `<span class="spice-tag">${tSize(it.size)}</span>` : '') + (it.cookMethod ? `<span class="spice-tag">${tCookMethod(it.cookMethod)}</span>` : '') + excludesTagsHTML(it.excludes),
             });
           }).join('')}
           ${totalRowHTML(total)}
