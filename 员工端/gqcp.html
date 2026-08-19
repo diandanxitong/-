@@ -56,6 +56,23 @@
   .restore-btn{background:rgba(95,190,138,.14);border:1.5px solid var(--ok);color:var(--ok);}
   .restore-btn:not(:disabled):hover{background:rgba(95,190,138,.24);}
 
+  .search-bar{position:relative;margin-bottom:18px;max-width:420px;}
+  .search-bar input{
+    width:100%;background:var(--card);border:1px solid var(--line);border-radius:20px;
+    color:var(--text);font-family:inherit;font-size:14px;padding:10px 38px 10px 16px;
+  }
+  .search-bar input::placeholder{color:var(--text-muted);}
+  .search-bar input:focus{outline:none;border-color:var(--warn);}
+  .search-clear-btn{
+    position:absolute;right:6px;top:50%;transform:translateY(-50%);
+    width:26px;height:26px;border-radius:50%;border:none;background:none;
+    color:var(--text-muted);font-size:16px;cursor:pointer;display:none;
+    align-items:center;justify-content:center;
+  }
+  .search-clear-btn.visible{display:flex;}
+  .search-clear-btn:hover{color:var(--text);}
+  .no-results{color:var(--text-muted);font-size:14px;padding:10px 2px;}
+
   .cat-section{margin-bottom:22px;}
   .cat-section h2{font-size:14px;font-weight:900;color:var(--warn);letter-spacing:.03em;margin-bottom:10px;padding-left:2px;}
   .dish-list{list-style:none;display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:8px;}
@@ -121,6 +138,10 @@
     <button class="action-btn restore-btn" id="restoreBtn" onclick="openRestoreModal()" disabled>恢复售卖</button>
   </div>
 </header>
+<div class="search-bar">
+  <input type="text" id="searchInput" placeholder="搜索菜品或酒水名称…" oninput="onSearchInput(this.value)" autocomplete="off">
+  <button class="search-clear-btn" id="searchClearBtn" onclick="clearSearch()">✕</button>
+</div>
 <div id="app"></div>
 <div id="modal-root"></div>
 
@@ -270,6 +291,26 @@ let soldOutIds = new Set();
 let selected = new Set();
 let modal = null;   // null | 'soldOut' | 'restore'
 let loaded = false;
+let searchQuery = '';
+
+function onSearchInput(value){
+  searchQuery = value;
+  document.getElementById('searchClearBtn').classList.toggle('visible', searchQuery.length > 0);
+  renderList();   // search box lives outside #app, so it doesn't need (and shouldn't trigger) a full render()
+}
+
+function clearSearch(){
+  searchQuery = '';
+  const input = document.getElementById('searchInput');
+  if(input) input.value = '';
+  document.getElementById('searchClearBtn').classList.remove('visible');
+  renderList();
+}
+
+function matchesSearch(d){
+  if(!searchQuery.trim()) return true;
+  return d.name.toLowerCase().includes(searchQuery.trim().toLowerCase());
+}
 
 menuStatusRef.onSnapshot(snap => {
   const data = snap.data();
@@ -367,23 +408,27 @@ function renderModal(){
   }
 }
 
+function renderList(){
+  const app = document.getElementById('app');
+  if(!loaded){
+    app.innerHTML = '';
+    return;
+  }
+  const sections = CATEGORY_ORDER.map(cat => {
+    const items = DISH_LIST.filter(d => d.category === cat && matchesSearch(d));
+    if(items.length === 0) return '';
+    return `<section class="cat-section"><h2>${CATEGORY_LABELS[cat]}</h2><ul class="dish-list">${items.map(dishRowHTML).join('')}</ul></section>`;
+  }).join('');
+  app.innerHTML = sections || '<p class="no-results">没有找到匹配的菜品</p>';
+}
+
 function render(){
   document.getElementById('selCount').textContent = selected.size;
   document.getElementById('soldOutCount').textContent = soldOutIds.size;
   document.getElementById('soldOutBtn').disabled = selected.size === 0;
   document.getElementById('restoreBtn').disabled = selected.size === 0;
 
-  const app = document.getElementById('app');
-  if(!loaded){
-    app.innerHTML = '';
-  }else{
-    app.innerHTML = CATEGORY_ORDER.map(cat => {
-      const items = DISH_LIST.filter(d => d.category === cat);
-      if(items.length === 0) return '';
-      return `<section class="cat-section"><h2>${CATEGORY_LABELS[cat]}</h2><ul class="dish-list">${items.map(dishRowHTML).join('')}</ul></section>`;
-    }).join('');
-  }
-
+  renderList();
   renderModal();
 }
 
