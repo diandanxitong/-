@@ -128,10 +128,11 @@
   }
   .operator-input{
     width:100%;background:var(--bg);border:1px solid var(--line);border-radius:10px;
-    color:var(--text);font-family:inherit;font-size:14px;padding:11px 14px;margin-bottom:18px;
+    color:var(--text);font-family:inherit;font-size:14px;padding:11px 14px;margin-bottom:6px;
     text-align:left;
   }
   .operator-input:focus{outline:none;border-color:var(--urgent);}
+  .operator-hint{font-size:11.5px;color:var(--text-muted);text-align:left;margin-bottom:16px;}
 
   .card-top{display:flex;justify-content:space-between;align-items:flex-start;}
   .table-num{font-family:'Archivo Black',sans-serif;font-size:30px;line-height:1;}
@@ -431,11 +432,19 @@ function cancelDelete(){
   renderDeleteModal();
 }
 
+// 操作人姓名只准填汉字和英文字母——不要数字、符号、空格，边打字边过滤掉
+function sanitizeOperatorName(v){
+  return (v || '').replace(/[^a-zA-Z一-龥]/g, '');
+}
+
 function updateDeleteOperatorName(v){
   if(!deleteModalCtx) return;
-  deleteModalCtx.operatorName = v;
+  const clean = sanitizeOperatorName(v);
+  deleteModalCtx.operatorName = clean;
+  const input = document.getElementById('operator-name-input');
+  if(input && input.value !== clean) input.value = clean;
   const btn = document.getElementById('delete-confirm-btn');
-  if(btn) btn.disabled = deleteModalCtx.operatorName.trim().length === 0;
+  if(btn) btn.disabled = clean.trim().length === 0;
 }
 
 function confirmDelete(){
@@ -465,6 +474,7 @@ function renderDeleteModal(){
         <input type="text" class="operator-input" id="operator-name-input" placeholder="请输入操作人员姓名，不填不能删除"
                value="${operatorName}" oninput="updateDeleteOperatorName(this.value)"
                onkeydown="if(event.key==='Enter' && this.value.trim()) confirmDelete()" autocomplete="off">
+        <p class="operator-hint">仅支持汉字和英文字母</p>
         <div class="confirm-actions">
           <button class="confirm-cancel-btn" onclick="cancelDelete()">取消</button>
           <button class="confirm-yes-btn" id="delete-confirm-btn" onclick="confirmDelete()" ${operatorName.trim() ? '' : 'disabled'}>确认删除</button>

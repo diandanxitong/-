@@ -66,10 +66,18 @@
 
   .login-screen{display:flex;align-items:center;justify-content:center;min-height:60vh;padding:20px;}
   .login-box{
+    position:relative;
     background:var(--card);border:1px solid var(--line);border-radius:16px;
     padding:30px 26px;max-width:320px;width:100%;text-align:center;
   }
   .login-box h1{margin-bottom:6px;}
+  .login-close-btn{
+    position:absolute;top:10px;right:10px;width:28px;height:28px;border-radius:50%;
+    border:1px solid var(--line);background:none;color:var(--text-muted);
+    font-size:15px;font-weight:900;cursor:pointer;font-family:inherit;line-height:1;
+    display:flex;align-items:center;justify-content:center;text-decoration:none;
+  }
+  .login-close-btn:hover{color:var(--text);border-color:var(--text-muted);}
   .login-hint{font-size:13px;color:var(--text-muted);margin-bottom:22px;}
   .login-input{
     width:100%;background:var(--bg);border:1px solid var(--line);border-radius:10px;
@@ -194,6 +202,7 @@ function loginScreenHTML(){
   return `
     <div class="login-screen">
       <div class="login-box">
+        <a class="login-close-btn" href="sjxddxtygd.html" aria-label="关闭，返回接单看板">✕</a>
         <h1>员工操作日志</h1>
         <p class="login-hint">此页面仅限管理员查看</p>
         <input type="text" id="login-user" class="login-input" placeholder="用户名" autocomplete="off"
