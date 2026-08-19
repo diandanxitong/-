@@ -93,6 +93,24 @@
   }
   .call-dismiss-btn:hover{background:rgba(227,66,31,.28);}
 
+  .confirm-overlay{
+    position:fixed;inset:0;z-index:100;background:rgba(0,0,0,.6);
+    display:flex;align-items:center;justify-content:center;padding:20px;
+  }
+  .confirm-box{
+    background:var(--card);border:1px solid var(--line);border-radius:16px;
+    padding:26px 22px 22px;max-width:320px;width:100%;text-align:center;
+  }
+  .confirm-question{font-size:17px;font-weight:900;margin-bottom:20px;}
+  .confirm-actions{display:flex;gap:10px;}
+  .confirm-cancel-btn, .confirm-yes-btn{
+    flex:1;padding:12px;border-radius:10px;font-size:14px;font-weight:700;cursor:pointer;
+  }
+  .confirm-cancel-btn{background:none;border:1px solid var(--line);color:var(--text-muted);}
+  .confirm-cancel-btn:hover{border-color:var(--text-muted);color:var(--text);}
+  .confirm-yes-btn{background:rgba(227,66,31,.18);border:1px solid var(--urgent);color:var(--urgent);}
+  .confirm-yes-btn:hover{background:rgba(227,66,31,.28);}
+
   .card-top{display:flex;justify-content:space-between;align-items:flex-start;}
   .table-num{font-family:'Archivo Black',sans-serif;font-size:30px;line-height:1;}
   .elapsed{
@@ -151,6 +169,7 @@
   </div>
 </header>
 <div id="app"></div>
+<div id="confirm-modal"></div>
 
 <script src="https://www.gstatic.com/firebasejs/12.17.1/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/12.17.1/firebase-firestore-compat.js"></script>
@@ -219,6 +238,41 @@ async function archiveOrder(keys){
     keys.forEach(key => batch.delete(ordersRef.doc(key)));
     await batch.commit();
   }catch(e){ /* onSnapshot 会在下一次推送时自动纠正 */ }
+}
+
+// “顾客已离开，移除看板”会误删还在用餐的桌，先弹窗二次确认
+let confirmKeys = null;
+
+function confirmLeave(keys){
+  confirmKeys = keys;
+  renderConfirmModal();
+}
+
+function cancelLeave(){
+  confirmKeys = null;
+  renderConfirmModal();
+}
+
+function confirmLeaveYes(){
+  const keys = confirmKeys;
+  confirmKeys = null;
+  renderConfirmModal();
+  archiveOrder(keys);
+}
+
+function renderConfirmModal(){
+  const el = document.getElementById('confirm-modal');
+  if(!confirmKeys){ el.innerHTML = ''; return; }
+  el.innerHTML = `
+    <div class="confirm-overlay">
+      <div class="confirm-box">
+        <p class="confirm-question">确认顾客已离开？</p>
+        <div class="confirm-actions">
+          <button class="confirm-cancel-btn" onclick="cancelLeave()">取消移除看板</button>
+          <button class="confirm-yes-btn" onclick="confirmLeaveYes()">确认已离开</button>
+        </div>
+      </div>
+    </div>`;
 }
 
 // 同一桌可能分多次下单（加菜），这里按桌号把订单合并成一张看板卡片
@@ -305,7 +359,7 @@ function cardHTML(group){
   const anyPending = pendingKeys.length > 0;
   const actionBtn = !hasRealContent ? '' : (anyPending
     ? `<button class="confirm-btn" data-keys="${pendingKeys.join(',')}" onclick="confirmToKitchen(this.dataset.keys.split(','))">🍳 确认，送入厨房</button>`
-    : `<button class="done-btn" data-keys="${realBatch.map(o=>o.key).join(',')}" onclick="archiveOrder(this.dataset.keys.split(','))">✓ 顾客已离开，移除看板</button>`);
+    : `<button class="done-btn" data-keys="${realBatch.map(o=>o.key).join(',')}" onclick="confirmLeave(this.dataset.keys.split(','))">✓ 顾客已离开，移除看板</button>`);
   return `
     <div class="order-card ${level}">
       <div class="card-top">
