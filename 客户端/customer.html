@@ -2190,7 +2190,11 @@ function setCategory(cat){
   state.activeCategory = cat;
   render();
   const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-  window.scrollTo({ top: 0, behavior: reduceMotion ? 'auto' : 'smooth' });
+  const behavior = reduceMotion ? 'auto' : 'smooth';
+  const dishList = document.querySelector('.dish-list');
+  const firstEl = dishList && dishList.firstElementChild;
+  if(firstEl) firstEl.scrollIntoView({ behavior, block: 'start' });
+  else window.scrollTo({ top: 0, behavior });
 }
 
 function toggleAllergenInfo(){
