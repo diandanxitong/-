@@ -25,6 +25,15 @@
     font-family:'Noto Sans SC','PingFang SC','Microsoft YaHei',sans-serif;
     min-height:100vh;padding:22px 26px 40px;
   }
+  .warn-banner{
+    background:var(--urgent);color:#fff;text-align:center;
+    font-weight:900;font-size:15px;letter-spacing:.02em;
+    padding:12px 16px;margin:-22px -26px 20px;
+  }
+  @media (prefers-reduced-motion:no-preference){
+    .warn-banner{animation:warn-pulse 1.4s ease-in-out infinite;}
+  }
+  @keyframes warn-pulse{0%,100%{opacity:1}50%{opacity:.7}}
   .top-nav{margin-bottom:16px;}
   .control-btn{
     display:inline-flex;align-items:center;gap:6px;text-decoration:none;
@@ -130,6 +139,7 @@
 </style>
 </head>
 <body>
+<div class="warn-banner">顾客未离开时禁止点击移除看板！！！！！！</div>
 <nav class="top-nav">
   <a class="control-btn" href="../index.html">← 控制系统</a>
 </nav>
@@ -295,7 +305,7 @@ function cardHTML(group){
   const anyPending = pendingKeys.length > 0;
   const actionBtn = !hasRealContent ? '' : (anyPending
     ? `<button class="confirm-btn" data-keys="${pendingKeys.join(',')}" onclick="confirmToKitchen(this.dataset.keys.split(','))">🍳 确认，送入厨房</button>`
-    : `<button class="done-btn" data-keys="${realBatch.map(o=>o.key).join(',')}" onclick="archiveOrder(this.dataset.keys.split(','))">✓ 已处理，移出看板</button>`);
+    : `<button class="done-btn" data-keys="${realBatch.map(o=>o.key).join(',')}" onclick="archiveOrder(this.dataset.keys.split(','))">✓ 顾客已离开，移除看板</button>`);
   return `
     <div class="order-card ${level}">
       <div class="card-top">
