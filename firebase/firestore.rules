@@ -46,11 +46,21 @@ service cloud.firestore {
                     && request.resource.data.partySize <= 50
                     && request.resource.data.status == 'pending';
 
-      // 订单一旦建立，唯一允许的修改是员工端把 status 从 pending 推进到 confirmed
-      // （顾客端据此从“等待确认”切换到“已送入厨房”动画），其余字段一律不可变
-      allow update: if request.resource.data.diff(resource.data).affectedKeys().hasOnly(['status'])
-                    && resource.data.status == 'pending'
-                    && request.resource.data.status == 'confirmed';
+      // 订单一旦建立，只允许两种修改：
+      // 1. 员工端把 status 从 pending 推进到 confirmed（顾客端据此从"等待确认"切换到
+      //    "已送入厨房"动画）
+      // 2. 员工端在接单看板上单品删除：只准动 items 这一个字段，且新数组只能比原数组
+      //    短（纯删除），挡不住“删哪一条”这种语义校验，但至少不能借这个口子塞数据、
+      //    改价格或凭空让菜品变多
+      allow update: if (
+                      request.resource.data.diff(resource.data).affectedKeys().hasOnly(['status'])
+                      && resource.data.status == 'pending'
+                      && request.resource.data.status == 'confirmed'
+                    ) || (
+                      request.resource.data.diff(resource.data).affectedKeys().hasOnly(['items'])
+                      && request.resource.data.items is list
+                      && request.resource.data.items.size() < resource.data.items.size()
+                    );
 
       // 员工端"已处理，移出看板"需要删除订单；没有登录态，只能开放删
       allow delete: if true;
