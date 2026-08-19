@@ -386,7 +386,8 @@ function mergeItems(batch){
 }
 
 function itemLineHTML(it){
-  const tags = [`<span class="spice-tag">${it.spice}</span>`];
+  const tags = [];
+  if(it.spice) tags.push(`<span class="spice-tag">${it.spice}</span>`);
   if(it.size) tags.push(`<span class="spice-tag">${SIZE_LABELS_ZH[it.size] || it.size}</span>`);
   if(it.cookMethod) tags.push(`<span class="spice-tag">${COOK_METHOD_LABELS_ZH[it.cookMethod] || it.cookMethod}</span>`);
   it.excludes.forEach(k => tags.push(`<span class="exclude-tag">${OPTION_LABELS_ZH[k] || k}</span>`));

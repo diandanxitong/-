@@ -2460,7 +2460,8 @@ async function submitOrder(){
     .map(d => {
       const it = getItem(d.id);
       if(it.qty <= 0) return null;
-      const entry = { name: zhDishName(d.id), qty: it.qty, spice: it.spice, price: dishUnitPrice(d, it) };
+      const entry = { name: zhDishName(d.id), qty: it.qty, price: dishUnitPrice(d, it) };
+      if(d.spicy) entry.spice = it.spice;
       if(d.sizes) entry.size = it.size || d.sizes[0].key;
       if(d.category === 'dumplings') entry.cookMethod = it.cookMethod || 'steamed';
       const excludeKeys = Object.keys(it.excludes || {}).filter(k => it.excludes[k]);
