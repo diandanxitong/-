@@ -268,6 +268,11 @@
   }
   .stepper button:disabled{opacity:.35;cursor:not-allowed;}
   .stepper button:not(:disabled):hover{border-color:var(--ember);color:var(--ember);}
+  .stepper button.stepper-add{
+    border-radius:50%;border-color:var(--jade);background:var(--jade);color:#fff;font-size:20px;
+  }
+  .stepper button.stepper-add:not(:disabled):hover{border-color:var(--jade-dark);background:var(--jade-dark);color:#fff;}
+  .dish-card .stepper button.stepper-add{font-size:18px;}
   .stepper .qty{
     width:30px;text-align:center;font-weight:700;font-size:16px;
     font-family:'Archivo Black',sans-serif;
@@ -2033,8 +2038,7 @@ function welcomeHTML(){
         <div class="welcome-btn-wrap ${v}" id="welcome-btn-wrap">
           ${state.langMenuOpen ? `<button class="panda-overlay" onclick="toggleWelcomeLangMenu()" aria-label="${t('closeMenu')}"></button>` : ''}
           <button class="lang-select-btn" onclick="toggleWelcomeLangMenu()">
-            <span class="lang-select-icon">🌐</span>
-            <span>选择语言 · Select Language</span>
+            <span>选择语言并开始点单</span>
           </button>
           ${state.langMenuOpen ? langPanelHTML('selectLanguage') : ''}
         </div>
@@ -2520,7 +2524,7 @@ function dishCardHTML(d){
             <div class="stepper">
               <button onclick="changeQty('${d.id}',-1)" ${it.qty<=0?'disabled':''} aria-label="${t('decreaseQty')}">−</button>
               <span class="qty">${it.qty}</span>
-              <button onclick="changeQty('${d.id}',1)" aria-label="${t('increaseQty')}">+</button>
+              <button class="stepper-add" onclick="changeQty('${d.id}',1)" aria-label="${t('increaseQty')}">+</button>
             </div>
           </div>
           ${it.qty>0 && d.spicy ? `
