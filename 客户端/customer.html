@@ -103,12 +103,10 @@
     padding:0;font-family:inherit;color:var(--text);
   }
   .panda-avatar{
-    width:38px;height:38px;border-radius:50%;flex-shrink:0;
-    background:var(--card);border:1.5px solid var(--gold-line);
-    display:flex;align-items:center;justify-content:center;font-size:19px;line-height:1;
-    box-shadow:0 0 0 3px rgba(232,162,61,.08);
+    width:38px;height:38px;flex-shrink:0;
+    display:flex;align-items:center;justify-content:center;line-height:1;
   }
-  .my-order-btn:hover .panda-avatar{border-color:var(--gold);}
+  .panda-avatar img{display:block;width:100%;height:100%;object-fit:contain;}
   .my-order-label{font-size:12.5px;font-weight:700;color:var(--text-muted);}
   .my-order-btn:hover .my-order-label{color:var(--gold);}
   .panda-dropdown{
@@ -750,7 +748,7 @@ const I18N = {
     pickEyebrow:"选择桌号", pickTitle:"请选择桌号",
     pickHint:"顾客请直接扫桌上二维码；员工帮客人点单，请选择对应桌号",
     tablePrefix:"桌 ", tableEyebrow:"桌号", changeTable:"切换桌号",
-    menuTitle:"菜单", myPot:"我的小锅", cart:"购物车", orderedItems:"已点菜品",
+    menuTitle:"菜单", myPot:"我的", cart:"购物车", orderedItems:"已点菜品",
     addToCart:"加入购物车", addToCartSub:"小纠结？先丢进购物车！",
     callWaiter:"呼叫服务员", callWaiterSub:"有需要？点一下就好", calling:"呼叫中…", waiterCalled:"已呼叫服务员！",
     orderNow:"立即下单", orderNowSub:"不再犹豫！", ordering:"下单中…",
@@ -773,7 +771,7 @@ const I18N = {
     pickEyebrow:"Select Table", pickTitle:"Choose Your Table",
     pickHint:"Guests: please scan the QR code on your table. Staff: select the matching table to order on a guest's behalf.",
     tablePrefix:"Table ", tableEyebrow:"Table", changeTable:"Change Table",
-    menuTitle:"Menu", myPot:"My Pot", cart:"Cart", orderedItems:"Items Ordered",
+    menuTitle:"Menu", myPot:"Mine", cart:"Cart", orderedItems:"Items Ordered",
     addToCart:"Add to Cart", addToCartSub:"Still deciding? Add it to your cart!",
     callWaiter:"Call Waiter", callWaiterSub:"Need something? Just tap!", calling:"Calling…", waiterCalled:"Waiter called!",
     orderNow:"Order Now", orderNowSub:"No more hesitating!", ordering:"Ordering…",
@@ -796,7 +794,7 @@ const I18N = {
     pickEyebrow:"Seleziona Tavolo", pickTitle:"Scegli il Tuo Tavolo",
     pickHint:"Clienti: scansionate il codice QR sul tavolo. Staff: selezionate il tavolo corrispondente per ordinare per un cliente.",
     tablePrefix:"Tavolo ", tableEyebrow:"Tavolo", changeTable:"Cambia Tavolo",
-    menuTitle:"Menu", myPot:"La Mia Pentola", cart:"Carrello", orderedItems:"Piatti Ordinati",
+    menuTitle:"Menu", myPot:"Il Mio", cart:"Carrello", orderedItems:"Piatti Ordinati",
     addToCart:"Aggiungi al Carrello", addToCartSub:"Ancora indeciso? Mettilo nel carrello!",
     callWaiter:"Chiama il Cameriere", callWaiterSub:"Hai bisogno di qualcosa? Basta un tocco!", calling:"Chiamata in corso…", waiterCalled:"Cameriere chiamato!",
     orderNow:"Ordina Ora", orderNowSub:"Non esitare più!", ordering:"Ordinazione in corso…",
@@ -819,7 +817,7 @@ const I18N = {
     pickEyebrow:"Choisir une Table", pickTitle:"Choisissez Votre Table",
     pickHint:"Clients : veuillez scanner le code QR sur votre table. Personnel : sélectionnez la table correspondante pour commander pour un client.",
     tablePrefix:"Table ", tableEyebrow:"Table", changeTable:"Changer de Table",
-    menuTitle:"Menu", myPot:"Mon Petit Pot", cart:"Panier", orderedItems:"Plats Commandés",
+    menuTitle:"Menu", myPot:"Le Mien", cart:"Panier", orderedItems:"Plats Commandés",
     addToCart:"Ajouter au Panier", addToCartSub:"Pas encore décidé ? Mettez-le dans le panier !",
     callWaiter:"Appeler le Serveur", callWaiterSub:"Besoin de quelque chose ? Il suffit d'appuyer !", calling:"Appel en cours…", waiterCalled:"Serveur appelé !",
     orderNow:"Commander", orderNowSub:"N'hésitez plus !", ordering:"Commande en cours…",
@@ -842,7 +840,7 @@ const I18N = {
     pickEyebrow:"Elegir Mesa", pickTitle:"Elige Tu Mesa",
     pickHint:"Clientes: por favor escaneen el código QR de su mesa. Personal: seleccionen la mesa correspondiente para pedir en nombre de un cliente.",
     tablePrefix:"Mesa ", tableEyebrow:"Mesa", changeTable:"Cambiar Mesa",
-    menuTitle:"Menú", myPot:"Mi Ollita", cart:"Carrito", orderedItems:"Platos Pedidos",
+    menuTitle:"Menú", myPot:"Mío", cart:"Carrito", orderedItems:"Platos Pedidos",
     addToCart:"Añadir al Carrito", addToCartSub:"¿Aún indeciso? ¡Añádelo al carrito!",
     callWaiter:"Llamar al Camarero", callWaiterSub:"¿Necesitas algo? ¡Solo toca!", calling:"Llamando…", waiterCalled:"¡Camarero llamado!",
     orderNow:"Pedir Ahora", orderNowSub:"¡No lo dudes más!", ordering:"Pidiendo…",
@@ -2850,7 +2848,7 @@ function pandaNavHTML(){
   return `
     ${state.pandaMenuOpen ? `<button class="panda-overlay" onclick="closePandaMenu()" aria-label="${t('closeMenu')}"></button>` : ''}
     <button class="my-order-btn" onclick="togglePandaMenu()" aria-label="${t('myPot')}" aria-expanded="${state.pandaMenuOpen}">
-      <span class="panda-avatar">🐼</span>
+      <span class="panda-avatar"><img src="../image/LOGO/logo.png" alt=""/></span>
       <span class="my-order-label">${t('myPot')}</span>
     </button>
     ${state.pandaMenuOpen ? `
