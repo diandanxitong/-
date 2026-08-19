@@ -56,6 +56,16 @@ service cloud.firestore {
       allow delete: if true;
     }
 
+    // 沽清菜品：员工在"沽清菜品"页勾选后写入这一个文档，顾客端和看板都实时监听
+    // 没有登录态，只能靠形状校验兜底：只准写 soldOut 这一个文档，且只能是一个 id 数组
+    match /menuStatus/{docId} {
+      allow read: if true;
+      allow write: if docId == 'soldOut'
+                    && request.resource.data.keys().hasOnly(['ids'])
+                    && request.resource.data.ids is list
+                    && request.resource.data.ids.size() <= 200;
+    }
+
     // 兜底：其他任何 collection 一律拒绝，避免规则之外的路径被意外读写
     match /{document=**} {
       allow read, write: if false;

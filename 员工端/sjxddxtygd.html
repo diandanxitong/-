@@ -43,6 +43,10 @@
   }
   .control-btn:hover{color:var(--text);border-color:var(--text-muted);}
   .control-btn:disabled{color:#5FBE8A;border-color:#5FBE8A;cursor:default;opacity:.9;}
+  .sold-out-entry-btn{
+    background:rgba(232,162,61,.16);border-color:var(--warn);color:var(--warn);font-weight:900;
+  }
+  .sold-out-entry-btn:hover{background:rgba(232,162,61,.26);color:var(--warn);border-color:var(--warn);}
 
   header{display:flex;align-items:baseline;justify-content:space-between;margin-bottom:22px;flex-wrap:wrap;gap:10px;}
   header h1{font-family:'Archivo Black',sans-serif;font-size:22px;letter-spacing:.02em;}
@@ -166,6 +170,7 @@
 <header>
   <h1><span class="live-dot"></span>接单看板</h1>
   <div style="display:flex;align-items:center;gap:12px;">
+    <a class="control-btn sold-out-entry-btn" href="gqcp.html">🚫 沽清菜品</a>
     <button class="control-btn" id="sound-toggle" onclick="unlockAudio()">🔊 开启提示音</button>
     <span class="status" id="status">加载中…</span>
     <span class="count-pill">待处理 <b id="count">0</b> 桌</span>

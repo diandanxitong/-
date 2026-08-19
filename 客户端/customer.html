@@ -213,6 +213,10 @@
     white-space:nowrap;padding-top:2px;
   }
   .dish-body .tag{font-size:12.5px;color:var(--text-muted);margin-top:6px;line-height:1.55;overflow-wrap:break-word;}
+  .dish-card.sold-out .dish-photo{filter:grayscale(1);opacity:.55;}
+  .dish-card.sold-out .dish-photo-wrap::before{opacity:.14;}
+  .dish-card.sold-out .dish-name{color:var(--text-muted);}
+  .sold-out-msg{font-size:13px;font-weight:800;color:var(--gold);text-align:center;margin-top:10px;}
   .allergen-row{display:flex;flex-wrap:wrap;gap:5px;margin-top:10px;}
   .allergen-chip{
     font-size:10px;font-weight:800;letter-spacing:.02em;color:var(--text-muted);
@@ -732,6 +736,17 @@ const firebaseConfig = {
 firebase.initializeApp(firebaseConfig);
 const db = firebase.firestore();
 const ordersRef = db.collection('orders');
+const menuStatusRef = db.collection('menuStatus').doc('soldOut');
+
+// 沽清菜品：员工在接单看板的"沽清菜品"页里勾选后写入这里，这边实时监听，
+// 让菜单里对应菜品立刻变灰、不可点选（无需刷新页面）
+let soldOutIds = new Set();
+function isSoldOut(id){ return soldOutIds.has(id); }
+menuStatusRef.onSnapshot(snap => {
+  const data = snap.data();
+  soldOutIds = new Set((data && data.ids) || []);
+  render();
+}, err => {});
 
 const LANG_ORDER = ['zh','en','it','fr','es'];
 const LANG_META = {
@@ -765,6 +780,7 @@ const I18N = {
     upsellTitle:"忘了点什么？", addToOrderBtn:"加入到当前订单", laterBtn:"以后再说",
     categories:{ all:"全部", appetizers:"前菜", dumplings:"饺子", soup:"汤", chefSpecial:"厨师推荐", vegetables:"蔬菜", riceNoodles:"饭/面类", dessert:"甜品", drinks:"酒水" },
     spice:["微辣","中辣","特辣"],
+    soldOutMsg:"暂时售罄，抱歉！",
   },
   en:{
     appTitle:"Scan to Order",
@@ -788,6 +804,7 @@ const I18N = {
     upsellTitle:"Forgot Something?", addToOrderBtn:"Add to Order", laterBtn:"Later",
     categories:{ all:"All", appetizers:"Appetizers", dumplings:"Dumplings", soup:"Soup", chefSpecial:"Chef's Specials", vegetables:"Vegetables", riceNoodles:"Rice & Noodles", dessert:"Dessert", drinks:"Drinks" },
     spice:["Mild","Medium","Extra Spicy"],
+    soldOutMsg:"Sorry, temporarily sold out~",
   },
   it:{
     appTitle:"Scansiona per Ordinare",
@@ -811,6 +828,7 @@ const I18N = {
     upsellTitle:"Hai Dimenticato Qualcosa?", addToOrderBtn:"Aggiungi all'Ordine", laterBtn:"Più Tardi",
     categories:{ all:"Tutti", appetizers:"Antipasti", dumplings:"Ravioli", soup:"Zuppe", chefSpecial:"Specialità dello Chef", vegetables:"Verdure", riceNoodles:"Riso e Noodles", dessert:"Dessert", drinks:"Bevande" },
     spice:["Poco Piccante","Piccante","Molto Piccante"],
+    soldOutMsg:"Siamo spiacenti, momentaneamente esaurito~",
   },
   fr:{
     appTitle:"Scanner pour Commander",
@@ -834,6 +852,7 @@ const I18N = {
     upsellTitle:"Vous Avez Oublié Quelque Chose ?", addToOrderBtn:"Ajouter à la Commande", laterBtn:"Plus Tard",
     categories:{ all:"Tous", appetizers:"Entrées", dumplings:"Raviolis", soup:"Soupes", chefSpecial:"Spécialités du Chef", vegetables:"Légumes", riceNoodles:"Riz et Nouilles", dessert:"Dessert", drinks:"Boissons" },
     spice:["Peu Épicé","Épicé","Très Épicé"],
+    soldOutMsg:"Désolé, temporairement épuisé~",
   },
   es:{
     appTitle:"Escanea para Pedir",
@@ -857,6 +876,7 @@ const I18N = {
     upsellTitle:"¿Olvidaste Algo?", addToOrderBtn:"Añadir al Pedido", laterBtn:"Más Tarde",
     categories:{ all:"Todos", appetizers:"Entrantes", dumplings:"Empanadillas", soup:"Sopas", chefSpecial:"Especialidades del Chef", vegetables:"Verduras", riceNoodles:"Arroz y Fideos", dessert:"Postres", drinks:"Bebidas" },
     spice:["Poco Picante","Picante","Muy Picante"],
+    soldOutMsg:"Lo sentimos, agotado temporalmente~",
   },
 };
 
@@ -2292,7 +2312,7 @@ function handlePlaceOrderClick(){
 
 function openUpsell(){
   const casualDrinkSubs = new Set(['softDrink','juice','beer']);
-  const pool = MENU.filter(d => (d.category === 'drinks' && casualDrinkSubs.has(d.sub)) || d.category === 'dessert');
+  const pool = MENU.filter(d => ((d.category === 'drinks' && casualDrinkSubs.has(d.sub)) || d.category === 'dessert') && !isSoldOut(d.id));
   state.upsellItems = shuffle(pool.map(d => d.id)).slice(0, 4);
   state.upsellSelected = {};
   state.upsellOpen = true;
@@ -2574,14 +2594,26 @@ function dishBodyHTML(d){
 // Photo wrapper is rendered once per card and never touched again by
 // updateItemUI — only .dish-body gets patched — so tapping qty/spice/
 // size/exclude never re-creates the <img> and flashes the photo.
+function soldOutBodyHTML(d){
+  const name = tDish(d.id,'name');
+  const tag = tDish(d.id,'tag');
+  return `
+          <div class="dish-title-row">
+            <h3 class="dish-name">${name}</h3>
+          </div>
+          ${tag ? `<p class="tag">${tag}</p>` : ''}
+          <p class="sold-out-msg">${t('soldOutMsg')}</p>`;
+}
+
 function dishCardHTML(d){
   const name = tDish(d.id,'name');
+  const soldOut = isSoldOut(d.id);
   return `
-      <div class="dish-card" data-id="${d.id}">
+      <div class="dish-card${soldOut ? ' sold-out' : ''}" data-id="${d.id}">
         <div class="dish-photo-wrap">
           <img class="dish-photo" src="${d.img}" alt="${name}" loading="lazy" decoding="async" onerror="this.style.display='none'">
         </div>
-        <div class="dish-body">${dishBodyHTML(d)}</div>
+        <div class="dish-body">${soldOut ? soldOutBodyHTML(d) : dishBodyHTML(d)}</div>
       </div>`;
 }
 
