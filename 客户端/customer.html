@@ -735,8 +735,20 @@ const firebaseConfig = {
 };
 firebase.initializeApp(firebaseConfig);
 const db = firebase.firestore();
+// 餐厅 wifi 经常是带代理/防火墙的访客网络，会挡掉 Firestore 默认用的 WebSocket 长连接，
+// 导致请求悬在那里既不成功也不报错。这里让 SDK 自动探测并回退到长轮询，兼容性更好。
+db.settings({ experimentalAutoDetectLongPolling: true });
 const ordersRef = db.collection('orders');
 const menuStatusRef = db.collection('menuStatus').doc('soldOut');
+
+// 给一个 promise 加超时：网络很差时 Firestore 请求可能一直挂着不 resolve 也不 reject，
+// 页面就会卡在"下单中"出不来。超时后统一当失败处理，好歹能提示顾客重试。
+function withTimeout(promise, ms){
+  return Promise.race([
+    promise,
+    new Promise((_, reject) => setTimeout(() => reject(new Error('timeout')), ms)),
+  ]);
+}
 
 // 沽清菜品：员工在接单看板的"沽清菜品"页里勾选后写入这里，这边实时监听，
 // 让菜单里对应菜品立刻变灰、不可点选（无需刷新页面）
@@ -2259,11 +2271,11 @@ async function callWaiter(){
   state.callingWaiter = true;
   render();
   try{
-    await ordersRef.add({
+    await withTimeout(ordersRef.add({
       table: state.table, items: [], createdAt: Date.now(),
       nickname: state.orderNickname || '', partySize: state.orderPartySize || 1,
       status: 'pending', call: true,
-    });
+    }), 12000);
     celebrateCallWaiter();
   }catch(e){ alert(t('orderFailed')); }
   state.callingWaiter = false;
@@ -2387,7 +2399,7 @@ function resetToMenu(){
 
 async function fetchTableOrders(table){
   try{
-    const snap = await ordersRef.where('table', '==', String(table)).get();
+    const snap = await withTimeout(ordersRef.where('table', '==', String(table)).get(), 8000);
     return snap.docs.map(d => d.data());
   }catch(e){ return []; }
 }
@@ -2430,14 +2442,14 @@ async function submitOrder(){
     const priorOrders = await fetchTableOrders(state.table);
     const isAddOn = priorOrders.length > 0;
 
-    const docRef = await ordersRef.add({
+    const docRef = await withTimeout(ordersRef.add({
       table: order.table,
       items: order.items,
       createdAt: order.createdAt,
       nickname: order.nickname,
       partySize: order.partySize,
       status: 'pending',
-    });
+    }), 12000);
 
     const tableOrders = await fetchTableOrders(state.table);
     const summaryItems = mergeItems(tableOrders.length > 0 ? tableOrders : [...priorOrders, order]);

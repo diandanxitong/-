@@ -192,6 +192,7 @@ const firebaseConfig = {
 };
 firebase.initializeApp(firebaseConfig);
 const db = firebase.firestore();
+db.settings({ experimentalAutoDetectLongPolling: true });
 const ordersRef = db.collection('orders');
 
 let orders = [];   // { key, table, items, createdAt, nickname, partySize, status }
@@ -199,14 +200,25 @@ let loaded = false;
 
 // 提示音：顾客呼叫 / 顾客下单。浏览器要求先有一次用户交互才允许播放音频，
 // 所以需要员工手动点一下"开启提示音"，这里顺带做一次静音播放来解锁。
+//
+// 之前 playSound 是每次 cloneNode() 出一个新 <audio> 再播放——iPad Safari 上
+// clone 出来的元素没有经过用户手势解锁，播放会被静默拒绝（桌面 Chrome 对这条
+// 策略比较宽松所以不会发现问题）。这里改成在解锁时就一次性 clone 出一小池
+// 元素并逐个解锁，播放时轮流复用池子里的元素，而不是现造一个新的。
+const SOUND_POOL_SIZE = 4;
 const callSound = new Audio('提示音/顾客呼叫.mp3');
 const orderSound = new Audio('提示音/顾客下单.mp3');
 let audioUnlocked = false;
+let callPool = [];
+let orderPool = [];
+let poolCursor = { call: 0, order: 0 };
 
 function unlockAudio(){
   if(audioUnlocked) return;
   audioUnlocked = true;
-  [callSound, orderSound].forEach(a => {
+  callPool = Array.from({length: SOUND_POOL_SIZE}, () => callSound.cloneNode());
+  orderPool = Array.from({length: SOUND_POOL_SIZE}, () => orderSound.cloneNode());
+  [callSound, orderSound, ...callPool, ...orderPool].forEach(a => {
     a.muted = true;
     a.play().then(()=>{ a.pause(); a.currentTime = 0; a.muted = false; }).catch(()=>{ a.muted = false; });
   });
@@ -214,10 +226,14 @@ function unlockAudio(){
   if(btn){ btn.textContent = '🔔 提示音已开启'; btn.disabled = true; }
 }
 
-function playSound(audio){
+function playSound(kind){
+  const pool = kind === 'call' ? callPool : orderPool;
+  if(pool.length === 0) return;
+  const a = pool[poolCursor[kind] % pool.length];
+  poolCursor[kind]++;
   try{
-    const clone = audio.cloneNode();
-    clone.play().catch(()=>{});
+    a.currentTime = 0;
+    a.play().catch(()=>{});
   }catch(e){}
 }
 
@@ -244,8 +260,8 @@ ordersRef.onSnapshot(snap => {
       if(change.type !== 'added') return;
       if(change.doc.data().call) hasNewCall = true; else hasNewOrder = true;
     });
-    if(hasNewCall) playSound(callSound);
-    if(hasNewOrder) playSound(orderSound);
+    if(hasNewCall) playSound('call');
+    if(hasNewOrder) playSound('order');
   }
   firstSnapshot = false;
 

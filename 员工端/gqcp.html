@@ -137,6 +137,7 @@ const firebaseConfig = {
 };
 firebase.initializeApp(firebaseConfig);
 const db = firebase.firestore();
+db.settings({ experimentalAutoDetectLongPolling: true });
 const menuStatusRef = db.collection('menuStatus').doc('soldOut');
 
 // 菜品清单：id / 分类 / 中文名，跟顾客端 customer.html 里的 DISH_DATA 保持一致
