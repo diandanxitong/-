@@ -81,29 +81,38 @@
 
   /* ---------- header ---------- */
   header.bar{
-    padding:28px 24px 18px;border-bottom:1px solid var(--card-line);
+    padding:26px 24px 22px;
     position:relative;overflow:hidden;
   }
   header.bar::after{
-    content:"";position:absolute;top:-30px;right:-30px;width:130px;height:130px;
+    content:"";position:absolute;top:-42px;right:-42px;width:120px;height:120px;
     background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><g fill='none' stroke='%23E8A23D' stroke-width='2'><circle cx='50' cy='50' r='30'/><path d='M20 50 Q35 30 50 50 Q65 70 80 50'/><path d='M20 50 Q35 70 50 50 Q65 30 80 50'/></g></svg>");
-    background-size:contain;background-repeat:no-repeat;opacity:.14;pointer-events:none;
+    background-size:contain;background-repeat:no-repeat;opacity:.1;pointer-events:none;
   }
-  .table-badge{display:flex;flex-direction:column;align-items:flex-start;gap:4px;position:relative;}
+  .bar-row{position:relative;z-index:1;display:flex;align-items:flex-start;justify-content:space-between;gap:12px;}
+  .table-badge{display:flex;flex-direction:column;align-items:flex-start;gap:10px;position:relative;}
+  .table-badge-row{display:flex;align-items:baseline;gap:14px;}
   .table-badge .num{
     font-family:'Archivo Black',sans-serif;
     font-size:36px;color:var(--ember);line-height:1;
     text-shadow:0 0 22px rgba(227,66,31,.5);
   }
+  .masthead-rule{
+    margin-top:2px;height:1px;position:relative;
+    background:linear-gradient(90deg, var(--gold-line), transparent 85%);
+  }
   .change-table{
     background:none;border:1px solid var(--card-line);color:var(--text-muted);
     font-size:12px;padding:6px 10px;border-radius:20px;cursor:pointer;
-    margin-top:6px;
   }
   .change-table:hover{color:var(--gold);border-color:var(--gold-line);}
 
-  /* ---------- panda nav (fixed, shown on every screen once a table is known) ---------- */
+  /* ---------- panda nav ----------
+     On the menu screen it's docked inline in the header (.menu-panda-slot)
+     so it scrolls away with the page instead of floating forever; #panda-nav
+     is the fixed fallback root used on the other (less-visited) screens. */
   #panda-nav{position:fixed;top:18px;right:18px;z-index:60;display:flex;flex-direction:column;align-items:flex-end;}
+  .menu-panda-slot{position:relative;z-index:56;flex-shrink:0;display:flex;flex-direction:column;align-items:flex-end;}
   .panda-overlay{position:fixed;inset:0;z-index:55;background:none;border:none;padding:0;margin:0;cursor:default;}
   .my-order-btn{
     position:relative;z-index:56;
@@ -147,45 +156,52 @@
   .allergen-grid{padding:4px 18px 16px;display:grid;grid-template-columns:1fr 1fr;gap:9px 14px;}
   .allergen-grid-item{display:flex;align-items:center;gap:8px;font-size:12px;color:var(--text);}
   /* ---------- chef's-special carousel (one photo, auto-advances every 3s) ---------- */
-  .chef-carousel{padding:18px 0 6px;}
-  .chef-carousel-label{padding:0 24px 10px;}
+  .chef-carousel{padding:22px 0 6px;}
   .chef-slide{
     position:relative;display:block;width:calc(100% - 48px);margin:0 24px;aspect-ratio:16/9;
-    border-radius:16px;overflow:hidden;border:1px solid var(--card-line);
+    border-radius:16px;overflow:hidden;border:1px solid var(--gold-line);
     background:var(--card);padding:0;cursor:pointer;font-family:inherit;
   }
   .chef-slide-photo{
     width:100%;height:100%;object-fit:cover;display:block;
     transition:opacity .3s ease;
   }
+  .chef-slide-tag{
+    position:absolute;left:14px;top:14px;z-index:2;
+    background:rgba(20,14,11,.55);backdrop-filter:blur(3px);-webkit-backdrop-filter:blur(3px);
+    border:1px solid var(--gold-line);color:var(--gold-hi);
+    font-size:10.5px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;
+    padding:5px 11px;border-radius:20px;
+  }
   .chef-slide-caption{
-    position:absolute;left:0;right:0;bottom:0;padding:26px 16px 12px;
-    background:linear-gradient(0deg, rgba(0,0,0,.72) 0%, rgba(0,0,0,0) 100%);
-    color:#fff;font-size:14px;font-weight:800;text-align:left;
+    position:absolute;left:0;right:0;bottom:0;padding:30px 16px 14px;
+    background:linear-gradient(0deg, rgba(0,0,0,.76) 0%, rgba(0,0,0,0) 100%);
+    color:#fff;font-size:15px;font-weight:800;letter-spacing:.01em;text-align:left;
     overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
     transition:opacity .3s ease;
   }
   .menu-body{display:flex;align-items:flex-start;}
   .category-nav{
     width:84px;flex-shrink:0;display:flex;flex-direction:column;
-    border-right:1px solid var(--card-line);
+    border-right:1px solid rgba(232,162,61,.14);
     position:sticky;top:0;align-self:flex-start;
     max-height:100vh;overflow-y:auto;
     scrollbar-width:none;
+    padding:4px 0;
   }
   .category-nav::-webkit-scrollbar{display:none;}
   .cat-btn{
     position:relative;
     background:none;border:none;color:var(--text-muted);
-    font-size:13px;font-weight:700;padding:14px 6px;cursor:pointer;text-align:center;
+    font-size:13px;font-weight:700;padding:12px 6px;cursor:pointer;text-align:center;
     font-family:inherit;line-height:1.3;
+    margin:2px 8px;border-radius:11px;
   }
-  .cat-btn::before{
-    content:"";position:absolute;left:0;top:10px;bottom:10px;width:3px;border-radius:2px;
-    background:linear-gradient(180deg,var(--cinnabar),var(--gold));opacity:0;transition:opacity .15s;
+  .cat-btn.active{
+    color:var(--gold-hi);
+    background:linear-gradient(160deg, rgba(232,162,61,.16), rgba(232,162,61,.04));
+    box-shadow:inset 0 0 0 1px var(--gold-line);
   }
-  .cat-btn.active{color:var(--text);background:var(--bg-soft);}
-  .cat-btn.active::before{opacity:1;}
   .cat-btn:hover{color:var(--text);}
   .dish-panel{flex:1;min-width:0;padding-right:16px;}
   .dish-list{padding:0 0 0 16px;display:flex;flex-direction:column;gap:14px;}
@@ -200,10 +216,6 @@
     border:1px solid var(--card-line);border-top:1px solid var(--gold-line);
     border-radius:var(--radius);
   }
-  .dish-card::before{
-    content:"";position:absolute;left:0;top:0;bottom:0;width:4px;z-index:2;
-    background:linear-gradient(180deg,var(--cinnabar),var(--gold));
-  }
   .dish-photo-wrap{
     position:relative;width:100%;aspect-ratio:3/2;overflow:hidden;
     background:linear-gradient(160deg,var(--bg-soft) 0%,var(--card) 100%);
@@ -213,12 +225,13 @@
     content:"🍽";font-size:36px;opacity:.28;position:absolute;
   }
   .dish-photo{position:relative;z-index:1;width:100%;height:100%;object-fit:cover;display:block;}
-  .dish-body{padding:13px 16px 13px 18px;}
+  .dish-body{padding:15px 18px 16px;}
   .dish-title-row{display:flex;justify-content:space-between;align-items:flex-start;gap:10px;}
   .dish-name{font-size:14.5px;font-weight:900;letter-spacing:.01em;line-height:1.32;color:var(--text);}
   .dish-price{
-    flex-shrink:0;font-family:'Archivo Black',sans-serif;font-size:13px;color:var(--gold);
-    white-space:nowrap;padding-top:2px;
+    flex-shrink:0;font-family:'Archivo Black',sans-serif;font-size:11.5px;color:var(--bg);
+    background:linear-gradient(160deg,var(--gold-hi),var(--gold) 62%,var(--gold-deep));
+    white-space:nowrap;padding:3px 9px 4px;border-radius:7px;margin-top:1px;
   }
   .dish-body .tag{font-size:12.5px;color:var(--text-muted);margin-top:6px;line-height:1.55;overflow-wrap:break-word;}
   .dish-card.sold-out .dish-photo-wrap::after{
@@ -271,26 +284,30 @@
   }
   .option-chip.active{border-color:var(--jade);color:var(--text);background:rgba(47,122,94,.16);}
   .option-chip.active .option-check{background:var(--jade);border-color:var(--jade);color:#fff;}
-  .dish-actions{display:flex;justify-content:flex-end;margin-top:12px;}
-  .stepper{display:flex;align-items:center;gap:2px;flex-shrink:0;}
+  .dish-actions{display:flex;justify-content:flex-end;margin-top:14px;padding-top:12px;border-top:1px dashed var(--card-line);}
+  .stepper{
+    display:flex;align-items:center;gap:0;flex-shrink:0;
+    border:1px solid var(--card-line);border-radius:999px;padding:3px;
+    background:var(--bg-soft);
+  }
   .stepper button{
-    width:32px;height:32px;border-radius:9px;border:1px solid var(--card-line);
-    background:var(--bg-soft);color:var(--text);font-size:18px;cursor:pointer;
+    width:30px;height:30px;border-radius:999px;border:none;
+    background:none;color:var(--text);font-size:17px;cursor:pointer;
     display:flex;align-items:center;justify-content:center;line-height:1;
   }
   .stepper button:disabled{opacity:.35;cursor:not-allowed;}
-  .stepper button:not(:disabled):hover{border-color:var(--ember);color:var(--ember);}
+  .stepper button:not(:disabled):hover{color:var(--ember);}
   .stepper button.stepper-add{
-    border-radius:50%;border-color:var(--jade);background:var(--jade);color:#fff;font-size:20px;
+    border-radius:50%;background:var(--jade);color:#fff;font-size:19px;
   }
-  .stepper button.stepper-add:not(:disabled):hover{border-color:var(--jade-dark);background:var(--jade-dark);color:#fff;}
-  .dish-card .stepper button.stepper-add{font-size:18px;}
+  .stepper button.stepper-add:not(:disabled):hover{background:var(--jade-dark);color:#fff;}
+  .dish-card .stepper button.stepper-add{font-size:17px;}
   .stepper .qty{
-    width:30px;text-align:center;font-weight:700;font-size:16px;
+    width:28px;text-align:center;font-weight:700;font-size:15px;
     font-family:'Archivo Black',sans-serif;
   }
-  .dish-card .stepper button{width:28px;height:28px;font-size:16px;}
-  .dish-card .stepper .qty{width:26px;font-size:14px;}
+  .dish-card .stepper button{width:27px;height:27px;font-size:15px;}
+  .dish-card .stepper .qty{width:24px;font-size:13.5px;}
   .spice-row{display:flex;gap:6px;margin-top:14px;padding-top:14px;border-top:1px dashed var(--card-line);}
   .spice-pill{
     flex:1;min-width:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;
@@ -325,20 +342,21 @@
   .submit-btn:not(:disabled):active{background:var(--ember-dark);}
 
   /* one unified pill spanning most of the screen width, slim, split unevenly into two actions */
-  .action-pill-wrap{width:84%;max-width:380px;min-width:280px;margin:0 auto;}
+  .action-pill-wrap{position:relative;width:84%;max-width:380px;min-width:280px;margin:0 auto;}
   .action-pill{
     position:relative;display:flex;align-items:stretch;
     border-radius:999px;overflow:hidden;
+    background:var(--card);
     border:1px solid var(--gold-line);
     box-shadow:0 12px 28px rgba(0,0,0,.45);
   }
   .action-pill::before{
     content:"";position:absolute;inset:0;z-index:2;pointer-events:none;
-    background:linear-gradient(180deg, rgba(255,255,255,.16) 0%, rgba(255,255,255,0) 42%);
+    background:linear-gradient(180deg, rgba(255,255,255,.1) 0%, rgba(255,255,255,0) 42%);
   }
   .action-pill::after{
-    content:"";position:absolute;z-index:2;top:16%;bottom:16%;left:60%;width:1px;
-    background:linear-gradient(180deg, transparent, rgba(232,162,61,.65), transparent);
+    content:"";position:absolute;z-index:2;top:20%;bottom:20%;left:40%;width:1px;
+    background:linear-gradient(180deg, transparent, rgba(232,162,61,.45), transparent);
     pointer-events:none;
   }
   .cart-btn, .order-now-btn{
@@ -346,30 +364,42 @@
     display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px;
     padding:10px 8px;text-align:center;
   }
-  .cart-btn{flex:3;}
-  .order-now-btn{flex:2;}
-  .cart-btn{background:linear-gradient(160deg,var(--jade) 0%,var(--jade-dark) 100%);color:#fff;}
-  .order-now-btn{background:linear-gradient(160deg,var(--ember) 0%,var(--ember-dark) 100%);color:#fff;}
-  .cart-btn:disabled, .order-now-btn:disabled{background:var(--card-line);color:var(--text-muted);cursor:not-allowed;}
-  .cart-btn:not(:disabled):active{background:var(--jade-dark);}
+  .cart-btn{flex:2;background:none;color:var(--gold-hi);}
+  .order-now-btn{flex:3;background:linear-gradient(160deg,var(--ember) 0%,var(--ember-dark) 100%);color:#fff;}
+  .cart-btn .cart-btn-sub{color:var(--text-muted);}
+  .cart-btn:disabled{color:var(--text-muted);cursor:not-allowed;}
+  .order-now-btn:disabled{background:var(--card-line);color:var(--text-muted);cursor:not-allowed;box-shadow:none;}
+  .cart-btn:not(:disabled):active{background:rgba(232,162,61,.1);}
   .order-now-btn:not(:disabled):active{background:var(--ember-dark);}
   .cart-btn-title, .order-now-title{font-size:16px;font-weight:900;letter-spacing:.02em;overflow-wrap:break-word;}
   .cart-btn-sub, .order-now-sub{font-size:10px;font-weight:500;opacity:.85;overflow-wrap:break-word;}
 
-  /* ---------- side-floating cart button + slide-in panel ---------- */
+  /* ---------- cart button: slim vertical tab docked to the right edge ---------- */
   .cart-side-fab{
-    position:fixed;right:14px;top:58%;transform:translateY(-50%);z-index:40;
-    width:50px;height:50px;
-    background:none;border:none;color:#fff;font-size:21px;cursor:pointer;
-    display:flex;align-items:center;justify-content:center;
-    filter:drop-shadow(0 6px 14px rgba(0,0,0,.45));
+    position:fixed;right:0;top:56%;transform:translateY(-50%);z-index:40;
+    width:32px;padding:12px 4px;font-family:inherit;
+    display:flex;flex-direction:column;align-items:center;justify-content:center;gap:7px;
+    background:linear-gradient(160deg,var(--card) 0%,var(--bg-soft) 100%);
+    border:1px solid var(--gold-line);border-right:none;border-radius:14px 0 0 14px;
+    color:var(--text);cursor:pointer;
+    box-shadow:-4px 6px 16px rgba(0,0,0,.4);
   }
-  .cart-side-fab-icon{width:40px;height:40px;object-fit:contain;pointer-events:none;}
+  .cart-side-fab:active:not(:disabled){transform:translateY(-50%) scale(.96);}
+  .cart-side-fab-icon-wrap{position:relative;flex-shrink:0;display:flex;}
+  .cart-side-fab-icon{width:20px;height:20px;object-fit:contain;pointer-events:none;display:block;}
   .cart-side-fab-badge{
-    position:absolute;top:-4px;right:-4px;min-width:19px;height:19px;padding:0 4px;
+    position:absolute;top:-7px;right:-9px;min-width:16px;height:16px;padding:0 3px;
     border-radius:999px;background:var(--cinnabar);color:#fff;
-    font-size:10px;font-weight:800;display:flex;align-items:center;justify-content:center;
-    border:1.5px solid var(--bg);
+    font-size:9px;font-weight:800;display:flex;align-items:center;justify-content:center;
+    border:1.5px solid var(--bg-soft);
+  }
+  .cart-side-fab-label{
+    font-family:inherit;font-size:10.5px;font-weight:700;letter-spacing:.03em;color:var(--gold-hi);
+    writing-mode:vertical-rl;text-orientation:upright;white-space:nowrap;line-height:1.2;
+    min-height:38px;
+  }
+  .cart-side-fab-label.latin{
+    text-orientation:sideways;letter-spacing:.02em;
   }
   .cart-side-overlay{position:fixed;inset:0;z-index:70;background:rgba(0,0,0,.45);border:none;padding:0;margin:0;cursor:default;}
   .cart-side-panel{
@@ -856,9 +886,10 @@ menuStatusRef.onSnapshot(snap => {
   render();
 }, err => {});
 
-const LANG_ORDER = ['zh','en','it','fr','es'];
+const LANG_ORDER = ['zh','zhHant','en','it','fr','es'];
 const LANG_META = {
   zh:{ native:'中文', greeting:'欢迎光临' },
+  zhHant:{ native:'繁體中文', greeting:'歡迎光臨' },
   en:{ native:'English', greeting:'Welcome' },
   it:{ native:'Italiano', greeting:'Benvenuti' },
   fr:{ native:'Français', greeting:'Bienvenue' },
@@ -890,6 +921,31 @@ const I18N = {
     categories:{ all:"全部", appetizers:"前菜", dumplings:"饺子", soup:"汤", chefSpecial:"厨师推荐", vegetables:"蔬菜", riceNoodles:"饭/面类", dessert:"甜品", drinks:"酒水" },
     spice:["微辣","中辣","特辣"],
     soldOutMsg:"暂时售罄，抱歉！",
+  },
+  zhHant:{
+    appTitle:'掃碼點單',
+    pickEyebrow:'選擇桌號', pickTitle:'請選擇桌號',
+    pickHint:'顧客請直接掃桌上二維碼；員工幫客人點單，請選擇對應桌號',
+    tablePrefix:'桌 ', tableEyebrow:'桌號', changeTable:'切換桌號',
+    menuTitle:'菜單', myPot:'我的', cart:'購物車', orderedItems:'已點菜品',
+    addToCart:'加入購物車', addToCartSub:'小糾結？先丟進購物車！',
+    callWaiter:'呼叫服務員', callWaiterSub:'有需要？點一下就好', calling:'呼叫中…', waiterCalled:'已呼叫服務員！',
+    orderNow:'立即下單', orderNowSub:'不再猶豫！', ordering:'下單中…',
+    addedToCart:'已加入購物車！', back:'返回',
+    addOnSuccess:'加單成功', orderPlaced:'已下單', waitConfirm:'請稍候，服務員馬上確認～',
+    kitchenSentTitle:'訂單已送進廚房', kitchenSentHint:'大廚已經開炒，請耐心等候上菜～',
+    orderRemovedNotice:'這筆訂單已被工作人員刪除，如有疑問請聯繫服務員～',
+    continueOrdering:'繼續點單', myOrder:'我的訂單', removeHint:'如需退菜，請聯繫服務員哦～',
+    loading:'加載中…', noOrderYet:'還沒有點菜，去菜單看看吧～', backToMenu:'返回菜單',
+    emptyCart:'購物車是空的，去菜單選幾道菜吧～',
+    orderFailed:'下單失敗，請重試一次，或直接告訴服務員～',
+    languageLabel:'語言', closeMenu:'關閉菜單', decreaseQty:'減少數量', increaseQty:'增加數量',
+    allergensBtn:'過敏原', allergensModalTitle:'過敏原說明', allergenTapHint:'點擊查看過敏原', totalLabel:'合計', perPersonSuffix:' /人',
+    orderReviewTitle:'確認訂單', nicknamePlaceholder:'請輸入你的暱稱，例如：JOHN', partySizeLabel:'請選擇您的就餐人數',
+    upsellTitle:'忘了點什麼？', addToOrderBtn:'加入到當前訂單', laterBtn:'以後再說',
+    categories:{ all:'全部', appetizers:'前菜', dumplings:'餃子', soup:'湯', chefSpecial:'廚師推薦', vegetables:'蔬菜', riceNoodles:'飯/麵類', dessert:'甜品', drinks:'酒水' },
+    spice:['微辣','中辣','特辣'],
+    soldOutMsg:'暫時售罄，抱歉！',
   },
   en:{
     appTitle:"Scan to Order",
@@ -995,51 +1051,51 @@ const I18N = {
 
 const ALLERGEN_CODE_ORDER = ['GW','GB','C','E','S','N','CE','M','F','P','MO','MU','L','SU','SE'];
 const ALLERGEN_NAMES = {
-  GW:{zh:'麸质(小麦)',en:'Wheat Gluten',it:'Glutine di Grano',fr:'Gluten de Blé',es:'Gluten de Trigo'},
-  GB:{zh:'麸质(大麦)',en:'Barley Gluten',it:"Glutine d'Orzo",fr:"Gluten d'Orge",es:'Gluten de Cebada'},
-  C:{zh:'甲壳类',en:'Crustaceans',it:'Crostacei',fr:'Crustacés',es:'Crustáceos'},
-  E:{zh:'蛋',en:'Egg',it:'Uova',fr:'Œufs',es:'Huevo'},
-  S:{zh:'大豆',en:'Soybeans',it:'Soia',fr:'Soja',es:'Soja'},
-  N:{zh:'腰果',en:'Cashew Nuts',it:'Anacardi',fr:'Noix de Cajou',es:'Anacardos'},
-  CE:{zh:'芹菜',en:'Celery',it:'Sedano',fr:'Céleri',es:'Apio'},
-  M:{zh:'奶',en:'Milk',it:'Latte',fr:'Lait',es:'Leche'},
-  F:{zh:'鱼',en:'Fish',it:'Pesce',fr:'Poisson',es:'Pescado'},
-  P:{zh:'花生',en:'Peanuts',it:'Arachidi',fr:'Arachides',es:'Cacahuetes'},
-  MO:{zh:'软体动物',en:'Molluscs',it:'Molluschi',fr:'Mollusques',es:'Moluscos'},
-  MU:{zh:'芥末',en:'Mustard',it:'Senape',fr:'Moutarde',es:'Mostaza'},
-  L:{zh:'羽扇豆',en:'Lupin',it:'Lupini',fr:'Lupin',es:'Altramuces'},
-  SU:{zh:'亚硫酸盐',en:'Sulphites',it:'Solfiti',fr:'Sulfites',es:'Sulfitos'},
-  SE:{zh:'芝麻',en:'Sesame Seeds',it:'Semi di Sesamo',fr:'Graines de Sésame',es:'Semillas de Sésamo'},
+  GW:{zh:'麸质(小麦)',zhHant:'麩質(小麥)',en:'Wheat Gluten',it:'Glutine di Grano',fr:'Gluten de Blé',es:'Gluten de Trigo'},
+  GB:{zh:'麸质(大麦)',zhHant:'麩質(大麥)',en:'Barley Gluten',it:"Glutine d'Orzo",fr:"Gluten d'Orge",es:'Gluten de Cebada'},
+  C:{zh:'甲壳类',zhHant:'甲殼類',en:'Crustaceans',it:'Crostacei',fr:'Crustacés',es:'Crustáceos'},
+  E:{zh:'蛋',zhHant:'蛋',en:'Egg',it:'Uova',fr:'Œufs',es:'Huevo'},
+  S:{zh:'大豆',zhHant:'大豆',en:'Soybeans',it:'Soia',fr:'Soja',es:'Soja'},
+  N:{zh:'腰果',zhHant:'腰果',en:'Cashew Nuts',it:'Anacardi',fr:'Noix de Cajou',es:'Anacardos'},
+  CE:{zh:'芹菜',zhHant:'芹菜',en:'Celery',it:'Sedano',fr:'Céleri',es:'Apio'},
+  M:{zh:'奶',zhHant:'奶',en:'Milk',it:'Latte',fr:'Lait',es:'Leche'},
+  F:{zh:'鱼',zhHant:'魚',en:'Fish',it:'Pesce',fr:'Poisson',es:'Pescado'},
+  P:{zh:'花生',zhHant:'花生',en:'Peanuts',it:'Arachidi',fr:'Arachides',es:'Cacahuetes'},
+  MO:{zh:'软体动物',zhHant:'軟體動物',en:'Molluscs',it:'Molluschi',fr:'Mollusques',es:'Moluscos'},
+  MU:{zh:'芥末',zhHant:'芥末',en:'Mustard',it:'Senape',fr:'Moutarde',es:'Mostaza'},
+  L:{zh:'羽扇豆',zhHant:'羽扇豆',en:'Lupin',it:'Lupini',fr:'Lupin',es:'Altramuces'},
+  SU:{zh:'亚硫酸盐',zhHant:'亞硫酸鹽',en:'Sulphites',it:'Solfiti',fr:'Sulfites',es:'Sulfitos'},
+  SE:{zh:'芝麻',zhHant:'芝麻',en:'Sesame Seeds',it:'Semi di Sesamo',fr:'Graines de Sésame',es:'Semillas de Sésamo'},
 };
 const SIZE_LABELS = {
-  half:{zh:'半只',en:'Half',it:'Mezza',fr:'Demi',es:'Media'},
-  whole:{zh:'整只',en:'Whole',it:'Intera',fr:'Entier',es:'Entera'},
-  large:{zh:'大份',en:'Large',it:'Grande',fr:'Grande',es:'Grande'},
-  small:{zh:'小份',en:'Small',it:'Piccola',fr:'Petite',es:'Pequeña'},
-  glass:{zh:'杯',en:'Glass',it:'Calice',fr:'Verre',es:'Copa'},
-  bottle:{zh:'瓶',en:'Bottle',it:'Bottiglia',fr:'Bouteille',es:'Botella'},
+  half:{zh:'半只',zhHant:'半隻',en:'Half',it:'Mezza',fr:'Demi',es:'Media'},
+  whole:{zh:'整只',zhHant:'整隻',en:'Whole',it:'Intera',fr:'Entier',es:'Entera'},
+  large:{zh:'大份',zhHant:'大份',en:'Large',it:'Grande',fr:'Grande',es:'Grande'},
+  small:{zh:'小份',zhHant:'小份',en:'Small',it:'Piccola',fr:'Petite',es:'Pequeña'},
+  glass:{zh:'杯',zhHant:'杯',en:'Glass',it:'Calice',fr:'Verre',es:'Copa'},
+  bottle:{zh:'瓶',zhHant:'瓶',en:'Bottle',it:'Bottiglia',fr:'Bouteille',es:'Botella'},
 };
 // 饺子/烧卖不提供忌口选项，只需要选蒸/煎的做法
 const COOK_METHOD_LABELS = {
-  steamed:{zh:'蒸',en:'Steamed',it:'Al vapore',fr:'Vapeur',es:'Al vapor'},
-  panFried:{zh:'煎',en:'Pan-Fried',it:'In padella',fr:'Poêlé',es:'A la plancha'},
+  steamed:{zh:'蒸',zhHant:'蒸',en:'Steamed',it:'Al vapore',fr:'Vapeur',es:'Al vapor'},
+  panFried:{zh:'煎',zhHant:'煎',en:'Pan-Fried',it:'In padella',fr:'Poêlé',es:'A la plancha'},
 };
 const SUBGROUP_LABELS = {
-  whiteWine:{zh:'白葡萄酒',en:'White Wine',it:'Vino Bianco',fr:'Vin Blanc',es:'Vino Blanco'},
-  redWine:{zh:'红葡萄酒',en:'Red Wine',it:'Vino Rosso',fr:'Vin Rouge',es:'Vino Tinto'},
-  rose:{zh:'桃红',en:'Rosé',it:'Rosé',fr:'Rosé',es:'Rosado'},
-  sparkling:{zh:'起泡酒',en:'Sparkling',it:'Spumante',fr:'Pétillant',es:'Espumoso'},
-  softDrink:{zh:'软饮 + 水',en:'Soft Drinks & Water',it:'Bibite e Acqua',fr:'Boissons et Eau',es:'Refrescos y Agua'},
-  juice:{zh:'果汁',en:'Juices',it:'Succhi di Frutta',fr:'Jus de Fruits',es:'Zumos'},
-  beer:{zh:'啤酒',en:'Beer',it:'Birra',fr:'Bière',es:'Cerveza'},
+  whiteWine:{zh:'白葡萄酒',zhHant:'白葡萄酒',en:'White Wine',it:'Vino Bianco',fr:'Vin Blanc',es:'Vino Blanco'},
+  redWine:{zh:'红葡萄酒',zhHant:'紅葡萄酒',en:'Red Wine',it:'Vino Rosso',fr:'Vin Rouge',es:'Vino Tinto'},
+  rose:{zh:'桃红',zhHant:'桃紅',en:'Rosé',it:'Rosé',fr:'Rosé',es:'Rosado'},
+  sparkling:{zh:'起泡酒',zhHant:'起泡酒',en:'Sparkling',it:'Spumante',fr:'Pétillant',es:'Espumoso'},
+  softDrink:{zh:'软饮 + 水',zhHant:'軟飲 + 水',en:'Soft Drinks & Water',it:'Bibite e Acqua',fr:'Boissons et Eau',es:'Refrescos y Agua'},
+  juice:{zh:'果汁',zhHant:'果汁',en:'Juices',it:'Succhi di Frutta',fr:'Jus de Fruits',es:'Zumos'},
+  beer:{zh:'啤酒',zhHant:'啤酒',en:'Beer',it:'Birra',fr:'Bière',es:'Cerveza'},
 };
 function tSubGroup(key){ return (SUBGROUP_LABELS[key] || {})[state.lang] || SUBGROUP_LABELS[key].zh; }
 const OPTION_LABELS = {
-  scallion:{zh:'不要葱',en:'No Spring Onion',it:'Senza Cipollotto',fr:'Sans Oignon Vert',es:'Sin Cebolleta'},
-  onion:{zh:'不要洋葱',en:'No Onion',it:'Senza Cipolla',fr:'Sans Oignon',es:'Sin Cebolla'},
-  ginger:{zh:'不要姜',en:'No Ginger',it:'Senza Zenzero',fr:'Sans Gingembre',es:'Sin Jengibre'},
-  cilantro:{zh:'不要香菜',en:'No Coriander',it:'Senza Coriandolo',fr:'Sans Coriandre',es:'Sin Cilantro'},
-  meat:{zh:'不要肉',en:'No Meat',it:'Senza Carne',fr:'Sans Viande',es:'Sin Carne'},
+  scallion:{zh:'不要葱',zhHant:'不要蔥',en:'No Spring Onion',it:'Senza Cipollotto',fr:'Sans Oignon Vert',es:'Sin Cebolleta'},
+  onion:{zh:'不要洋葱',zhHant:'不要洋蔥',en:'No Onion',it:'Senza Cipolla',fr:'Sans Oignon',es:'Sin Cebolla'},
+  ginger:{zh:'不要姜',zhHant:'不要姜',en:'No Ginger',it:'Senza Zenzero',fr:'Sans Gingembre',es:'Sin Jengibre'},
+  cilantro:{zh:'不要香菜',zhHant:'不要香菜',en:'No Coriander',it:'Senza Coriandolo',fr:'Sans Coriandre',es:'Sin Cilantro'},
+  meat:{zh:'不要肉',zhHant:'不要肉',en:'No Meat',it:'Senza Carne',fr:'Sans Viande',es:'Sin Carne'},
 };
 
 function t(key){
@@ -1085,7 +1141,7 @@ const DISH_DATA = [
   // ---------- 前菜 Appetizers ----------
   { id:'spicyBag', category:'appetizers', price:11.80, allergens:[], img:'../image/菜品/spice bag.jpg',
     i18n:{
-      zh:{name:'辣袋', tag:'薯条、洋葱、红甜椒、鸡柳'},
+      zh:{name:'辣袋', tag:'薯条、洋葱、红甜椒、鸡柳'}, zhHant:{name:'辣袋', tag:'薯條、洋蔥、紅甜椒、雞柳'},
       en:{name:'Spice Bag', tag:'French fries, onion, red bell pepper, chicken strips'},
       it:{name:'Sacchetto Piccante', tag:'Patatine fritte, cipolla, peperone rosso, straccetti di pollo'},
       fr:{name:'Sachet Épicé', tag:'Frites, oignon, poivron rouge, aiguillettes de poulet'},
@@ -1093,7 +1149,7 @@ const DISH_DATA = [
     }},
   { id:'veggieSpringRoll', category:'appetizers', price:8.80, allergens:['GW','GB','M','E'],
     i18n:{
-      zh:{name:'蔬菜春卷', tag:'春卷皮、木耳、卷心菜、胡萝卜、上海青'},
+      zh:{name:'蔬菜春卷', tag:'春卷皮、木耳、卷心菜、胡萝卜、上海青'}, zhHant:{name:'蔬菜春捲', tag:'春捲皮、木耳、捲心菜、胡蘿蔔、上海青'},
       en:{name:'Vegetable Spring Rolls', tag:'Spring roll pastry, wood ear mushroom, cabbage, carrot, pak choi'},
       it:{name:'Involtini Primavera Vegetariani', tag:'Pasta per involtini, fungo nero, cavolo, carota, pak choi'},
       fr:{name:'Rouleaux de Printemps aux Légumes', tag:'Pâte à rouleaux de printemps, champignon noir, chou, carotte, pak choi'},
@@ -1101,7 +1157,7 @@ const DISH_DATA = [
     }},
   { id:'taroToastRoll', category:'appetizers', price:8.80, allergens:['GW','GB','E','M','SE'],
     i18n:{
-      zh:{name:'芋头吐司卷', tag:'芋头馅、脆皮、芝麻'},
+      zh:{name:'芋头吐司卷', tag:'芋头馅、脆皮、芝麻'}, zhHant:{name:'芋頭吐司卷', tag:'芋頭餡、脆皮、芝麻'},
       en:{name:'Taro Toast Rolls', tag:'Taro filling, crispy toast wrapper, sesame seeds'},
       it:{name:'Involtini di Toast al Taro', tag:'Ripieno di taro, involucro croccante, semi di sesamo'},
       fr:{name:'Rouleaux de Pain Toast au Taro', tag:'Farce de taro, enveloppe croustillante, graines de sésame'},
@@ -1109,7 +1165,7 @@ const DISH_DATA = [
     }},
   { id:'prawnToast', category:'appetizers', price:9.80, allergens:['GW','GB','E','C','M','SE'],
     i18n:{
-      zh:{name:'鲜虾多士', tag:'虾仁、多士面包、芝麻、芝麻沙拉酱'},
+      zh:{name:'鲜虾多士', tag:'虾仁、多士面包、芝麻、芝麻沙拉酱'}, zhHant:{name:'鮮蝦多士', tag:'蝦仁、多士麵包、芝麻、芝麻沙拉醬'},
       en:{name:'Prawn Toast', tag:'Prawn, toast bread, sesame seeds, sesame salad dressing'},
       it:{name:'Toast ai Gamberi', tag:'Gamberi, pane toast, semi di sesamo, salsa al sesamo'},
       fr:{name:'Toast aux Crevettes', tag:'Crevettes, pain toast, graines de sésame, sauce sésame'},
@@ -1117,7 +1173,7 @@ const DISH_DATA = [
     }},
   { id:'crispyWonton', category:'appetizers', price:9.80, allergens:['GW','GB','E','SE','C','M'],
     i18n:{
-      zh:{name:'脆香云吞', tag:'虾仁、鸡肉、云吞皮'},
+      zh:{name:'脆香云吞', tag:'虾仁、鸡肉、云吞皮'}, zhHant:{name:'脆香雲吞', tag:'蝦仁、雞肉、雲吞皮'},
       en:{name:'Crispy Wontons', tag:'Prawns, chicken, wonton wrapper'},
       it:{name:'Wonton Croccanti', tag:'Gamberi, pollo, involucro di wonton'},
       fr:{name:'Wontons Croustillants', tag:'Crevettes, poulet, pâte à wonton'},
@@ -1125,7 +1181,7 @@ const DISH_DATA = [
     }},
   { id:'crispySeafoodRoll', category:'appetizers', price:15.80, allergens:['GW','GB','M','E','C'],
     i18n:{
-      zh:{name:'脆皮海鲜卷', tag:'虾仁、威化纸'},
+      zh:{name:'脆皮海鲜卷', tag:'虾仁、威化纸'}, zhHant:{name:'脆皮海鮮卷', tag:'蝦仁、威化紙'},
       en:{name:'Crispy Seafood Rolls', tag:'Prawns, crispy wafer wrapper'},
       it:{name:'Involtini di Mare Croccanti', tag:'Gamberi, involucro di wafer croccante'},
       fr:{name:'Rouleaux de Fruits de Mer Croustillants', tag:'Crevettes, feuille de galette croustillante'},
@@ -1133,7 +1189,7 @@ const DISH_DATA = [
     }},
   { id:'mouthWateringChicken', category:'appetizers', price:12.80, allergens:['SE','CE','S','P','GW','GB'],
     i18n:{
-      zh:{name:'川味口水鸡', tag:'鸡肉、黄瓜、蒜、辣椒粉'},
+      zh:{name:'川味口水鸡', tag:'鸡肉、黄瓜、蒜、辣椒粉'}, zhHant:{name:'川味口水雞', tag:'雞肉、黃瓜、蒜、辣椒粉'},
       en:{name:'Sichuan Mouth-Watering Chicken', tag:'Chicken, cucumber, garlic, chilli oil'},
       it:{name:'Pollo Piccante alla Sichuan "Acquolina"', tag:'Pollo, cetriolo, aglio, olio piccante'},
       fr:{name:'Poulet Sichuan "Qui Fait Saliver"', tag:'Poulet, concombre, ail, huile pimentée'},
@@ -1141,7 +1197,7 @@ const DISH_DATA = [
     }},
   { id:'mustardPrawns', category:'appetizers', price:14.80, allergens:['GW','GB','M','E','C','MU'],
     i18n:{
-      zh:{name:'芥酥芥末虾', tag:'虾仁、丘比沙拉酱、黄芥末'},
+      zh:{name:'芥酥芥末虾', tag:'虾仁、丘比沙拉酱、黄芥末'}, zhHant:{name:'芥酥芥末蝦', tag:'蝦仁、丘比沙拉醬、黃芥末'},
       en:{name:'Signature Wasabi Mayo Prawns', tag:'Prawns, Kewpie mayo dressing, yellow mustard'},
       it:{name:'Gamberi alla Senape (Specialità)', tag:'Gamberi, maionese Kewpie, senape gialla'},
       fr:{name:'Crevettes à la Moutarde (Spécialité)', tag:'Crevettes, mayonnaise Kewpie, moutarde jaune'},
@@ -1149,7 +1205,7 @@ const DISH_DATA = [
     }},
   { id:'chongqingSpicyChicken', category:'appetizers', price:14.80, allergens:['SE','S','P','GW','GB'],
     i18n:{
-      zh:{name:'重庆辣子鸡', tag:'鸡肉、干辣椒、姜、蒜'},
+      zh:{name:'重庆辣子鸡', tag:'鸡肉、干辣椒、姜、蒜'}, zhHant:{name:'重慶辣子雞', tag:'雞肉、幹辣椒、姜、蒜'},
       en:{name:'Chongqing Chilli Chicken', tag:'Chicken, dried chillies, ginger, garlic'},
       it:{name:'Pollo Piccante alla Chongqing', tag:'Pollo, peperoncini secchi, zenzero, aglio'},
       fr:{name:'Poulet Épicé de Chongqing', tag:'Poulet, piments séchés, gingembre, ail'},
@@ -1157,7 +1213,7 @@ const DISH_DATA = [
     }},
   { id:'fuqiFeipian', category:'appetizers', price:14.80, allergens:['SE','CE','S','P','GW','GB'],
     i18n:{
-      zh:{name:'夫妻肺片', tag:'牛肉、牛舌、牛肚、芹菜、蒜、辣椒油'},
+      zh:{name:'夫妻肺片', tag:'牛肉、牛舌、牛肚、芹菜、蒜、辣椒油'}, zhHant:{name:'夫妻肺片', tag:'牛肉、牛舌、牛肚、芹菜、蒜、辣椒油'},
       en:{name:'Sliced Beef & Ox Tongue in Chilli Sauce', tag:'Beef, ox tongue, ox tripe, celery, garlic, chilli oil'},
       it:{name:'Manzo e Lingua di Bue in Salsa Piccante', tag:'Manzo, lingua di bue, trippa di bue, sedano, aglio, olio piccante'},
       fr:{name:'Bœuf et Langue de Bœuf en Sauce Pimentée', tag:'Bœuf, langue de bœuf, tripes de bœuf, céleri, ail, huile pimentée'},
@@ -1165,7 +1221,7 @@ const DISH_DATA = [
     }},
   { id:'cucumberSalad', category:'appetizers', price:9.80, allergens:['GW','GB','S','SE'],
     i18n:{
-      zh:{name:'手拍黄瓜', tag:'黄瓜、蒜、辣椒油'},
+      zh:{name:'手拍黄瓜', tag:'黄瓜、蒜、辣椒油'}, zhHant:{name:'手拍黃瓜', tag:'黃瓜、蒜、辣椒油'},
       en:{name:'Smashed Cucumber Salad', tag:'Cucumber, garlic, chilli oil'},
       it:{name:'Insalata di Cetrioli Schiacciati', tag:'Cetriolo, aglio, olio piccante'},
       fr:{name:'Salade de Concombre Écrasé', tag:'Concombre, ail, huile pimentée'},
@@ -1173,7 +1229,7 @@ const DISH_DATA = [
     }},
   { id:'spicyBeefJerky', category:'appetizers', price:15.80, allergens:['GW','GB','S','SE'],
     i18n:{
-      zh:{name:'麻辣牛肉干', tag:'牛肉、干辣椒'},
+      zh:{name:'麻辣牛肉干', tag:'牛肉、干辣椒'}, zhHant:{name:'麻辣牛肉乾', tag:'牛肉、幹辣椒'},
       en:{name:'Mala Spiced Beef Jerky', tag:'Beef, dried chillies'},
       it:{name:'Manzo Essiccato Piccante "Mala"', tag:'Manzo, peperoncini secchi'},
       fr:{name:'Bœuf Séché Épicé "Mala"', tag:'Bœuf, piments séchés'},
@@ -1183,7 +1239,7 @@ const DISH_DATA = [
   // ---------- 饺子 Dumplings ----------
   { id:'porkDumplings', category:'dumplings', price:9.80, allergens:['GW','GB','S','SU','E','SE'],
     i18n:{
-      zh:{name:'猪肉饺子 (6只)', tag:'猪肉、姜'},
+      zh:{name:'猪肉饺子 (6只)', tag:'猪肉、姜'}, zhHant:{name:'豬肉餃子 (6只)', tag:'豬肉、姜'},
       en:{name:'Pork Dumplings (6pcs)', tag:'Pork, ginger'},
       it:{name:'Ravioli al Maiale (6pz)', tag:'Maiale, zenzero'},
       fr:{name:'Raviolis au Porc (6pcs)', tag:'Porc, gingembre'},
@@ -1191,7 +1247,7 @@ const DISH_DATA = [
     }},
   { id:'chickenDumplings', category:'dumplings', price:9.80, allergens:['GW','GB','S','SU','E','SE'],
     i18n:{
-      zh:{name:'鸡肉饺子 (6只)', tag:'鸡肉、姜'},
+      zh:{name:'鸡肉饺子 (6只)', tag:'鸡肉、姜'}, zhHant:{name:'雞肉餃子 (6只)', tag:'雞肉、姜'},
       en:{name:'Chicken Dumplings (6pcs)', tag:'Chicken, ginger'},
       it:{name:'Ravioli al Pollo (6pz)', tag:'Pollo, zenzero'},
       fr:{name:'Raviolis au Poulet (6pcs)', tag:'Poulet, gingembre'},
@@ -1199,7 +1255,7 @@ const DISH_DATA = [
     }},
   { id:'vegDumplings', category:'dumplings', price:9.80, allergens:['GW','GB','S','E','SE'],
     i18n:{
-      zh:{name:'蔬菜饺子 (6只)', tag:'韭菜、豆腐、鸡蛋'},
+      zh:{name:'蔬菜饺子 (6只)', tag:'韭菜、豆腐、鸡蛋'}, zhHant:{name:'蔬菜餃子 (6只)', tag:'韭菜、豆腐、雞蛋'},
       en:{name:'Vegetable Dumplings (6pcs)', tag:'Leek, tofu, egg'},
       it:{name:'Ravioli Vegetariani (6pz)', tag:'Porro, tofu, uovo'},
       fr:{name:'Raviolis aux Légumes (6pcs)', tag:'Poireau, tofu, œuf'},
@@ -1207,7 +1263,7 @@ const DISH_DATA = [
     }},
   { id:'siuMai', category:'dumplings', price:9.80, allergens:['GW','GB','S','SU','E','SE'],
     i18n:{
-      zh:{name:'干蒸烧卖 (6只)', tag:'鸡肉、虾仁、烧卖皮、鱼籽、马铃薯淀粉'},
+      zh:{name:'干蒸烧卖 (6只)', tag:'鸡肉、虾仁、烧卖皮、鱼籽、马铃薯淀粉'}, zhHant:{name:'幹蒸燒賣 (6只)', tag:'雞肉、蝦仁、燒賣皮、魚籽、馬鈴薯澱粉'},
       en:{name:'Steamed Chicken & Prawn Siu Mai (6pcs)', tag:'Chicken, prawn, siu mai wrapper, fish roe, potato starch'},
       it:{name:'Siu Mai al Vapore con Pollo e Gamberi (6pz)', tag:'Pollo, gamberi, involucro siu mai, uova di pesce, amido di patate'},
       fr:{name:'Siu Mai Vapeur au Poulet et aux Crevettes (6pcs)', tag:'Poulet, crevettes, pâte à siu mai, œufs de poisson, fécule de pomme de terre'},
@@ -1217,7 +1273,7 @@ const DISH_DATA = [
   // ---------- 汤 Soup (priced per person) ----------
   { id:'hotSourSoupVeg', category:'soup', price:6.80, unit:'person', allergens:['GW','GB','S','E','L'],
     i18n:{
-      zh:{name:'酸辣汤(素)', tag:'香菇、木耳、豆腐'},
+      zh:{name:'酸辣汤(素)', tag:'香菇、木耳、豆腐'}, zhHant:{name:'酸辣湯(素)', tag:'香菇、木耳、豆腐'},
       en:{name:'Hot & Sour Soup (Vegetable)', tag:'Mushroom, wood ear mushroom, tofu'},
       it:{name:'Zuppa Agropiccante (Vegetariana)', tag:'Fungo, fungo nero, tofu'},
       fr:{name:'Soupe Aigre-Piquante (Végétarienne)', tag:'Champignon, champignon noir, tofu'},
@@ -1225,7 +1281,7 @@ const DISH_DATA = [
     }},
   { id:'hotSourSoupChicken', category:'soup', price:7.80, unit:'person', allergens:['GW','GB','S','SE','L'],
     i18n:{
-      zh:{name:'酸辣汤(鸡肉)', tag:'香菇、木耳、豆腐、鸡肉'},
+      zh:{name:'酸辣汤(鸡肉)', tag:'香菇、木耳、豆腐、鸡肉'}, zhHant:{name:'酸辣湯(雞肉)', tag:'香菇、木耳、豆腐、雞肉'},
       en:{name:'Hot & Sour Soup (Chicken)', tag:'Mushroom, wood ear mushroom, tofu, chicken'},
       it:{name:'Zuppa Agropiccante (Pollo)', tag:'Fungo, fungo nero, tofu, pollo'},
       fr:{name:'Soupe Aigre-Piquante (Poulet)', tag:'Champignon, champignon noir, tofu, poulet'},
@@ -1233,7 +1289,7 @@ const DISH_DATA = [
     }},
   { id:'hotSourSoupSeafood', category:'soup', price:8.80, unit:'person', allergens:['GW','GB','S','SE','L','C'],
     i18n:{
-      zh:{name:'酸辣汤(海鲜)', tag:'香菇、木耳、豆腐、虾仁'},
+      zh:{name:'酸辣汤(海鲜)', tag:'香菇、木耳、豆腐、虾仁'}, zhHant:{name:'酸辣湯(海鮮)', tag:'香菇、木耳、豆腐、蝦仁'},
       en:{name:'Hot & Sour Soup (Seafood)', tag:'Mushroom, wood ear mushroom, tofu, prawn'},
       it:{name:'Zuppa Agropiccante (Mare)', tag:'Fungo, fungo nero, tofu, gamberi'},
       fr:{name:'Soupe Aigre-Piquante (Fruits de Mer)', tag:'Champignon, champignon noir, tofu, crevettes'},
@@ -1241,7 +1297,7 @@ const DISH_DATA = [
     }},
   { id:'cornSoupVeg', category:'soup', price:6.80, unit:'person', allergens:['M'],
     i18n:{
-      zh:{name:'玉米汤(素)', tag:'甜玉米'},
+      zh:{name:'玉米汤(素)', tag:'甜玉米'}, zhHant:{name:'玉米湯(素)', tag:'甜玉米'},
       en:{name:'Sweetcorn Soup (Vegetable)', tag:'Sweet corn'},
       it:{name:'Zuppa di Mais (Vegetariana)', tag:'Mais dolce'},
       fr:{name:'Soupe de Maïs (Végétarienne)', tag:'Maïs doux'},
@@ -1249,7 +1305,7 @@ const DISH_DATA = [
     }},
   { id:'cornSoupChicken', category:'soup', price:7.80, unit:'person', allergens:['M'],
     i18n:{
-      zh:{name:'玉米汤(鸡肉)', tag:'甜玉米、鸡肉'},
+      zh:{name:'玉米汤(鸡肉)', tag:'甜玉米、鸡肉'}, zhHant:{name:'玉米湯(雞肉)', tag:'甜玉米、雞肉'},
       en:{name:'Sweetcorn & Chicken Soup', tag:'Sweet corn, chicken'},
       it:{name:'Zuppa di Mais e Pollo', tag:'Mais dolce, pollo'},
       fr:{name:'Soupe de Maïs au Poulet', tag:'Maïs doux, poulet'},
@@ -1257,7 +1313,7 @@ const DISH_DATA = [
     }},
   { id:'nourishingChickenSoup', category:'soup', price:16.80, allergens:[],
     i18n:{
-      zh:{name:'滋补鸡汤', tag:'鸡肉、猪肉、红枣、枸杞、姜、香菇'},
+      zh:{name:'滋补鸡汤', tag:'鸡肉、猪肉、红枣、枸杞、姜、香菇'}, zhHant:{name:'滋補雞湯', tag:'雞肉、豬肉、紅棗、枸杞、姜、香菇'},
       en:{name:'Nourishing Chicken Soup', tag:'Chicken, pork, jujube, goji berry, ginger, shiitake mushroom'},
       it:{name:'Zuppa di Pollo Nutriente', tag:'Pollo, maiale, giuggiola, bacche di goji, zenzero, fungo shiitake'},
       fr:{name:'Soupe de Poulet Nourrissante', tag:'Poulet, porc, jujube, baies de goji, gingembre, champignon shiitake'},
@@ -1267,7 +1323,7 @@ const DISH_DATA = [
   // ---------- 厨师推荐 Chef's Specials ----------
   { id:'pekingDuck', category:'chefSpecial', sizes:[{key:'half',price:29.80},{key:'whole',price:52.80}], allergens:['GW','GB','C','E','M','S'],
     i18n:{
-      zh:{name:'北京烤鸭', tag:'鸭肉、海鲜酱、黄瓜、青葱'},
+      zh:{name:'北京烤鸭', tag:'鸭肉、海鲜酱、黄瓜、青葱'}, zhHant:{name:'北京烤鴨', tag:'鴨肉、海鮮醬、黃瓜、青蔥'},
       en:{name:'Peking Duck', tag:'Duck, hoisin sauce, cucumber, spring onion'},
       it:{name:'Anatra alla Pechinese', tag:'Anatra, salsa hoisin, cetriolo, cipollotto'},
       fr:{name:'Canard Laqué de Pékin', tag:'Canard, sauce hoisin, concombre, oignon vert'},
@@ -1275,7 +1331,7 @@ const DISH_DATA = [
     }},
   { id:'kungPaoChicken', category:'chefSpecial', price:14.80, allergens:['GW','GB','SE','S','E','P','N','C'],
     i18n:{
-      zh:{name:'宫保鸡丁', tag:'鸡肉、姜、青葱、蒜、干辣椒、花椒、花生、宫保酱'},
+      zh:{name:'宫保鸡丁', tag:'鸡肉、姜、青葱、蒜、干辣椒、花椒、花生、宫保酱'}, zhHant:{name:'宮保雞丁', tag:'雞肉、姜、青蔥、蒜、幹辣椒、花椒、花生、宮保醬'},
       en:{name:'Kung Pao Chicken', tag:'Chicken, ginger, spring onion, garlic, dried chilli, Sichuan pepper, peanuts, Kung Pao sauce'},
       it:{name:'Pollo alla Kung Pao', tag:'Pollo, zenzero, cipollotto, aglio, peperoncino secco, pepe di Sichuan, arachidi, salsa Kung Pao'},
       fr:{name:'Poulet Kung Pao', tag:'Poulet, gingembre, oignon vert, ail, piment séché, poivre du Sichuan, arachides, sauce Kung Pao'},
@@ -1283,7 +1339,7 @@ const DISH_DATA = [
     }},
   { id:'kungPaoPrawns', category:'chefSpecial', price:22.80, allergens:['GW','GB','SE','S','E','P','N','C'],
     i18n:{
-      zh:{name:'宫保虾球', tag:'虾仁、姜、青葱、蒜、干辣椒、花椒、花生、宫保酱'},
+      zh:{name:'宫保虾球', tag:'虾仁、姜、青葱、蒜、干辣椒、花椒、花生、宫保酱'}, zhHant:{name:'宮保蝦球', tag:'蝦仁、姜、青蔥、蒜、幹辣椒、花椒、花生、宮保醬'},
       en:{name:'Kung Pao Prawns', tag:'Prawn, ginger, spring onion, garlic, dried chilli, Sichuan pepper, peanuts, Kung Pao sauce'},
       it:{name:'Gamberi alla Kung Pao', tag:'Gamberi, zenzero, cipollotto, aglio, peperoncino secco, pepe di Sichuan, arachidi, salsa Kung Pao'},
       fr:{name:'Crevettes Kung Pao', tag:'Crevettes, gingembre, oignon vert, ail, piment séché, poivre du Sichuan, arachides, sauce Kung Pao'},
@@ -1291,7 +1347,7 @@ const DISH_DATA = [
     }},
   { id:'kungPaoTofu', category:'chefSpecial', price:14.80, allergens:['GW','GB','S','SE'],
     i18n:{
-      zh:{name:'宫保豆腐', tag:'豆腐、姜、青葱、蒜、干辣椒、花椒'},
+      zh:{name:'宫保豆腐', tag:'豆腐、姜、青葱、蒜、干辣椒、花椒'}, zhHant:{name:'宮保豆腐', tag:'豆腐、姜、青蔥、蒜、幹辣椒、花椒'},
       en:{name:'Kung Pao Tofu', tag:'Tofu, ginger, spring onion, garlic, dried chilli, Sichuan pepper'},
       it:{name:'Tofu alla Kung Pao', tag:'Tofu, zenzero, cipollotto, aglio, peperoncino secco, pepe di Sichuan'},
       fr:{name:'Tofu Kung Pao', tag:'Tofu, gingembre, oignon vert, ail, piment séché, poivre du Sichuan'},
@@ -1299,7 +1355,7 @@ const DISH_DATA = [
     }},
   { id:'sweetSourChickenPineapple', category:'chefSpecial', price:14.80, allergens:['GW','GB','E','S','SE','C'],
     i18n:{
-      zh:{name:'菠萝咕噜鸡', tag:'鸡肉、菠萝、甜椒、洋葱、糖醋汁'},
+      zh:{name:'菠萝咕噜鸡', tag:'鸡肉、菠萝、甜椒、洋葱、糖醋汁'}, zhHant:{name:'菠蘿咕嚕雞', tag:'雞肉、菠蘿、甜椒、洋蔥、糖醋汁'},
       en:{name:'Sweet & Sour Chicken with Pineapple', tag:'Chicken, pineapple, bell pepper, onion, sweet and sour sauce'},
       it:{name:"Pollo Agrodolce all'Ananas", tag:'Pollo, ananas, peperone, cipolla, salsa agrodolce'},
       fr:{name:"Poulet Aigre-Doux à l'Ananas", tag:'Poulet, ananas, poivron, oignon, sauce aigre-douce'},
@@ -1307,7 +1363,7 @@ const DISH_DATA = [
     }},
   { id:'sweetSourPrawnsPineapple', category:'chefSpecial', price:22.80, allergens:['GW','GB','E','S','SE','C'], img:'../image/菜品/9菠萝咕噜虾.jpg',
     i18n:{
-      zh:{name:'菠萝咕噜虾', tag:'虾仁、菠萝、甜椒、洋葱、糖醋汁'},
+      zh:{name:'菠萝咕噜虾', tag:'虾仁、菠萝、甜椒、洋葱、糖醋汁'}, zhHant:{name:'菠蘿咕嚕蝦', tag:'蝦仁、菠蘿、甜椒、洋蔥、糖醋汁'},
       en:{name:'Sweet & Sour Prawns with Pineapple', tag:'Prawn, pineapple, bell pepper, onion, sweet and sour sauce'},
       it:{name:'Gamberi Agrodolci all\'Ananas', tag:'Gamberi, ananas, peperone, cipolla, salsa agrodolce'},
       fr:{name:'Crevettes Aigre-Douces à l\'Ananas', tag:'Crevettes, ananas, poivron, oignon, sauce aigre-douce'},
@@ -1315,7 +1371,7 @@ const DISH_DATA = [
     }},
   { id:'goldenCrispyChickenSalad', category:'chefSpecial', price:14.80, allergens:['SE','E','M','GW','GB'],
     i18n:{
-      zh:{name:'香酥鸡排沙拉', tag:'鸡肉、面包糠、生菜、草莓、芒果、黄瓜、沙拉酱、甜辣酱'},
+      zh:{name:'香酥鸡排沙拉', tag:'鸡肉、面包糠、生菜、草莓、芒果、黄瓜、沙拉酱、甜辣酱'}, zhHant:{name:'香酥雞排沙拉', tag:'雞肉、麵包糠、生菜、草莓、芒果、黃瓜、沙拉醬、甜辣醬'},
       en:{name:'Golden Crispy Chicken with Side Salad', tag:'Chicken, breadcrumbs, lettuce, strawberry, mango, cucumber, salad dressing, sweet chilli sauce'},
       it:{name:'Cotoletta di Pollo Croccante con Insalata', tag:'Pollo, pangrattato, lattuga, fragola, mango, cetriolo, salsa per insalata, salsa piccante dolce'},
       fr:{name:'Escalope de Poulet Croustillante et Salade', tag:'Poulet, chapelure, laitue, fraise, mangue, concombre, sauce salade, sauce piment doux'},
@@ -1323,7 +1379,7 @@ const DISH_DATA = [
     }},
   { id:'sweetSpicyPrawnBalls', category:'chefSpecial', price:22.80, allergens:['GW','GB','E','S','SE','C'],
     i18n:{
-      zh:{name:'甜辣虾球', tag:'虾仁、甜椒、洋葱、甜辣酱'},
+      zh:{name:'甜辣虾球', tag:'虾仁、甜椒、洋葱、甜辣酱'}, zhHant:{name:'甜辣蝦球', tag:'蝦仁、甜椒、洋蔥、甜辣醬'},
       en:{name:'Sweet & Spicy Prawn Balls', tag:'Prawn, bell pepper, onion, sweet and spicy sauce'},
       it:{name:'Polpette di Gamberi Dolci e Piccanti', tag:'Gamberi, peperone, cipolla, salsa dolce e piccante'},
       fr:{name:'Boulettes de Crevettes Douces et Épicées', tag:'Crevettes, poivron, oignon, sauce douce et épicée'},
@@ -1331,7 +1387,7 @@ const DISH_DATA = [
     }},
   { id:'sweetSpicyChicken', category:'chefSpecial', price:14.80, allergens:['GW','GB','E','S','SE','C'],
     i18n:{
-      zh:{name:'甜辣鸡肉', tag:'鸡肉、甜椒、洋葱、甜辣酱'},
+      zh:{name:'甜辣鸡肉', tag:'鸡肉、甜椒、洋葱、甜辣酱'}, zhHant:{name:'甜辣雞肉', tag:'雞肉、甜椒、洋蔥、甜辣醬'},
       en:{name:'Sweet & Spicy Chicken', tag:'Chicken, bell pepper, onion, sweet and spicy sauce'},
       it:{name:'Pollo Dolce e Piccante', tag:'Pollo, peperone, cipolla, salsa dolce e piccante'},
       fr:{name:'Poulet Doux et Épicé', tag:'Poulet, poivron, oignon, sauce douce et épicée'},
@@ -1339,7 +1395,7 @@ const DISH_DATA = [
     }},
   { id:'blackPepperBeef', category:'chefSpecial', price:16.80, allergens:['GW','GB','SE','C','S','E'],
     i18n:{
-      zh:{name:'黑椒牛柳', tag:'牛肉、甜椒、洋葱、黑椒汁'},
+      zh:{name:'黑椒牛柳', tag:'牛肉、甜椒、洋葱、黑椒汁'}, zhHant:{name:'黑椒牛柳', tag:'牛肉、甜椒、洋蔥、黑椒汁'},
       en:{name:'Black Pepper Beef', tag:'Beef, bell pepper, onion, black pepper sauce'},
       it:{name:'Manzo al Pepe Nero', tag:'Manzo, peperone, cipolla, salsa al pepe nero'},
       fr:{name:'Bœuf au Poivre Noir', tag:'Bœuf, poivron, oignon, sauce au poivre noir'},
@@ -1347,7 +1403,7 @@ const DISH_DATA = [
     }},
   { id:'blackPepperChicken', category:'chefSpecial', price:14.80, allergens:['GW','GB','SE','C','S','E'],
     i18n:{
-      zh:{name:'黑椒鸡肉', tag:'鸡肉、甜椒、洋葱、黑椒汁'},
+      zh:{name:'黑椒鸡肉', tag:'鸡肉、甜椒、洋葱、黑椒汁'}, zhHant:{name:'黑椒雞肉', tag:'雞肉、甜椒、洋蔥、黑椒汁'},
       en:{name:'Black Pepper Chicken', tag:'Chicken, bell pepper, onion, black pepper sauce'},
       it:{name:'Pollo al Pepe Nero', tag:'Pollo, peperone, cipolla, salsa al pepe nero'},
       fr:{name:'Poulet au Poivre Noir', tag:'Poulet, poivron, oignon, sauce au poivre noir'},
@@ -1355,7 +1411,7 @@ const DISH_DATA = [
     }},
   { id:'sirloinBeefCubes', category:'chefSpecial', price:24.80, allergens:['GW','GB','CE','SE','S'],
     i18n:{
-      zh:{name:'招牌西冷牛肉粒', tag:'西冷牛肉、甜椒、芹菜、香辣酱'},
+      zh:{name:'招牌西冷牛肉粒', tag:'西冷牛肉、甜椒、芹菜、香辣酱'}, zhHant:{name:'招牌西冷牛肉粒', tag:'西冷牛肉、甜椒、芹菜、香辣醬'},
       en:{name:'Signature Sirloin Beef Cubes', tag:'Sirloin beef, bell pepper, celery, spicy sauce'},
       it:{name:'Cubetti di Controfiletto (Specialità)', tag:'Controfiletto di manzo, peperone, sedano, salsa piccante'},
       fr:{name:'Cubes de Faux-Filet (Spécialité)', tag:'Faux-filet de bœuf, poivron, céleri, sauce piquante'},
@@ -1363,7 +1419,7 @@ const DISH_DATA = [
     }},
   { id:'signatureSpicyShrimp', category:'chefSpecial', price:22.80, allergens:['GW','GB','CE','SE','S','E','C'],
     i18n:{
-      zh:{name:'招牌麻辣虾', tag:'虾仁、甜椒、芹菜、辣椒油'},
+      zh:{name:'招牌麻辣虾', tag:'虾仁、甜椒、芹菜、辣椒油'}, zhHant:{name:'招牌麻辣蝦', tag:'蝦仁、甜椒、芹菜、辣椒油'},
       en:{name:'Signature Mala Prawns', tag:'Prawn, bell pepper, celery, chilli oil'},
       it:{name:'Gamberi Piccanti "Mala" (Specialità)', tag:'Gamberi, peperone, sedano, olio piccante'},
       fr:{name:'Crevettes Épicées "Mala" (Spécialité)', tag:'Crevettes, poivron, céleri, huile pimentée'},
@@ -1371,7 +1427,7 @@ const DISH_DATA = [
     }},
   { id:'braisedIrishSteak', category:'chefSpecial', price:28.80, allergens:['GW','GB','S','SE','CE','C'],
     i18n:{
-      zh:{name:'姜醋汁焗爱尔兰牛柳', tag:'爱尔兰牛柳、西兰花、姜醋汁'},
+      zh:{name:'姜醋汁焗爱尔兰牛柳', tag:'爱尔兰牛柳、西兰花、姜醋汁'}, zhHant:{name:'姜醋汁焗愛爾蘭牛柳', tag:'愛爾蘭牛柳、西蘭花、姜醋汁'},
       en:{name:'Braised Irish Steak in Ginger & Vinegar Sauce', tag:'Irish beef steak, broccoli, ginger and vinegar sauce'},
       it:{name:'Filetto Irlandese Brasato in Salsa allo Zenzero e Aceto', tag:'Filetto di manzo irlandese, broccoli, salsa zenzero e aceto'},
       fr:{name:'Filet Irlandais Braisé, Sauce Gingembre-Vinaigre', tag:'Filet de bœuf irlandais, brocoli, sauce gingembre-vinaigre'},
@@ -1379,7 +1435,7 @@ const DISH_DATA = [
     }},
   { id:'sweetSourPorkChop', category:'chefSpecial', price:22.80, allergens:['GW','GB','E','S','SE'],
     i18n:{
-      zh:{name:'糖醋猪排', tag:'猪排'},
+      zh:{name:'糖醋猪排', tag:'猪排'}, zhHant:{name:'糖醋豬排', tag:'豬排'},
       en:{name:'Sweet & Sour Pork Chop', tag:'Pork chop'},
       it:{name:'Costoletta di Maiale in Agrodolce', tag:'Costoletta di maiale'},
       fr:{name:"Côtelette de Porc à l'Aigre-Douce", tag:'Côtelette de porc'},
@@ -1387,7 +1443,7 @@ const DISH_DATA = [
     }},
   { id:'mapoTofu', category:'chefSpecial', price:14.80, allergens:['GW','GB','S'],
     i18n:{
-      zh:{name:'麻婆豆腐', tag:'豆腐、鸡肉末、青葱、辣椒粉、花椒粉'},
+      zh:{name:'麻婆豆腐', tag:'豆腐、鸡肉末、青葱、辣椒粉、花椒粉'}, zhHant:{name:'麻婆豆腐', tag:'豆腐、雞肉末、青蔥、辣椒粉、花椒粉'},
       en:{name:'Mapo Tofu', tag:'Tofu, minced chicken, spring onion, chilli powder, Sichuan pepper powder'},
       it:{name:'Tofu Mapo', tag:'Tofu, pollo macinato, cipollotto, peperoncino in polvere, pepe di Sichuan in polvere'},
       fr:{name:'Tofu Mapo', tag:'Tofu, poulet haché, oignon vert, piment en poudre, poivre du Sichuan en poudre'},
@@ -1395,7 +1451,7 @@ const DISH_DATA = [
     }},
   { id:'stirFriedYellowBeef', category:'chefSpecial', price:18.80, allergens:['GW','GB','S','SE','E','C'],
     i18n:{
-      zh:{name:'小炒黄牛肉', tag:'牛肉、红椒、香菜、姜、蒜'},
+      zh:{name:'小炒黄牛肉', tag:'牛肉、红椒、香菜、姜、蒜'}, zhHant:{name:'小炒黃牛肉', tag:'牛肉、紅椒、香菜、姜、蒜'},
       en:{name:'Stir-Fried Beef with Chilli & Coriander', tag:'Beef, red pepper, coriander, ginger, garlic'},
       it:{name:'Manzo Saltato con Peperoncino e Coriandolo', tag:'Manzo, peperone rosso, coriandolo, zenzero, aglio'},
       fr:{name:'Bœuf Sauté au Piment et à la Coriandre', tag:'Bœuf, poivron rouge, coriandre, gingembre, ail'},
@@ -1403,7 +1459,7 @@ const DISH_DATA = [
     }},
   { id:'maoXueWang', category:'chefSpecial', sizes:[{key:'large',price:18.80},{key:'small',price:12.80}], allergens:['GW','GB','S','SE','CE'],
     i18n:{
-      zh:{name:'四川毛血旺', tag:'土豆、卷心菜、红薯粉、木耳、牛肚、午餐肉、猪大肠、鸭血、干花椒、干辣椒'},
+      zh:{name:'四川毛血旺', tag:'土豆、卷心菜、红薯粉、木耳、牛肚、午餐肉、猪大肠、鸭血、干花椒、干辣椒'}, zhHant:{name:'四川毛血旺', tag:'土豆、捲心菜、紅薯粉、木耳、牛肚、午餐肉、豬大腸、鴨血、乾花椒、幹辣椒'},
       en:{name:'Sichuan Mao Xue Wang (Spicy Offal Hot Pot)', tag:'Potato, cabbage, sweet potato vermicelli, wood ear mushroom, ox tripe, luncheon meat, pork intestine, blood curd, dried Sichuan pepper, dried chilli'},
       it:{name:'Mao Xue Wang alla Sichuan (Pentola Piccante di Frattaglie)', tag:'Patata, cavolo, vermicelli di patata dolce, fungo nero, trippa di bue, luncheon meat, intestino di maiale, cagliata di sangue, pepe di Sichuan secco, peperoncino secco'},
       fr:{name:"Mao Xue Wang du Sichuan (Marmite Épicée d'Abats)", tag:'Pomme de terre, chou, vermicelles de patate douce, champignon noir, tripes de bœuf, luncheon meat, intestin de porc, caillé de sang, poivre du Sichuan séché, piment séché'},
@@ -1411,7 +1467,7 @@ const DISH_DATA = [
     }},
   { id:'kidneyFlowers', category:'chefSpecial', sizes:[{key:'large',price:18.80},{key:'small',price:12.80}], allergens:['GW','GB','S','SE','CE'],
     i18n:{
-      zh:{name:'火爆腰花', tag:'猪腰、青葱、芹菜、干辣椒、花椒、辣椒油'},
+      zh:{name:'火爆腰花', tag:'猪腰、青葱、芹菜、干辣椒、花椒、辣椒油'}, zhHant:{name:'火爆腰花', tag:'豬腰、青蔥、芹菜、幹辣椒、花椒、辣椒油'},
       en:{name:'Sizzling Stir-Fried Pork Kidney', tag:'Pork kidney, spring onion, celery, dried chilli, Sichuan pepper, chilli oil'},
       it:{name:'Rognone di Maiale Saltato al Fuoco Vivo', tag:'Rognone di maiale, cipollotto, sedano, peperoncino secco, pepe di Sichuan, olio piccante'},
       fr:{name:'Rognon de Porc Sauté au Feu Vif', tag:'Rognon de porc, oignon vert, céleri, piment séché, poivre du Sichuan, huile pimentée'},
@@ -1419,7 +1475,7 @@ const DISH_DATA = [
     }},
   { id:'twiceCookedPork', category:'chefSpecial', price:14.80, allergens:['GW','GB','S','SU'],
     i18n:{
-      zh:{name:'青椒回锅肉', tag:'青椒、猪肉'},
+      zh:{name:'青椒回锅肉', tag:'青椒、猪肉'}, zhHant:{name:'青椒回鍋肉', tag:'青椒、豬肉'},
       en:{name:'Twice-Cooked Pork with Green Pepper', tag:'Green pepper, pork'},
       it:{name:'Maiale Cotto Due Volte con Peperone Verde', tag:'Peperone verde, maiale'},
       fr:{name:'Porc Deux Fois Cuit au Poivron Vert', tag:'Poivron vert, porc'},
@@ -1427,7 +1483,7 @@ const DISH_DATA = [
     }},
   { id:'steamedSeaBass', category:'chefSpecial', price:24.80, allergens:['GW','GB','SE','F','S','SU'],
     i18n:{
-      zh:{name:'清蒸鲈鱼', tag:'鲈鱼、青葱、蒸鱼豉油'},
+      zh:{name:'清蒸鲈鱼', tag:'鲈鱼、青葱、蒸鱼豉油'}, zhHant:{name:'清蒸鱸魚', tag:'鱸魚、青蔥、蒸魚豉油'},
       en:{name:'Steamed Sea Bass', tag:'Sea bass, spring onion, steamed fish soy sauce'},
       it:{name:'Branzino al Vapore', tag:'Branzino, cipollotto, salsa di soia per pesce al vapore'},
       fr:{name:'Bar Vapeur', tag:'Bar, oignon vert, sauce soja pour poisson vapeur'},
@@ -1435,7 +1491,7 @@ const DISH_DATA = [
     }},
   { id:'steamedSeaBassChilli', category:'chefSpecial', price:24.80, allergens:['GW','GB','SE','F','S','SU'],
     i18n:{
-      zh:{name:'剁椒蒸鲈鱼', tag:'鲈鱼、青葱、剁椒、蒸鱼豉油'},
+      zh:{name:'剁椒蒸鲈鱼', tag:'鲈鱼、青葱、剁椒、蒸鱼豉油'}, zhHant:{name:'剁椒蒸鱸魚', tag:'鱸魚、青蔥、剁椒、蒸魚豉油'},
       en:{name:'Steamed Sea Bass with Chopped Chilli', tag:'Sea bass, spring onion, chopped chilli, steamed fish soy sauce'},
       it:{name:'Branzino al Vapore con Peperoncino Tritato', tag:'Branzino, cipollotto, peperoncino tritato, salsa di soia per pesce al vapore'},
       fr:{name:'Bar Vapeur au Piment Haché', tag:'Bar, oignon vert, piment haché, sauce soja pour poisson vapeur'},
@@ -1443,7 +1499,7 @@ const DISH_DATA = [
     }},
   { id:'seaBassSpicyBroth', category:'chefSpecial', price:24.80, allergens:['GW','GB','CE','SE','F','E'],
     i18n:{
-      zh:{name:'水煮鲈鱼', tag:'鲈鱼、豆芽、香菇、芹菜、青葱、干花椒、干辣椒'},
+      zh:{name:'水煮鲈鱼', tag:'鲈鱼、豆芽、香菇、芹菜、青葱、干花椒、干辣椒'}, zhHant:{name:'水煮鱸魚', tag:'鱸魚、豆芽、香菇、芹菜、青蔥、乾花椒、幹辣椒'},
       en:{name:'Sea Bass Fillet in Sichuan Spicy Broth', tag:'Sea bass, bean sprout, mushroom, celery, spring onion, dried Sichuan pepper, dried chilli'},
       it:{name:'Filetto di Branzino in Brodo Piccante alla Sichuan', tag:'Branzino, germogli di soia, fungo, sedano, cipollotto, pepe di Sichuan secco, peperoncino secco'},
       fr:{name:'Filet de Bar en Bouillon Épicé du Sichuan', tag:'Bar, pousses de soja, champignon, céleri, oignon vert, poivre du Sichuan séché, piment séché'},
@@ -1451,7 +1507,7 @@ const DISH_DATA = [
     }},
   { id:'beefSpicyBroth', category:'chefSpecial', price:18.80, allergens:['GW','GB','CE','SE','F','E'],
     i18n:{
-      zh:{name:'水煮牛肉', tag:'牛肉、豆芽、香菇、芹菜、青葱、干花椒、干辣椒'},
+      zh:{name:'水煮牛肉', tag:'牛肉、豆芽、香菇、芹菜、青葱、干花椒、干辣椒'}, zhHant:{name:'水煮牛肉', tag:'牛肉、豆芽、香菇、芹菜、青蔥、乾花椒、幹辣椒'},
       en:{name:'Beef Fillet in Sichuan Spicy Broth', tag:'Beef, bean sprout, mushroom, celery, spring onion, dried Sichuan pepper, dried chilli'},
       it:{name:'Filetto di Manzo in Brodo Piccante alla Sichuan', tag:'Manzo, germogli di soia, fungo, sedano, cipollotto, pepe di Sichuan secco, peperoncino secco'},
       fr:{name:'Filet de Bœuf en Bouillon Épicé du Sichuan', tag:'Bœuf, pousses de soja, champignon, céleri, oignon vert, poivre du Sichuan séché, piment séché'},
@@ -1459,7 +1515,7 @@ const DISH_DATA = [
     }},
   { id:'porkSpicyBroth', category:'chefSpecial', price:15.80, allergens:['GW','GB','CE','SE','F','E'],
     i18n:{
-      zh:{name:'水煮猪肉', tag:'猪肉、豆芽、香菇、芹菜、青葱、干花椒、干辣椒'},
+      zh:{name:'水煮猪肉', tag:'猪肉、豆芽、香菇、芹菜、青葱、干花椒、干辣椒'}, zhHant:{name:'水煮豬肉', tag:'豬肉、豆芽、香菇、芹菜、青蔥、乾花椒、幹辣椒'},
       en:{name:'Sliced Pork in Sichuan Spicy Broth', tag:'Pork, bean sprout, mushroom, celery, spring onion, dried Sichuan pepper, dried chilli'},
       it:{name:'Maiale a Fette in Brodo Piccante alla Sichuan', tag:'Maiale, germogli di soia, fungo, sedano, cipollotto, pepe di Sichuan secco, peperoncino secco'},
       fr:{name:'Porc Émincé en Bouillon Épicé du Sichuan', tag:'Porc, pousses de soja, champignon, céleri, oignon vert, poivre du Sichuan séché, piment séché'},
@@ -1467,7 +1523,7 @@ const DISH_DATA = [
     }},
   { id:'tiHuaTang', category:'chefSpecial', price:15.80, allergens:['GW'],
     i18n:{
-      zh:{name:'老妈蹄花汤', tag:'猪蹄、薏米、金针花、白芸豆（自带川味蘸料）'},
+      zh:{name:'老妈蹄花汤', tag:'猪蹄、薏米、金针花、白芸豆（自带川味蘸料）'}, zhHant:{name:'老媽蹄花湯', tag:'豬蹄、薏米、金針花、白芸豆（自帶川味蘸料）'},
       en:{name:'Braised Pork Trotter Soup', tag:'Pork trotter, pearl barley, lily buds, white beans (served with a Sichuan-style dipping sauce)'},
       it:{name:'Zuppa di Zampetti di Maiale Brasati', tag:'Zampetti di maiale, orzo perlato, fiori di giglio essiccati, fagioli bianchi (con salsa piccante alla Sichuan)'},
       fr:{name:'Soupe de Pieds de Porc Braisés', tag:'Pieds de porc, orge perlé, boutons de lys séchés, haricots blancs (avec sauce à tremper façon Sichuan)'},
@@ -1475,7 +1531,7 @@ const DISH_DATA = [
     }},
   { id:'dryFriedPorkIntestine', category:'chefSpecial', price:18.80, allergens:['GW','GB','S','SE','CE'],
     i18n:{
-      zh:{name:'干煸肥肠', tag:'猪大肠、甜椒、芹菜、蒜、干辣椒、花椒'},
+      zh:{name:'干煸肥肠', tag:'猪大肠、甜椒、芹菜、蒜、干辣椒、花椒'}, zhHant:{name:'乾煸肥腸', tag:'豬大腸、甜椒、芹菜、蒜、幹辣椒、花椒'},
       en:{name:'Dry-Fried Pork Intestine', tag:'Pork intestine, bell pepper, celery, garlic, dried chilli, Sichuan pepper'},
       it:{name:'Intestino di Maiale Saltato a Secco', tag:'Intestino di maiale, peperone, sedano, aglio, peperoncino secco, pepe di Sichuan'},
       fr:{name:'Intestin de Porc Sauté à Sec', tag:'Intestin de porc, poivron, céleri, ail, piment séché, poivre du Sichuan'},
@@ -1483,7 +1539,7 @@ const DISH_DATA = [
     }},
   { id:'farmhousePork', category:'chefSpecial', price:14.80, allergens:['GW','GB','S','C','SE'],
     i18n:{
-      zh:{name:'农家小炒肉', tag:'猪肉、青椒、蒜、辣椒油'},
+      zh:{name:'农家小炒肉', tag:'猪肉、青椒、蒜、辣椒油'}, zhHant:{name:'農家小炒肉', tag:'豬肉、青椒、蒜、辣椒油'},
       en:{name:'Farmhouse Stir-Fried Pork', tag:'Pork, green pepper, garlic, chilli oil'},
       it:{name:'Maiale Saltato alla Contadina', tag:'Maiale, peperone verde, aglio, olio piccante'},
       fr:{name:'Porc Sauté à la Fermière', tag:'Porc, poivron vert, ail, huile pimentée'},
@@ -1491,7 +1547,7 @@ const DISH_DATA = [
     }},
   { id:'griddleCauliflower', category:'chefSpecial', price:14.80, allergens:['GW','GB','C','SE','S'],
     i18n:{
-      zh:{name:'干锅花菜', tag:'花菜、五花肉、姜、蒜、青葱、辣椒油'},
+      zh:{name:'干锅花菜', tag:'花菜、五花肉、姜、蒜、青葱、辣椒油'}, zhHant:{name:'乾鍋花菜', tag:'花菜、五花肉、姜、蒜、青蔥、辣椒油'},
       en:{name:'Griddle Cauliflower', tag:'Cauliflower, pork belly, ginger, garlic, spring onion, chilli oil'},
       it:{name:'Cavolfiore al Wok Piccante', tag:'Cavolfiore, pancetta di maiale, zenzero, aglio, cipollotto, olio piccante'},
       fr:{name:'Chou-Fleur Sauté au Wok Épicé', tag:'Chou-fleur, poitrine de porc, gingembre, ail, oignon vert, huile pimentée'},
@@ -1499,7 +1555,7 @@ const DISH_DATA = [
     }},
   { id:'chickenCurry', category:'chefSpecial', price:18.80, allergens:['SE','S','F','M','E'],
     i18n:{
-      zh:{name:'咖喱鸡肉', tag:'鸡肉、土豆、胡萝卜、咖喱汁'},
+      zh:{name:'咖喱鸡肉', tag:'鸡肉、土豆、胡萝卜、咖喱汁'}, zhHant:{name:'咖喱雞肉', tag:'雞肉、土豆、胡蘿蔔、咖喱汁'},
       en:{name:'Chicken Curry', tag:'Chicken, potato, carrot, curry sauce'},
       it:{name:'Pollo al Curry', tag:'Pollo, patata, carota, salsa al curry'},
       fr:{name:'Poulet au Curry', tag:'Poulet, pomme de terre, carotte, sauce curry'},
@@ -1507,7 +1563,7 @@ const DISH_DATA = [
     }},
   { id:'beefCurry', category:'chefSpecial', price:22.80, allergens:['SE','S','F','M','E'],
     i18n:{
-      zh:{name:'咖喱牛肉', tag:'小牛肉、土豆、胡萝卜、咖喱汁'},
+      zh:{name:'咖喱牛肉', tag:'小牛肉、土豆、胡萝卜、咖喱汁'}, zhHant:{name:'咖喱牛肉', tag:'小牛肉、土豆、胡蘿蔔、咖喱汁'},
       en:{name:'Beef Curry', tag:'Veal, potato, carrot, curry sauce'},
       it:{name:'Manzo al Curry', tag:'Vitello, patata, carota, salsa al curry'},
       fr:{name:'Bœuf au Curry', tag:'Veau, pomme de terre, carotte, sauce curry'},
@@ -1517,7 +1573,7 @@ const DISH_DATA = [
   // ---------- 蔬菜 Vegetables ----------
   { id:'eggplantGreenBeans', category:'vegetables', price:14.80, allergens:['GW','GB','S','C','SE'],
     i18n:{
-      zh:{name:'长豆角炒茄子', tag:'茄子、长豆角、蒜、辣椒油'},
+      zh:{name:'长豆角炒茄子', tag:'茄子、长豆角、蒜、辣椒油'}, zhHant:{name:'長豆角炒茄子', tag:'茄子、長豆角、蒜、辣椒油'},
       en:{name:'Stir-Fried Eggplant with Long Beans', tag:'Eggplant, long beans, garlic, chilli oil'},
       it:{name:'Melanzane Saltate con Fagiolini Lunghi', tag:'Melanzana, fagiolini lunghi, aglio, olio piccante'},
       fr:{name:'Aubergine Sautée aux Haricots Longs', tag:'Aubergine, haricots longs, ail, huile pimentée'},
@@ -1525,7 +1581,7 @@ const DISH_DATA = [
     }},
   { id:'yuXiangEggplant', category:'vegetables', price:9.80, allergens:['GW','GB','E','M'],
     i18n:{
-      zh:{name:'鱼香茄条', tag:'茄子、糖醋辣酱'},
+      zh:{name:'鱼香茄条', tag:'茄子、糖醋辣酱'}, zhHant:{name:'魚香茄條', tag:'茄子、糖醋辣醬'},
       en:{name:'Crispy Eggplant Strips in Yu-Xiang Sauce', tag:'Eggplant, sweet-sour-spicy sauce'},
       it:{name:'Striscioline di Melanzana Croccanti in Salsa Yu-Xiang', tag:'Melanzana, salsa agrodolce piccante'},
       fr:{name:'Aubergine Croustillante Sauce Yu-Xiang', tag:'Aubergine, sauce aigre-douce épicée'},
@@ -1533,7 +1589,7 @@ const DISH_DATA = [
     }},
   { id:'dryFriedGreenBeans', category:'vegetables', price:14.80, allergens:['GW','GB','S','SE'],
     i18n:{
-      zh:{name:'干煸四季豆', tag:'四季豆、姜、蒜、辣椒油、青葱'},
+      zh:{name:'干煸四季豆', tag:'四季豆、姜、蒜、辣椒油、青葱'}, zhHant:{name:'乾煸四季豆', tag:'四季豆、姜、蒜、辣椒油、青蔥'},
       en:{name:'Dry-Fried Green Beans', tag:'Green beans, ginger, garlic, chilli oil, spring onion'},
       it:{name:'Fagiolini Saltati a Secco', tag:'Fagiolini, zenzero, aglio, olio piccante, cipollotto'},
       fr:{name:'Haricots Verts Sautés à Sec', tag:'Haricots verts, gingembre, ail, huile pimentée, oignon vert'},
@@ -1541,7 +1597,7 @@ const DISH_DATA = [
     }},
   { id:'garlicBroccoli', category:'vegetables', price:13.80, allergens:[],
     i18n:{
-      zh:{name:'蒜蓉西兰花', tag:'蒜末、西兰花'},
+      zh:{name:'蒜蓉西兰花', tag:'蒜末、西兰花'}, zhHant:{name:'蒜蓉西蘭花', tag:'蒜末、西蘭花'},
       en:{name:'Garlic Broccoli', tag:'Chopped garlic, broccoli'},
       it:{name:"Broccoli all'Aglio", tag:'Aglio tritato, broccoli'},
       fr:{name:"Brocoli à l'Ail", tag:'Ail haché, brocoli'},
@@ -1549,7 +1605,7 @@ const DISH_DATA = [
     }},
   { id:'seasonalVeg', category:'vegetables', price:12.80, allergens:[],
     i18n:{
-      zh:{name:'清炒时蔬', tag:''},
+      zh:{name:'清炒时蔬', tag:''}, zhHant:{name:'清炒時蔬', tag:''},
       en:{name:'Stir-Fried Seasonal Vegetables', tag:''},
       it:{name:'Verdure di Stagione Saltate', tag:''},
       fr:{name:'Légumes de Saison Sautés', tag:''},
@@ -1559,7 +1615,7 @@ const DISH_DATA = [
   // ---------- 饭/面类 Rice / Noodles ----------
   { id:'eggFriedRice', category:'riceNoodles', price:6.30, allergens:['GW','GB','SE','SU','E'],
     i18n:{
-      zh:{name:'鸡蛋炒饭', tag:'鸡蛋、米饭'},
+      zh:{name:'鸡蛋炒饭', tag:'鸡蛋、米饭'}, zhHant:{name:'雞蛋炒飯', tag:'雞蛋、米飯'},
       en:{name:'Egg Fried Rice', tag:'Egg, rice'},
       it:{name:"Riso Saltato all'Uovo", tag:'Uovo, riso'},
       fr:{name:'Riz Sauté aux Œufs', tag:'Œuf, riz'},
@@ -1567,7 +1623,7 @@ const DISH_DATA = [
     }},
   { id:'seafoodFriedRice', category:'riceNoodles', price:10.80, allergens:['GW','GB','SE','SU','C'],
     i18n:{
-      zh:{name:'海鲜炒饭', tag:'虾仁、米饭'},
+      zh:{name:'海鲜炒饭', tag:'虾仁、米饭'}, zhHant:{name:'海鮮炒飯', tag:'蝦仁、米飯'},
       en:{name:'Seafood Fried Rice', tag:'Prawn, rice'},
       it:{name:'Riso Saltato ai Frutti di Mare', tag:'Gamberi, riso'},
       fr:{name:'Riz Sauté aux Fruits de Mer', tag:'Crevettes, riz'},
@@ -1575,7 +1631,7 @@ const DISH_DATA = [
     }},
   { id:'chickenFriedRice', category:'riceNoodles', price:8.80, allergens:['GW','GB','SE','SU'],
     i18n:{
-      zh:{name:'鸡肉炒饭', tag:'鸡肉、米饭'},
+      zh:{name:'鸡肉炒饭', tag:'鸡肉、米饭'}, zhHant:{name:'雞肉炒飯', tag:'雞肉、米飯'},
       en:{name:'Chicken Fried Rice', tag:'Chicken, rice'},
       it:{name:'Riso Saltato al Pollo', tag:'Pollo, riso'},
       fr:{name:'Riz Sauté au Poulet', tag:'Poulet, riz'},
@@ -1583,7 +1639,7 @@ const DISH_DATA = [
     }},
   { id:'hamFriedRice', category:'riceNoodles', price:9.80, allergens:['GW','GB','SE','SU'],
     i18n:{
-      zh:{name:'火腿炒饭', tag:'火腿、米饭'},
+      zh:{name:'火腿炒饭', tag:'火腿、米饭'}, zhHant:{name:'火腿炒飯', tag:'火腿、米飯'},
       en:{name:'Ham Fried Rice', tag:'Ham, rice'},
       it:{name:'Riso Saltato al Prosciutto', tag:'Prosciutto, riso'},
       fr:{name:'Riz Sauté au Jambon', tag:'Jambon, riz'},
@@ -1591,7 +1647,7 @@ const DISH_DATA = [
     }},
   { id:'vegFriedRice', category:'riceNoodles', price:7.30, allergens:['GW','GB','S','SE','SU'],
     i18n:{
-      zh:{name:'蔬菜炒饭', tag:'甜玉米、胡萝卜、四季豆、米饭'},
+      zh:{name:'蔬菜炒饭', tag:'甜玉米、胡萝卜、四季豆、米饭'}, zhHant:{name:'蔬菜炒飯', tag:'甜玉米、胡蘿蔔、四季豆、米飯'},
       en:{name:'Vegetable Fried Rice', tag:'Sweet corn, carrot, green beans, rice'},
       it:{name:'Riso Saltato alle Verdure', tag:'Mais dolce, carota, fagiolini, riso'},
       fr:{name:'Riz Sauté aux Légumes', tag:'Maïs doux, carotte, haricots verts, riz'},
@@ -1599,7 +1655,7 @@ const DISH_DATA = [
     }},
   { id:'beefFriedNoodles', category:'riceNoodles', price:12.80, allergens:['GW','GB','SE'],
     i18n:{
-      zh:{name:'牛肉炒面', tag:'牛肉、红甜椒、面条'},
+      zh:{name:'牛肉炒面', tag:'牛肉、红甜椒、面条'}, zhHant:{name:'牛肉炒麵', tag:'牛肉、紅甜椒、麵條'},
       en:{name:'Beef Fried Noodles', tag:'Beef, red bell pepper, noodles'},
       it:{name:'Noodles Saltati al Manzo', tag:'Manzo, peperone rosso, noodles'},
       fr:{name:'Nouilles Sautées au Bœuf', tag:'Bœuf, poivron rouge, nouilles'},
@@ -1607,7 +1663,7 @@ const DISH_DATA = [
     }},
   { id:'seafoodFriedNoodles', category:'riceNoodles', price:12.80, allergens:['GW','GB','S','SE','C'],
     i18n:{
-      zh:{name:'海鲜炒面', tag:'虾仁、甜椒、面条'},
+      zh:{name:'海鲜炒面', tag:'虾仁、甜椒、面条'}, zhHant:{name:'海鮮炒麵', tag:'蝦仁、甜椒、麵條'},
       en:{name:'Seafood Fried Noodles', tag:'Prawn, bell pepper, noodles'},
       it:{name:'Noodles Saltati ai Frutti di Mare', tag:'Gamberi, peperone, noodles'},
       fr:{name:'Nouilles Sautées aux Fruits de Mer', tag:'Crevettes, poivron, nouilles'},
@@ -1615,7 +1671,7 @@ const DISH_DATA = [
     }},
   { id:'chickenFriedNoodles', category:'riceNoodles', price:11.80, allergens:['GW','GB','S','SE'],
     i18n:{
-      zh:{name:'鸡肉炒面', tag:'鸡肉、甜椒、面条'},
+      zh:{name:'鸡肉炒面', tag:'鸡肉、甜椒、面条'}, zhHant:{name:'雞肉炒麵', tag:'雞肉、甜椒、麵條'},
       en:{name:'Chicken Fried Noodles', tag:'Chicken, bell pepper, noodles'},
       it:{name:'Noodles Saltati al Pollo', tag:'Pollo, peperone, noodles'},
       fr:{name:'Nouilles Sautées au Poulet', tag:'Poulet, poivron, nouilles'},
@@ -1623,7 +1679,7 @@ const DISH_DATA = [
     }},
   { id:'vegFriedNoodles', category:'riceNoodles', price:10.80, allergens:['GW','GB','S','SE'],
     i18n:{
-      zh:{name:'蔬菜炒面', tag:'卷心菜、甜椒、洋葱、豆芽、面条'},
+      zh:{name:'蔬菜炒面', tag:'卷心菜、甜椒、洋葱、豆芽、面条'}, zhHant:{name:'蔬菜炒麵', tag:'捲心菜、甜椒、洋蔥、豆芽、麵條'},
       en:{name:'Vegetable Fried Noodles', tag:'Cabbage, bell pepper, onion, bean sprout, noodles'},
       it:{name:'Noodles Saltati alle Verdure', tag:'Cavolo, peperone, cipolla, germogli di soia, noodles'},
       fr:{name:'Nouilles Sautées aux Légumes', tag:'Chou, poivron, oignon, pousses de soja, nouilles'},
@@ -1631,7 +1687,7 @@ const DISH_DATA = [
     }},
   { id:'udonSeafood', category:'riceNoodles', price:12.80, allergens:['GW','GB','S','SE','C'],
     i18n:{
-      zh:{name:'炒乌冬面(海鲜)', tag:'虾仁、甜椒、洋葱、上海青'},
+      zh:{name:'炒乌冬面(海鲜)', tag:'虾仁、甜椒、洋葱、上海青'}, zhHant:{name:'炒烏冬麵(海鮮)', tag:'蝦仁、甜椒、洋蔥、上海青'},
       en:{name:'Fried Udon Noodles (Seafood)', tag:'Prawn, bell pepper, onion, pak choi'},
       it:{name:'Udon Saltati (Frutti di Mare)', tag:'Gamberi, peperone, cipolla, pak choi'},
       fr:{name:'Nouilles Udon Sautées (Fruits de Mer)', tag:'Crevettes, poivron, oignon, pak choi'},
@@ -1639,7 +1695,7 @@ const DISH_DATA = [
     }},
   { id:'udonVeg', category:'riceNoodles', price:10.80, allergens:['GW','GB','SE'],
     i18n:{
-      zh:{name:'炒乌冬面(蔬菜)', tag:'甜椒、洋葱、上海青'},
+      zh:{name:'炒乌冬面(蔬菜)', tag:'甜椒、洋葱、上海青'}, zhHant:{name:'炒烏冬麵(蔬菜)', tag:'甜椒、洋蔥、上海青'},
       en:{name:'Fried Udon Noodles (Vegetable)', tag:'Bell pepper, onion, pak choi'},
       it:{name:'Udon Saltati (Verdure)', tag:'Peperone, cipolla, pak choi'},
       fr:{name:'Nouilles Udon Sautées (Légumes)', tag:'Poivron, oignon, pak choi'},
@@ -1647,7 +1703,7 @@ const DISH_DATA = [
     }},
   { id:'beefChowFun', category:'riceNoodles', price:12.80, allergens:['GW','GB','S','E','SE','C'],
     i18n:{
-      zh:{name:'牛肉炒河粉', tag:'牛肉、河粉、甜椒、洋葱'},
+      zh:{name:'牛肉炒河粉', tag:'牛肉、河粉、甜椒、洋葱'}, zhHant:{name:'牛肉炒河粉', tag:'牛肉、河粉、甜椒、洋蔥'},
       en:{name:'Beef Chow Fun', tag:'Beef, rice noodles, bell pepper, onion'},
       it:{name:'Tagliatelle di Riso Saltate al Manzo', tag:'Manzo, tagliatelle di riso, peperone, cipolla'},
       fr:{name:'Nouilles de Riz Plates Sautées au Bœuf', tag:'Bœuf, nouilles de riz plates, poivron, oignon'},
@@ -1655,7 +1711,7 @@ const DISH_DATA = [
     }},
   { id:'steamedRice', category:'riceNoodles', price:3.00, allergens:[],
     i18n:{
-      zh:{name:'白米饭', tag:''},
+      zh:{name:'白米饭', tag:''}, zhHant:{name:'白米飯', tag:''},
       en:{name:'Steamed Rice', tag:''},
       it:{name:'Riso al Vapore', tag:''},
       fr:{name:'Riz Vapeur', tag:''},
@@ -1665,7 +1721,7 @@ const DISH_DATA = [
   // ---------- 甜品 Dessert ----------
   { id:'lemonCheesecake', category:'dessert', price:4.80, allergens:['GW','GB','E'],
     i18n:{
-      zh:{name:'柠檬芝士蛋糕', tag:'柠檬芝士蛋糕、奶油、草莓'},
+      zh:{name:'柠檬芝士蛋糕', tag:'柠檬芝士蛋糕、奶油、草莓'}, zhHant:{name:'檸檬芝士蛋糕', tag:'檸檬芝士蛋糕、奶油、草莓'},
       en:{name:'Lemon Cheesecake', tag:'Lemon cheesecake, cream, strawberry'},
       it:{name:'Cheesecake al Limone', tag:'Cheesecake al limone, panna, fragola'},
       fr:{name:'Cheesecake au Citron', tag:'Cheesecake au citron, crème, fraise'},
@@ -1673,7 +1729,7 @@ const DISH_DATA = [
     }},
   { id:'chocoVanillaIceCream', category:'dessert', price:4.80, allergens:['E','M'],
     i18n:{
-      zh:{name:'巧克力香草冰淇淋', tag:'巧克力酱、冰淇淋、奥利奥饼干、巧克力碎'},
+      zh:{name:'巧克力香草冰淇淋', tag:'巧克力酱、冰淇淋、奥利奥饼干、巧克力碎'}, zhHant:{name:'巧克力香草冰淇淋', tag:'巧克力醬、冰淇淋、奧利奧餅乾、巧克力碎'},
       en:{name:'Chocolate & Vanilla Ice Cream', tag:'Chocolate sauce, ice cream, Oreo cookies, chocolate curls'},
       it:{name:'Gelato al Cioccolato e Vaniglia', tag:'Salsa al cioccolato, gelato, biscotti Oreo, riccioli di cioccolato'},
       fr:{name:'Glace Chocolat-Vanille', tag:'Sauce chocolat, glace, biscuits Oreo, copeaux de chocolat'},
@@ -1681,7 +1737,7 @@ const DISH_DATA = [
     }},
   { id:'mangoPomeloSago', category:'dessert', price:4.80, allergens:['M'],
     i18n:{
-      zh:{name:'杨枝甘露', tag:'芒果、柚子、西米'},
+      zh:{name:'杨枝甘露', tag:'芒果、柚子、西米'}, zhHant:{name:'楊枝甘露', tag:'芒果、柚子、西米'},
       en:{name:'Mango Pomelo Sago', tag:'Mango, pomelo, sago pearls'},
       it:{name:'Sago con Mango e Pomelo', tag:'Mango, pomelo, perle di sago'},
       fr:{name:'Sagou à la Mangue et au Pomelo', tag:'Mangue, pomelo, perles de sagou'},
@@ -1692,7 +1748,7 @@ const DISH_DATA = [
   // 白葡萄酒 White Wine
   { id:'wineMurariPinotGrigio', category:'drinks', sub:'whiteWine', sizes:[{key:'glass',price:7.90},{key:'bottle',price:28}], allergens:['SU'],
     i18n:{
-      zh:{name:'Murari Pinot Grigio 卡斯特拉尼灰皮诺', tag:'Veneto, Italy'},
+      zh:{name:'Murari Pinot Grigio 卡斯特拉尼灰皮诺', tag:'Veneto, Italy'}, zhHant:{name:'Murari Pinot Grigio 卡斯特拉尼灰皮諾', tag:'Veneto, Italy'},
       en:{name:'Murari Pinot Grigio', tag:'Veneto, Italy'},
       it:{name:'Murari Pinot Grigio', tag:'Veneto, Italia'},
       fr:{name:'Murari Pinot Grigio', tag:'Vénétie, Italie'},
@@ -1700,7 +1756,7 @@ const DISH_DATA = [
     }},
   { id:'wineBouchardSauvignonBlanc', category:'drinks', sub:'whiteWine', sizes:[{key:'glass',price:8.50},{key:'bottle',price:32}], allergens:['SU'],
     i18n:{
-      zh:{name:'Bouchard Aine & Fils Sauvignon Blanc 长相思', tag:'Languedoc, France'},
+      zh:{name:'Bouchard Aine & Fils Sauvignon Blanc 长相思', tag:'Languedoc, France'}, zhHant:{name:'Bouchard Aine & Fils Sauvignon Blanc 長相思', tag:'Languedoc, France'},
       en:{name:'Bouchard Aine & Fils Sauvignon Blanc', tag:'Languedoc, France'},
       it:{name:'Bouchard Aine & Fils Sauvignon Blanc', tag:'Linguadoca, Francia'},
       fr:{name:'Bouchard Aine & Fils Sauvignon Blanc', tag:'Languedoc, France'},
@@ -1708,7 +1764,7 @@ const DISH_DATA = [
     }},
   { id:'winePeterRiesling', category:'drinks', sub:'whiteWine', sizes:[{key:'glass',price:9.90},{key:'bottle',price:36}], allergens:['SU'],
     i18n:{
-      zh:{name:'Peter & Peter Riesling', tag:'Mosel, Germany'},
+      zh:{name:'Peter & Peter Riesling', tag:'Mosel, Germany'}, zhHant:{name:'Peter & Peter Riesling', tag:'Mosel, Germany'},
       en:{name:'Peter & Peter Riesling', tag:'Mosel, Germany'},
       it:{name:'Peter & Peter Riesling', tag:'Mosella, Germania'},
       fr:{name:'Peter & Peter Riesling', tag:'Moselle, Allemagne'},
@@ -1716,7 +1772,7 @@ const DISH_DATA = [
     }},
   { id:'wineNauMaiSauvignonBlanc', category:'drinks', sub:'whiteWine', sizes:[{key:'bottle',price:39}], allergens:['SU'],
     i18n:{
-      zh:{name:'Nau Mai Sauvignon Blanc', tag:'Marlborough, New Zealand'},
+      zh:{name:'Nau Mai Sauvignon Blanc', tag:'Marlborough, New Zealand'}, zhHant:{name:'Nau Mai Sauvignon Blanc', tag:'Marlborough, New Zealand'},
       en:{name:'Nau Mai Sauvignon Blanc', tag:'Marlborough, New Zealand'},
       it:{name:'Nau Mai Sauvignon Blanc', tag:'Marlborough, Nuova Zelanda'},
       fr:{name:'Nau Mai Sauvignon Blanc', tag:'Marlborough, Nouvelle-Zélande'},
@@ -1724,7 +1780,7 @@ const DISH_DATA = [
     }},
   { id:'wineCasalVentozelaAlvarinho', category:'drinks', sub:'whiteWine', sizes:[{key:'bottle',price:45}], allergens:['SU'],
     i18n:{
-      zh:{name:'Casal de Ventozela Alvarinho 阿瓦里诺', tag:'Vinho Verde, Portugal'},
+      zh:{name:'Casal de Ventozela Alvarinho 阿瓦里诺', tag:'Vinho Verde, Portugal'}, zhHant:{name:'Casal de Ventozela Alvarinho 阿瓦里諾', tag:'Vinho Verde, Portugal'},
       en:{name:'Casal de Ventozela Alvarinho', tag:'Vinho Verde, Portugal'},
       it:{name:'Casal de Ventozela Alvarinho', tag:'Vinho Verde, Portogallo'},
       fr:{name:'Casal de Ventozela Alvarinho', tag:'Vinho Verde, Portugal'},
@@ -1732,7 +1788,7 @@ const DISH_DATA = [
     }},
   { id:'wineDomaneWachauGruner', category:'drinks', sub:'whiteWine', sizes:[{key:'bottle',price:49}], allergens:['SU'],
     i18n:{
-      zh:{name:'Domäne Wachau Grüner Veltliner Federspiel', tag:'Wachau, Austria'},
+      zh:{name:'Domäne Wachau Grüner Veltliner Federspiel', tag:'Wachau, Austria'}, zhHant:{name:'Domäne Wachau Grüner Veltliner Federspiel', tag:'Wachau, Austria'},
       en:{name:'Domäne Wachau Grüner Veltliner Federspiel', tag:'Wachau, Austria'},
       it:{name:'Domäne Wachau Grüner Veltliner Federspiel', tag:'Wachau, Austria'},
       fr:{name:'Domäne Wachau Grüner Veltliner Federspiel', tag:'Wachau, Autriche'},
@@ -1740,7 +1796,7 @@ const DISH_DATA = [
     }},
   { id:'wineLouisJadotChardonnay', category:'drinks', sub:'whiteWine', sizes:[{key:'bottle',price:65}], allergens:['SU'],
     i18n:{
-      zh:{name:"Louis Jadot Bourgogne Chardonnay 'Couvent des Jacobins' 勃艮第霞多丽", tag:'Burgundy, France'},
+      zh:{name:"Louis Jadot Bourgogne Chardonnay 'Couvent des Jacobins' 勃艮第霞多丽", tag:'Burgundy, France'}, zhHant:{name:"Louis Jadot Bourgogne Chardonnay 'Couvent des Jacobins' 勃艮第霞多麗", tag:'Burgundy, France'},
       en:{name:"Louis Jadot Bourgogne Chardonnay 'Couvent des Jacobins'", tag:'Burgundy, France'},
       it:{name:"Louis Jadot Bourgogne Chardonnay 'Couvent des Jacobins'", tag:'Borgogna, Francia'},
       fr:{name:"Louis Jadot Bourgogne Chardonnay 'Couvent des Jacobins'", tag:'Bourgogne, France'},
@@ -1748,7 +1804,7 @@ const DISH_DATA = [
     }},
   { id:'wineMarquisGoulaineSancerre', category:'drinks', sub:'whiteWine', sizes:[{key:'bottle',price:79}], allergens:['SU'],
     i18n:{
-      zh:{name:"Marquis de Goulaine Sancerre 'Les Lorys' 桑塞尔", tag:'Loire Valley, France'},
+      zh:{name:"Marquis de Goulaine Sancerre 'Les Lorys' 桑塞尔", tag:'Loire Valley, France'}, zhHant:{name:"Marquis de Goulaine Sancerre 'Les Lorys' 桑塞爾", tag:'Loire Valley, France'},
       en:{name:"Marquis de Goulaine Sancerre 'Les Lorys'", tag:'Loire Valley, France'},
       it:{name:"Marquis de Goulaine Sancerre 'Les Lorys'", tag:'Valle della Loira, Francia'},
       fr:{name:"Marquis de Goulaine Sancerre 'Les Lorys'", tag:'Vallée de la Loire, France'},
@@ -1758,7 +1814,7 @@ const DISH_DATA = [
   // 红葡萄酒 Red Wine
   { id:'wineOrquestraTempranillo', category:'drinks', sub:'redWine', sizes:[{key:'glass',price:7.90},{key:'bottle',price:28}], allergens:['SU'],
     i18n:{
-      zh:{name:'Orquestra Tempranillo 丹魄乐团', tag:'La Mancha, Spain'},
+      zh:{name:'Orquestra Tempranillo 丹魄乐团', tag:'La Mancha, Spain'}, zhHant:{name:'Orquestra Tempranillo 丹魄樂團', tag:'La Mancha, Spain'},
       en:{name:'Orquestra Tempranillo', tag:'La Mancha, Spain'},
       it:{name:'Orquestra Tempranillo', tag:'La Mancha, Spagna'},
       fr:{name:'Orquestra Tempranillo', tag:'La Mancha, Espagne'},
@@ -1766,7 +1822,7 @@ const DISH_DATA = [
     }},
   { id:'wineReserveAubeSyrahMerlot', category:'drinks', sub:'redWine', sizes:[{key:'glass',price:8.50},{key:'bottle',price:32}], allergens:['SU'],
     i18n:{
-      zh:{name:"Reserve de L'Aube Syrah Merlot 奥布西拉梅洛珍藏", tag:'Languedoc, France'},
+      zh:{name:"Reserve de L'Aube Syrah Merlot 奥布西拉梅洛珍藏", tag:'Languedoc, France'}, zhHant:{name:"Reserve de L'Aube Syrah Merlot 奧布西拉梅洛珍藏", tag:'Languedoc, France'},
       en:{name:"Reserve de L'Aube Syrah Merlot", tag:'Languedoc, France'},
       it:{name:"Reserve de L'Aube Syrah Merlot", tag:'Linguadoca, Francia'},
       fr:{name:"Reserve de L'Aube Syrah Merlot", tag:'Languedoc, France'},
@@ -1774,7 +1830,7 @@ const DISH_DATA = [
     }},
   { id:'wineChateauGrandVallons', category:'drinks', sub:'redWine', sizes:[{key:'glass',price:10.95},{key:'bottle',price:39}], allergens:['SU'],
     i18n:{
-      zh:{name:'Château Les Grand Vallons 波尔多-城堡', tag:'Blaye, Côtes de Bordeaux, France'},
+      zh:{name:'Château Les Grand Vallons 波尔多-城堡', tag:'Blaye, Côtes de Bordeaux, France'}, zhHant:{name:'Château Les Grand Vallons 波爾多-城堡', tag:'Blaye, Côtes de Bordeaux, France'},
       en:{name:'Château Les Grand Vallons', tag:'Blaye, Côtes de Bordeaux, France'},
       it:{name:'Château Les Grand Vallons', tag:'Blaye, Côtes de Bordeaux, Francia'},
       fr:{name:'Château Les Grand Vallons', tag:'Blaye, Côtes de Bordeaux, France'},
@@ -1782,7 +1838,7 @@ const DISH_DATA = [
     }},
   { id:'wineFincaMonicaCrianza', category:'drinks', sub:'redWine', sizes:[{key:'bottle',price:42}], allergens:['SU'],
     i18n:{
-      zh:{name:'Finca Mónica Crianza', tag:'Rioja, Spain'},
+      zh:{name:'Finca Mónica Crianza', tag:'Rioja, Spain'}, zhHant:{name:'Finca Mónica Crianza', tag:'Rioja, Spain'},
       en:{name:'Finca Mónica Crianza', tag:'Rioja, Spain'},
       it:{name:'Finca Mónica Crianza', tag:'Rioja, Spagna'},
       fr:{name:'Finca Mónica Crianza', tag:'Rioja, Espagne'},
@@ -1790,7 +1846,7 @@ const DISH_DATA = [
     }},
   { id:'wineFinDelMundoMalbec', category:'drinks', sub:'redWine', sizes:[{key:'bottle',price:45}], allergens:['SU'],
     i18n:{
-      zh:{name:'Fin del Mundo Reserva Malbec 珍藏马尔贝克', tag:'Patagonia, Argentina'},
+      zh:{name:'Fin del Mundo Reserva Malbec 珍藏马尔贝克', tag:'Patagonia, Argentina'}, zhHant:{name:'Fin del Mundo Reserva Malbec 珍藏馬爾貝克', tag:'Patagonia, Argentina'},
       en:{name:'Fin del Mundo Reserva Malbec', tag:'Patagonia, Argentina'},
       it:{name:'Fin del Mundo Reserva Malbec', tag:'Patagonia, Argentina'},
       fr:{name:'Fin del Mundo Reserva Malbec', tag:'Patagonie, Argentine'},
@@ -1798,7 +1854,7 @@ const DISH_DATA = [
     }},
   { id:'wineSuraniPrimitivo', category:'drinks', sub:'redWine', sizes:[{key:'bottle',price:49}], allergens:['SU'],
     i18n:{
-      zh:{name:'Surani Primitivo di Manduria', tag:'Puglia, Italy'},
+      zh:{name:'Surani Primitivo di Manduria', tag:'Puglia, Italy'}, zhHant:{name:'Surani Primitivo di Manduria', tag:'Puglia, Italy'},
       en:{name:'Surani Primitivo di Manduria', tag:'Puglia, Italy'},
       it:{name:'Surani Primitivo di Manduria', tag:'Puglia, Italia'},
       fr:{name:'Surani Primitivo di Manduria', tag:'Pouilles, Italie'},
@@ -1806,7 +1862,7 @@ const DISH_DATA = [
     }},
   { id:'wineLouisJadotPinotNoir', category:'drinks', sub:'redWine', sizes:[{key:'bottle',price:69}], allergens:['SU'],
     i18n:{
-      zh:{name:"Louis Jadot Bourgogne Pinot Noir 'Couvent des Jacobins' 勃艮第黑皮诺", tag:'Burgundy, France'},
+      zh:{name:"Louis Jadot Bourgogne Pinot Noir 'Couvent des Jacobins' 勃艮第黑皮诺", tag:'Burgundy, France'}, zhHant:{name:"Louis Jadot Bourgogne Pinot Noir 'Couvent des Jacobins' 勃艮第黑皮諾", tag:'Burgundy, France'},
       en:{name:"Louis Jadot Bourgogne Pinot Noir 'Couvent des Jacobins'", tag:'Burgundy, France'},
       it:{name:"Louis Jadot Bourgogne Pinot Noir 'Couvent des Jacobins'", tag:'Borgogna, Francia'},
       fr:{name:"Louis Jadot Bourgogne Pinot Noir 'Couvent des Jacobins'", tag:'Bourgogne, France'},
@@ -1814,7 +1870,7 @@ const DISH_DATA = [
     }},
   { id:'wineHautsLynchMoussas', category:'drinks', sub:'redWine', sizes:[{key:'bottle',price:89}], allergens:['SU'],
     i18n:{
-      zh:{name:'Les Hauts de Lynch Moussas 上梦多克', tag:'Haut-Médoc, Bordeaux, France'},
+      zh:{name:'Les Hauts de Lynch Moussas 上梦多克', tag:'Haut-Médoc, Bordeaux, France'}, zhHant:{name:'Les Hauts de Lynch Moussas 上夢多克', tag:'Haut-Médoc, Bordeaux, France'},
       en:{name:'Les Hauts de Lynch Moussas', tag:'Haut-Médoc, Bordeaux, France'},
       it:{name:'Les Hauts de Lynch Moussas', tag:'Haut-Médoc, Bordeaux, Francia'},
       fr:{name:'Les Hauts de Lynch Moussas', tag:'Haut-Médoc, Bordeaux, France'},
@@ -1824,7 +1880,7 @@ const DISH_DATA = [
   // 桃红 Rosé
   { id:'roseColombetteGrenache', category:'drinks', sub:'rose', sizes:[{key:'glass',price:8},{key:'bottle',price:29}], allergens:['SU'],
     i18n:{
-      zh:{name:'Domaine La Colombette Grenache Rosé 歌海娜玫瑰庄', tag:'Languedoc, France'},
+      zh:{name:'Domaine La Colombette Grenache Rosé 歌海娜玫瑰庄', tag:'Languedoc, France'}, zhHant:{name:'Domaine La Colombette Grenache Rosé 歌海娜玫瑰莊', tag:'Languedoc, France'},
       en:{name:'Domaine La Colombette Grenache Rosé', tag:'Languedoc, France'},
       it:{name:'Domaine La Colombette Grenache Rosé', tag:'Linguadoca, Francia'},
       fr:{name:'Domaine La Colombette Grenache Rosé', tag:'Languedoc, France'},
@@ -1832,7 +1888,7 @@ const DISH_DATA = [
     }},
   { id:'roseChateauBerneRomance', category:'drinks', sub:'rose', sizes:[{key:'glass',price:10.95},{key:'bottle',price:39}], allergens:['SU'],
     i18n:{
-      zh:{name:'Château de Berne Romance Rosé 普罗旺斯玫瑰', tag:'Provence, France'},
+      zh:{name:'Château de Berne Romance Rosé 普罗旺斯玫瑰', tag:'Provence, France'}, zhHant:{name:'Château de Berne Romance Rosé 普羅旺斯玫瑰', tag:'Provence, France'},
       en:{name:'Château de Berne Romance Rosé', tag:'Provence, France'},
       it:{name:'Château de Berne Romance Rosé', tag:'Provenza, Francia'},
       fr:{name:'Château de Berne Romance Rosé', tag:'Provence, France'},
@@ -1842,7 +1898,7 @@ const DISH_DATA = [
   // 起泡酒 Sparkling
   { id:'proseccoSerenaFrizzante', category:'drinks', sub:'sparkling', sizes:[{key:'bottle',price:9.95}], allergens:['SU'],
     i18n:{
-      zh:{name:'Serena Prosecco Frizzante 罗普罗蜜克', tag:'单人装 20cl'},
+      zh:{name:'Serena Prosecco Frizzante 罗普罗蜜克', tag:'单人装 20cl'}, zhHant:{name:'Serena Prosecco Frizzante 羅普羅蜜克', tag:'單人裝 20cl'},
       en:{name:'Serena Prosecco Frizzante', tag:'Single serving 20cl'},
       it:{name:'Serena Prosecco Frizzante', tag:'Monodose 20cl'},
       fr:{name:'Serena Prosecco Frizzante', tag:'Format individuel 20cl'},
@@ -1850,7 +1906,7 @@ const DISH_DATA = [
     }},
   { id:'sparklingMontegrandeBianco', category:'drinks', sub:'sparkling', sizes:[{key:'bottle',price:29}], allergens:['SU'],
     i18n:{
-      zh:{name:'Montegrande Bianco Frizzante 蒙特格兰德', tag:''},
+      zh:{name:'Montegrande Bianco Frizzante 蒙特格兰德', tag:''}, zhHant:{name:'Montegrande Bianco Frizzante 蒙特格蘭德', tag:''},
       en:{name:'Montegrande Bianco Frizzante', tag:''},
       it:{name:'Montegrande Bianco Frizzante', tag:''},
       fr:{name:'Montegrande Bianco Frizzante', tag:''},
@@ -1858,7 +1914,7 @@ const DISH_DATA = [
     }},
   { id:'champagneTheophileBrut', category:'drinks', sub:'sparkling', sizes:[{key:'bottle',price:89}], allergens:['SU'],
     i18n:{
-      zh:{name:'Champagne Theophile Brut NV 香槟', tag:''},
+      zh:{name:'Champagne Theophile Brut NV 香槟', tag:''}, zhHant:{name:'Champagne Theophile Brut NV 香檳', tag:''},
       en:{name:'Champagne Theophile Brut NV', tag:''},
       it:{name:'Champagne Theophile Brut NV', tag:''},
       fr:{name:'Champagne Theophile Brut NV', tag:''},
@@ -1868,126 +1924,126 @@ const DISH_DATA = [
   // 软饮 + 水 Soft Drinks + Water
   { id:'coke', category:'drinks', sub:'softDrink', price:3.80, allergens:[],
     i18n:{
-      zh:{name:'可乐', tag:'330ml'}, en:{name:'Coke', tag:'330ml'}, it:{name:'Coca-Cola', tag:'330ml'},
+      zh:{name:'可乐', tag:'330ml'}, zhHant:{name:'可樂', tag:'330ml'}, en:{name:'Coke', tag:'330ml'}, it:{name:'Coca-Cola', tag:'330ml'},
       fr:{name:'Coca-Cola', tag:'330ml'}, es:{name:'Coca-Cola', tag:'330ml'},
     }},
   { id:'cokeZero', category:'drinks', sub:'softDrink', price:3.80, allergens:[],
     i18n:{
-      zh:{name:'无糖可乐', tag:'330ml'}, en:{name:'Coke Zero', tag:'330ml'}, it:{name:'Coca-Cola Zero', tag:'330ml'},
+      zh:{name:'无糖可乐', tag:'330ml'}, zhHant:{name:'無糖可樂', tag:'330ml'}, en:{name:'Coke Zero', tag:'330ml'}, it:{name:'Coca-Cola Zero', tag:'330ml'},
       fr:{name:'Coca-Cola Zero', tag:'330ml'}, es:{name:'Coca-Cola Zero', tag:'330ml'},
     }},
   { id:'dietCoke', category:'drinks', sub:'softDrink', price:3.80, allergens:[],
     i18n:{
-      zh:{name:'健怡可乐', tag:'330ml'}, en:{name:'Diet Coke', tag:'330ml'}, it:{name:'Coca-Cola Light', tag:'330ml'},
+      zh:{name:'健怡可乐', tag:'330ml'}, zhHant:{name:'健怡可樂', tag:'330ml'}, en:{name:'Diet Coke', tag:'330ml'}, it:{name:'Coca-Cola Light', tag:'330ml'},
       fr:{name:'Coca-Cola Light', tag:'330ml'}, es:{name:'Coca-Cola Light', tag:'330ml'},
     }},
   { id:'sevenUp', category:'drinks', sub:'softDrink', price:3.80, allergens:[],
     i18n:{
-      zh:{name:'七喜', tag:'300ml'}, en:{name:'7up', tag:'300ml'}, it:{name:'7up', tag:'300ml'},
+      zh:{name:'七喜', tag:'300ml'}, zhHant:{name:'七喜', tag:'300ml'}, en:{name:'7up', tag:'300ml'}, it:{name:'7up', tag:'300ml'},
       fr:{name:'7up', tag:'300ml'}, es:{name:'7up', tag:'300ml'},
     }},
   { id:'sevenUpFree', category:'drinks', sub:'softDrink', price:3.80, allergens:[],
     i18n:{
-      zh:{name:'无糖七喜', tag:'300ml'}, en:{name:'7up Free', tag:'300ml'}, it:{name:'7up Free', tag:'300ml'},
+      zh:{name:'无糖七喜', tag:'300ml'}, zhHant:{name:'無糖七喜', tag:'300ml'}, en:{name:'7up Free', tag:'300ml'}, it:{name:'7up Free', tag:'300ml'},
       fr:{name:'7up Free', tag:'300ml'}, es:{name:'7up Free', tag:'300ml'},
     }},
   { id:'fanta', category:'drinks', sub:'softDrink', price:3.80, allergens:[],
     i18n:{
-      zh:{name:'芬达', tag:'300ml'}, en:{name:'Fanta', tag:'300ml'}, it:{name:'Fanta', tag:'300ml'},
+      zh:{name:'芬达', tag:'300ml'}, zhHant:{name:'芬達', tag:'300ml'}, en:{name:'Fanta', tag:'300ml'}, it:{name:'Fanta', tag:'300ml'},
       fr:{name:'Fanta', tag:'300ml'}, es:{name:'Fanta', tag:'300ml'},
     }},
   { id:'jiaduobao', category:'drinks', sub:'softDrink', price:3.80, allergens:[],
     i18n:{
-      zh:{name:'加多宝', tag:''}, en:{name:'Jiaduobao', tag:''}, it:{name:'Jiaduobao', tag:''},
+      zh:{name:'加多宝', tag:''}, zhHant:{name:'加多寶', tag:''}, en:{name:'Jiaduobao', tag:''}, it:{name:'Jiaduobao', tag:''},
       fr:{name:'Jiaduobao', tag:''}, es:{name:'Jiaduobao', tag:''},
     }},
   { id:'aloeJuiceRegular', category:'drinks', sub:'softDrink', price:3.80, allergens:[],
     i18n:{
-      zh:{name:'芦荟汁', tag:''}, en:{name:'Aloe Juice', tag:'Regular'}, it:{name:"Succo d'Aloe", tag:'Normale'},
+      zh:{name:'芦荟汁', tag:''}, zhHant:{name:'蘆薈汁', tag:''}, en:{name:'Aloe Juice', tag:'Regular'}, it:{name:"Succo d'Aloe", tag:'Normale'},
       fr:{name:"Jus d'Aloès", tag:'Normal'}, es:{name:'Zumo de Aloe', tag:'Normal'},
     }},
   { id:'aloeJuiceLarge', category:'drinks', sub:'softDrink', price:9.00, allergens:[],
     i18n:{
-      zh:{name:'芦荟汁(大)', tag:''}, en:{name:'Aloe Juice', tag:'Large'}, it:{name:"Succo d'Aloe", tag:'Grande'},
+      zh:{name:'芦荟汁(大)', tag:''}, zhHant:{name:'蘆薈汁(大)', tag:''}, en:{name:'Aloe Juice', tag:'Large'}, it:{name:"Succo d'Aloe", tag:'Grande'},
       fr:{name:"Jus d'Aloès", tag:'Grand'}, es:{name:'Zumo de Aloe', tag:'Grande'},
     }},
   { id:'soyDrink', category:'drinks', sub:'softDrink', price:4.60, allergens:['S'],
     i18n:{
-      zh:{name:'维他豆奶(小)', tag:''}, en:{name:'Soy Drink', tag:''}, it:{name:'Bevanda di Soia', tag:''},
+      zh:{name:'维他豆奶(小)', tag:''}, zhHant:{name:'維他豆奶(小)', tag:''}, en:{name:'Soy Drink', tag:''}, it:{name:'Bevanda di Soia', tag:''},
       fr:{name:'Boisson au Soja', tag:''}, es:{name:'Bebida de Soja', tag:''},
     }},
   { id:'coconutJuice', category:'drinks', sub:'softDrink', price:4.60, allergens:[],
     i18n:{
-      zh:{name:'椰树牌椰汁', tag:''}, en:{name:'Coconut Juice', tag:''}, it:{name:'Succo di Cocco', tag:''},
+      zh:{name:'椰树牌椰汁', tag:''}, zhHant:{name:'椰樹牌椰汁', tag:''}, en:{name:'Coconut Juice', tag:''}, it:{name:'Succo di Cocco', tag:''},
       fr:{name:'Jus de Coco', tag:''}, es:{name:'Zumo de Coco', tag:''},
     }},
   { id:'stillWaterSmall', category:'drinks', sub:'softDrink', price:3.80, allergens:[],
     i18n:{
-      zh:{name:'小纯净水', tag:'330ml'}, en:{name:'Still Water', tag:'Small, 330ml'}, it:{name:'Acqua Naturale', tag:'Piccola, 330ml'},
+      zh:{name:'小纯净水', tag:'330ml'}, zhHant:{name:'小純淨水', tag:'330ml'}, en:{name:'Still Water', tag:'Small, 330ml'}, it:{name:'Acqua Naturale', tag:'Piccola, 330ml'},
       fr:{name:'Eau Plate', tag:'Petite, 330ml'}, es:{name:'Agua sin Gas', tag:'Pequeña, 330ml'},
     }},
   { id:'sparklingWaterSmall', category:'drinks', sub:'softDrink', price:3.80, allergens:[],
     i18n:{
-      zh:{name:'小气泡水', tag:'330ml'}, en:{name:'Sparkling Water', tag:'Small, 330ml'}, it:{name:'Acqua Frizzante', tag:'Piccola, 330ml'},
+      zh:{name:'小气泡水', tag:'330ml'}, zhHant:{name:'小氣泡水', tag:'330ml'}, en:{name:'Sparkling Water', tag:'Small, 330ml'}, it:{name:'Acqua Frizzante', tag:'Piccola, 330ml'},
       fr:{name:'Eau Gazeuse', tag:'Petite, 330ml'}, es:{name:'Agua con Gas', tag:'Pequeña, 330ml'},
     }},
   { id:'stillWaterLarge', category:'drinks', sub:'softDrink', price:6.00, allergens:[],
     i18n:{
-      zh:{name:'大纯净水', tag:'750ml'}, en:{name:'Still Water', tag:'Large, 750ml'}, it:{name:'Acqua Naturale', tag:'Grande, 750ml'},
+      zh:{name:'大纯净水', tag:'750ml'}, zhHant:{name:'大純淨水', tag:'750ml'}, en:{name:'Still Water', tag:'Large, 750ml'}, it:{name:'Acqua Naturale', tag:'Grande, 750ml'},
       fr:{name:'Eau Plate', tag:'Grande, 750ml'}, es:{name:'Agua sin Gas', tag:'Grande, 750ml'},
     }},
   { id:'sparklingWaterLarge', category:'drinks', sub:'softDrink', price:6.00, allergens:[],
     i18n:{
-      zh:{name:'大气泡水', tag:'750ml'}, en:{name:'Sparkling Water', tag:'Large, 750ml'}, it:{name:'Acqua Frizzante', tag:'Grande, 750ml'},
+      zh:{name:'大气泡水', tag:'750ml'}, zhHant:{name:'大氣泡水', tag:'750ml'}, en:{name:'Sparkling Water', tag:'Large, 750ml'}, it:{name:'Acqua Frizzante', tag:'Grande, 750ml'},
       fr:{name:'Eau Gazeuse', tag:'Grande, 750ml'}, es:{name:'Agua con Gas', tag:'Grande, 750ml'},
     }},
 
   // 果汁 Juices
   { id:'appleJuice', category:'drinks', sub:'juice', sizes:[{key:'glass',price:2.80},{key:'bottle',price:8.80}], allergens:[],
     i18n:{
-      zh:{name:'苹果汁', tag:''}, en:{name:'Apple Juice', tag:''}, it:{name:'Succo di Mela', tag:''},
+      zh:{name:'苹果汁', tag:''}, zhHant:{name:'蘋果汁', tag:''}, en:{name:'Apple Juice', tag:''}, it:{name:'Succo di Mela', tag:''},
       fr:{name:'Jus de Pomme', tag:''}, es:{name:'Zumo de Manzana', tag:''},
     }},
   { id:'orangeJuice', category:'drinks', sub:'juice', sizes:[{key:'glass',price:2.80},{key:'bottle',price:8.80}], allergens:[],
     i18n:{
-      zh:{name:'橙汁', tag:''}, en:{name:'Orange Juice', tag:''}, it:{name:"Succo d'Arancia", tag:''},
+      zh:{name:'橙汁', tag:''}, zhHant:{name:'橙汁', tag:''}, en:{name:'Orange Juice', tag:''}, it:{name:"Succo d'Arancia", tag:''},
       fr:{name:"Jus d'Orange", tag:''}, es:{name:'Zumo de Naranja', tag:''},
     }},
   { id:'cranberryJuice', category:'drinks', sub:'juice', sizes:[{key:'glass',price:2.80},{key:'bottle',price:8.80}], allergens:[],
     i18n:{
-      zh:{name:'蔓越莓汁', tag:''}, en:{name:'Cranberry Juice', tag:''}, it:{name:'Succo di Mirtillo Rosso', tag:''},
+      zh:{name:'蔓越莓汁', tag:''}, zhHant:{name:'蔓越莓汁', tag:''}, en:{name:'Cranberry Juice', tag:''}, it:{name:'Succo di Mirtillo Rosso', tag:''},
       fr:{name:'Jus de Canneberge', tag:''}, es:{name:'Zumo de Arándano Rojo', tag:''},
     }},
 
   // 啤酒 Beer
   { id:'tsingtaoBeer', category:'drinks', sub:'beer', price:5.95, allergens:['GW','GB'],
     i18n:{
-      zh:{name:'青岛啤酒', tag:'330ml'}, en:{name:'Tsingtao Beer', tag:'330ml'}, it:{name:'Birra Tsingtao', tag:'330ml'},
+      zh:{name:'青岛啤酒', tag:'330ml'}, zhHant:{name:'青島啤酒', tag:'330ml'}, en:{name:'Tsingtao Beer', tag:'330ml'}, it:{name:'Birra Tsingtao', tag:'330ml'},
       fr:{name:'Bière Tsingtao', tag:'330ml'}, es:{name:'Cerveza Tsingtao', tag:'330ml'},
     }},
   { id:'asahiBeer', category:'drinks', sub:'beer', price:5.95, allergens:['GW','GB'],
     i18n:{
-      zh:{name:'朝日啤酒', tag:'330ml'}, en:{name:'Asahi Beer', tag:'330ml'}, it:{name:'Birra Asahi', tag:'330ml'},
+      zh:{name:'朝日啤酒', tag:'330ml'}, zhHant:{name:'朝日啤酒', tag:'330ml'}, en:{name:'Asahi Beer', tag:'330ml'}, it:{name:'Birra Asahi', tag:'330ml'},
       fr:{name:'Bière Asahi', tag:'330ml'}, es:{name:'Cerveza Asahi', tag:'330ml'},
     }},
   { id:'heinekenBeer', category:'drinks', sub:'beer', price:5.95, allergens:['GW','GB'],
     i18n:{
-      zh:{name:'喜力啤酒', tag:'330ml'}, en:{name:'Heineken', tag:'330ml'}, it:{name:'Heineken', tag:'330ml'},
+      zh:{name:'喜力啤酒', tag:'330ml'}, zhHant:{name:'喜力啤酒', tag:'330ml'}, en:{name:'Heineken', tag:'330ml'}, it:{name:'Heineken', tag:'330ml'},
       fr:{name:'Heineken', tag:'330ml'}, es:{name:'Heineken', tag:'330ml'},
     }},
   { id:'heinekenZero', category:'drinks', sub:'beer', price:5.50, allergens:['GW','GB'],
     i18n:{
-      zh:{name:'喜力0.0', tag:'330ml'}, en:{name:'Heineken 0.0%', tag:'330ml'}, it:{name:'Heineken 0.0%', tag:'330ml'},
+      zh:{name:'喜力0.0', tag:'330ml'}, zhHant:{name:'喜力0.0', tag:'330ml'}, en:{name:'Heineken 0.0%', tag:'330ml'}, it:{name:'Heineken 0.0%', tag:'330ml'},
       fr:{name:'Heineken 0.0%', tag:'330ml'}, es:{name:'Heineken 0.0%', tag:'330ml'},
     }},
   { id:'guinnessBeer', category:'drinks', sub:'beer', price:7.95, allergens:['GB'],
     i18n:{
-      zh:{name:'健力士啤酒', tag:'500ml'}, en:{name:'Guinness', tag:'500ml'}, it:{name:'Guinness', tag:'500ml'},
+      zh:{name:'健力士啤酒', tag:'500ml'}, zhHant:{name:'健力士啤酒', tag:'500ml'}, en:{name:'Guinness', tag:'500ml'}, it:{name:'Guinness', tag:'500ml'},
       fr:{name:'Guinness', tag:'500ml'}, es:{name:'Guinness', tag:'500ml'},
     }},
   { id:'guinnessZero', category:'drinks', sub:'beer', price:7.50, allergens:['GB'],
     i18n:{
-      zh:{name:'健力士0.0', tag:'500ml'}, en:{name:'Guinness 0.0%', tag:'500ml'}, it:{name:'Guinness 0.0%', tag:'500ml'},
+      zh:{name:'健力士0.0', tag:'500ml'}, zhHant:{name:'健力士0.0', tag:'500ml'}, en:{name:'Guinness 0.0%', tag:'500ml'}, it:{name:'Guinness 0.0%', tag:'500ml'},
       fr:{name:'Guinness 0.0%', tag:'500ml'}, es:{name:'Guinness 0.0%', tag:'500ml'},
     }},
 ];
@@ -2288,19 +2344,12 @@ function updateItemUI(id){
   const count = totalCount();
   const fab = document.querySelector('.cart-side-fab');
   if(fab){
-    let badge = fab.querySelector('.cart-side-fab-badge');
-    if(count > 0){
-      if(!badge){
-        badge = document.createElement('span');
-        badge.className = 'cart-side-fab-badge';
-        fab.appendChild(badge);
-      }
+    const badge = fab.querySelector('.cart-side-fab-badge');
+    if(badge){
       badge.textContent = count;
       badge.classList.remove('bump');
       void badge.offsetWidth;
       badge.classList.add('bump');
-    }else if(badge){
-      badge.remove();
     }
   }
   const orderBtn = document.querySelector('.order-now-btn');
@@ -2504,10 +2553,15 @@ function skipUpsell(){
   submitOrder();
 }
 
-// panda-nav lives in its own root (see render()), so toggling the dropdown
-// only needs to repaint that root, not the whole menu screen behind it.
+// On the menu screen the button is docked inline in the header
+// (#menu-panda-slot), so it scrolls away instead of floating forever.
+// Everywhere else it falls back to the fixed #panda-nav root. Either way,
+// toggling the dropdown only repaints that one slot, not the whole screen
+// behind it (so the menu's dish cards never flash/re-mount).
 function renderPandaNav(){
-  document.getElementById('panda-nav').innerHTML = state.screen === 'welcome' ? '' : pandaNavHTML();
+  const inlineSlot = document.getElementById('menu-panda-slot');
+  document.getElementById('panda-nav').innerHTML = inlineSlot ? '' : (state.screen === 'welcome' ? '' : pandaNavHTML());
+  if(inlineSlot) inlineSlot.innerHTML = pandaNavHTML();
 }
 
 function togglePandaMenu(){
@@ -2724,9 +2778,9 @@ function chefCarouselHTML(){
   const name = tDish(d.id,'name');
   return `
     <div class="chef-carousel">
-      <p class="eyebrow chef-carousel-label">${tCat('chefSpecial')}</p>
       <button class="chef-slide" onclick="setCategory('chefSpecial')">
         <img id="chef-carousel-photo" class="chef-slide-photo" src="${d.img}" alt="${name}" decoding="async" onerror="this.style.display='none'">
+        <span class="chef-slide-tag">${tCat('chefSpecial')}</span>
         <span id="chef-carousel-caption" class="chef-slide-caption">${name}</span>
       </button>
     </div>`;
@@ -2814,11 +2868,17 @@ function menuHTML(){
   return `
     ${backRowHTML()}
     <header class="bar">
-      <div class="table-badge">
-        <span class="eyebrow">${t('tableEyebrow')}</span>
-        <span class="num">${state.table}</span>
-        ${!state.lockedByUrl ? `<button class="change-table" onclick="changeTable()">${t('changeTable')}</button>` : ''}
+      <div class="bar-row">
+        <div class="table-badge">
+          <span class="eyebrow">${t('tableEyebrow')}</span>
+          <div class="table-badge-row">
+            <span class="num">${state.table}</span>
+            ${!state.lockedByUrl ? `<button class="change-table" onclick="changeTable()">${t('changeTable')}</button>` : ''}
+          </div>
+        </div>
+        <div id="menu-panda-slot" class="menu-panda-slot"></div>
       </div>
+      <div class="masthead-rule"></div>
     </header>
     ${chefCarouselHTML()}
     <div class="menu-title-row">
@@ -2833,8 +2893,11 @@ function menuHTML(){
     </div>
     ${allergenModalHTML()}
     <button class="cart-side-fab" onclick="toggleCartPopup()" aria-label="${t('cart')}">
-      <img class="cart-side-fab-icon" src="../image/LOGO/CART.png" alt="${t('cart')}"/>
-      ${count > 0 ? `<span class="cart-side-fab-badge">${count}</span>` : ''}
+      <span class="cart-side-fab-icon-wrap">
+        <img class="cart-side-fab-icon" src="../image/LOGO/CART.png" alt=""/>
+        <span class="cart-side-fab-badge">${count}</span>
+      </span>
+      <span class="cart-side-fab-label${(state.lang === 'zh' || state.lang === 'zhHant') ? '' : ' latin'}">${t('cart')}</span>
     </button>
     <div class="bottom-bar">
       <div class="action-pill-wrap">
