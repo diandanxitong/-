@@ -25,6 +25,14 @@
     --text-muted:#AFA396;
     --radius:16px;
     --brush:'Ma Shan Zheng',cursive;
+    --ease-silk:cubic-bezier(.22,1,.36,1);
+    --dur-fast:.18s;
+    --dur:.32s;
+    --gold-hi:#F6DFA0;
+    --gold-deep:#9C6A1E;
+    --shadow-card:0 1px 2px rgba(10,6,4,.35), 0 16px 32px -16px rgba(10,6,4,.7);
+    --shadow-card-active:0 2px 4px rgba(10,6,4,.4), 0 22px 40px -14px rgba(10,6,4,.75);
+    --shadow-pop:0 22px 54px rgba(0,0,0,.62);
   }
   *{box-sizing:border-box;margin:0;padding:0;}
   html,body{background:var(--bg);color:var(--text);}
@@ -722,6 +730,86 @@
   .upsell-add-btn{background:linear-gradient(160deg,var(--jade) 0%,var(--jade-dark) 100%);color:#fff;border:1px solid var(--gold-line);}
   .upsell-later-btn{background:none;border:1px solid var(--card-line);color:var(--text-muted);}
   .upsell-later-btn:hover{color:var(--gold);border-color:var(--gold-line);}
+
+  /* ---------- premium motion & depth pass ---------- */
+  button, .dish-card, .cat-btn, .size-pill, .option-chip, .spice-pill,
+  .allergen-chip, .upsell-tile, .lang-panel button, .table-grid button,
+  .review-input, .review-field-stepper{
+    transition:
+      transform var(--dur-fast) var(--ease-silk),
+      background-color var(--dur) var(--ease-silk),
+      background var(--dur) var(--ease-silk),
+      border-color var(--dur) var(--ease-silk),
+      box-shadow var(--dur) var(--ease-silk),
+      color var(--dur) var(--ease-silk),
+      opacity var(--dur) var(--ease-silk);
+  }
+  button:active:not(:disabled){transform:scale(.96);}
+
+  .dish-card{
+    box-shadow:var(--shadow-card);
+    animation:dish-in .5s var(--ease-silk) both;
+  }
+  .dish-card:nth-of-type(1){animation-delay:0ms}
+  .dish-card:nth-of-type(2){animation-delay:35ms}
+  .dish-card:nth-of-type(3){animation-delay:70ms}
+  .dish-card:nth-of-type(4){animation-delay:105ms}
+  .dish-card:nth-of-type(5){animation-delay:140ms}
+  .dish-card:nth-of-type(6){animation-delay:175ms}
+  @keyframes dish-in{
+    from{opacity:0;transform:translateY(12px) scale(.985);}
+    to{opacity:1;transform:translateY(0) scale(1);}
+  }
+  .dish-card:active{transform:translateY(-1px);box-shadow:var(--shadow-card-active);}
+  @media (hover:hover){
+    .dish-card:hover{transform:translateY(-3px);box-shadow:var(--shadow-card-active);}
+  }
+  .dish-photo{transition:transform .6s var(--ease-silk);}
+  .dish-card:active .dish-photo{transform:scale(1.05);}
+  @media (hover:hover){
+    .dish-card:hover .dish-photo{transform:scale(1.05);}
+  }
+
+  .chef-slide{box-shadow:var(--shadow-card);}
+  .chef-slide-photo{animation:hero-kenburns 10s ease-in-out infinite alternate;}
+  @keyframes hero-kenburns{from{transform:scale(1);}to{transform:scale(1.07);}}
+
+  .menu-title, .cart-side-title, .kitchen-sent-title, .confirm-screen h2, .upsell-title{
+    background:linear-gradient(180deg, var(--gold-hi) 0%, var(--gold) 55%, var(--gold-deep) 100%);
+    -webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;
+    color:var(--gold);
+  }
+
+  .cart-side-overlay, .lang-switcher-overlay{
+    backdrop-filter:blur(7px) saturate(140%);-webkit-backdrop-filter:blur(7px) saturate(140%);
+    animation:overlay-fade .22s ease;
+  }
+  .panda-overlay{animation:overlay-fade .22s ease;}
+  @keyframes overlay-fade{from{opacity:0}to{opacity:1}}
+
+  .lang-switcher-panel, .upsell-modal{
+    animation:modal-pop-in .3s var(--ease-silk) both;
+  }
+  @keyframes modal-pop-in{
+    from{opacity:0;transform:translate(-50%,-50%) scale(.94);}
+    to{opacity:1;transform:translate(-50%,-50%) scale(1);}
+  }
+
+  .review-input:focus{box-shadow:0 0 0 3px rgba(232,162,61,.16);}
+
+  .cart-side-fab-badge.bump{animation:badge-bump .38s var(--ease-silk);}
+  @keyframes badge-bump{
+    0%{transform:scale(1);}
+    35%{transform:scale(1.35);}
+    100%{transform:scale(1);}
+  }
+
+  @media (prefers-reduced-motion: reduce){
+    .dish-card, .chef-slide-photo, .lang-switcher-panel, .upsell-modal,
+    .cart-side-overlay, .lang-switcher-overlay, .panda-overlay, .cart-side-fab-badge.bump{
+      animation:none !important;
+    }
+  }
 </style>
 </head>
 <body>
@@ -2208,6 +2296,9 @@ function updateItemUI(id){
         fab.appendChild(badge);
       }
       badge.textContent = count;
+      badge.classList.remove('bump');
+      void badge.offsetWidth;
+      badge.classList.add('bump');
     }else if(badge){
       badge.remove();
     }
